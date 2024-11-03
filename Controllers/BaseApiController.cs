@@ -5,7 +5,7 @@ namespace MedicineStorage.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController : ControllerBase
+    public class BaseApiController : ControllerBase
     {
 
     }

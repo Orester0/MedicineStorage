@@ -1,12 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using MedicineStorage.Models.Medicine;
+using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.AuditModels;
+using Microsoft.AspNetCore.Identity;
 
 namespace MedicineStorage.Models
 {
-    public class User
+    public class User : IdentityUser<int>
     {
-        [Key]
-        public int Id { get; set; }
 
         [Required]
         [StringLength(100)]
@@ -16,24 +16,16 @@ namespace MedicineStorage.Models
         [StringLength(100)]
         public string LastName { get; set; }
 
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; }
+        public virtual ICollection<MedicineRequest> MedicineRequests { get; set; } = [];
+        public virtual ICollection<Audit> ConductedAudits { get; set; } = [];
 
-        [Required]
-        public UserRole Role { get; set; }
-
-        public virtual ICollection<MedicineRequest> Requests { get; set; }
-        public virtual ICollection<Audit> ConductedAudits { get; set; }
-        public virtual ICollection<MedicineUsage> MedicineUsages { get; set; }
+        public virtual ICollection<UserRole> UserRoles { get; set; } = [];
     }
 
-    public enum UserRole
+    public class UserRole : IdentityUserRole<int> 
     {
-        Doctor,
-        Nurse,
-        Administrator,
-        HeadAdministrator
+        public User User { get; set; } = null!;
+        public AppRole Role { get; set; } = null!;
     }
 
 }

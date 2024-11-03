@@ -2,25 +2,24 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace MedicineStorage.Models.AuditModels
+namespace MedicineStorage.Models.TenderModels
 {
-    public class AuditItem
+    public class TenderItem
     {
+        [Required]
         [Key]
-        [Required]
         public int Id { get; set; }
-        [ForeignKey("Audit")]
         [Required]
-        public int AuditId { get; set; }
+        [ForeignKey("Tender")]
+        public int TenderId { get; set; }
+        [Required]
         [ForeignKey("Medicine")]
-        [Required]
         public int MedicineId { get; set; }
         [Required]
-        public decimal ExpectedQuantity { get; set; }
-        [Required]
-        public decimal ActualQuantity { get; set; }
+        public decimal RequiredQuantity { get; set; }
 
-        public virtual Audit Audit { get; set; }
+        // Navigation properties
+        public virtual Tender Tender { get; set; }
         public virtual Medicine Medicine { get; set; }
     }
 }

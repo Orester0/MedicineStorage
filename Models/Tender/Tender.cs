@@ -1,42 +1,40 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
-using MedicineStorage.Models.Distributor;
+using MedicineStorage.Models.MedicineModels;
 
-namespace MedicineStorage.Models.Tender
+namespace MedicineStorage.Models.TenderModels
 {
     public class Tender
     {
+        [Required]
         [Key]
         public int Id { get; set; }
-
         [Required]
-        public DateTime StartDate { get; set; }
-
+        public string Title { get; set; }
         [Required]
-        public DateTime EndDate { get; set; }
-
+        public string Description { get; set; }
+        [Required]
+        public DateTime PublishDate { get; set; }
+        [Required]
+        public DateTime DeadlineDate { get; set; }
         [Required]
         public TenderStatus Status { get; set; }
+        [Required]
+        [ForeignKey("CreatedByUser")]
+        public int CreatedByUserId { get; set; }
 
-        [StringLength(1000)]
-        public string Description { get; set; }
-
-        public int? WinningBidId { get; set; }
-
-        [ForeignKey("WinningBidId")]
-        public virtual DistributorBid WinningBid { get; set; }
-
-        public virtual ICollection<TenderRequest> Requests { get; set; }
-        public virtual ICollection<DistributorBid> Bids { get; set; }
+        // Navigation properties
+        public virtual User CreatedByUser { get; set; }
+        public virtual ICollection<TenderItem> Items { get; set; }
+        public virtual ICollection<TenderProposal> Proposals { get; set; }
     }
 
     public enum TenderStatus
     {
         Draft,
-        Open,
+        Published,
         Closed,
-        Cancelled,
-        Completed
+        Awarded,
+        Cancelled
     }
-
 }
