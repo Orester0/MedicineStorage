@@ -18,7 +18,6 @@ namespace MedicineStorage.Models
 
         public virtual ICollection<MedicineRequest> MedicineRequests { get; set; } = [];
         public virtual ICollection<Audit> ConductedAudits { get; set; } = [];
-
         public virtual ICollection<UserRole> UserRoles { get; set; } = [];
     }
 

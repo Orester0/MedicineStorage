@@ -21,11 +21,11 @@ namespace MedicineStorage.Models.MedicineModels
         [Required]
         public decimal MinimumStock { get; set; }
         [Required]
+        public decimal Stock { get; set; }
+        [Required]
         public bool RequiresStrictAudit { get; set; }
         [Required]
         public int AuditFrequencyDays { get; set; }
-
-        public virtual ICollection<Stock> StockRecords { get; set; }
         public virtual ICollection<MedicineRequest> Requests { get; set; }
         public virtual ICollection<MedicineUsage> UsageRecords { get; set; }
     }

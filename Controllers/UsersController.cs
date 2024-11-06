@@ -8,23 +8,24 @@ using Microsoft.EntityFrameworkCore;
 using MedicineStorage.Data;
 using MedicineStorage.Models;
 using Microsoft.AspNetCore.Authorization;
-using MedicineStorage.Services.Interfaces;
 using MedicineStorage.DTOs;
 using AutoMapper;
+using MedicineStorage.Data.Interfaces;
 
 namespace MedicineStorage.Controllers
 {
-    
-    public class UsersController(IUserRepository _userRepository, IMapper _mapper) : BaseApiController
+
+    public class UsersController(IUnitOfWork _unitOfWork, IMapper _mapper) : BaseApiController
     {
         // GET: api/Users
         [HttpGet]
         public async Task<ActionResult<IEnumerable<UserKnownDTO>>> GetUsers()
         {
-            var users = await _userRepository.GetAllAsync();
+            var users = await _unitOfWork.UserRepository.GetAllAsync();
 
             var usersToReturn = _mapper.Map<IEnumerable<UserKnownDTO>>(users);
 
+            bool success = await _unitOfWork.Complete();
             return Ok(usersToReturn); 
         }
 
@@ -32,7 +33,7 @@ namespace MedicineStorage.Controllers
         [HttpGet("{username}")]
         public async Task<ActionResult<UserKnownDTO>> GetUser(string username)
         {
-            var user = await _userRepository.GetByUserNameAsync(username);
+            var user = await _unitOfWork.UserRepository.GetByUserNameAsync(username);
 
             if (user == null)
             {
@@ -41,6 +42,7 @@ namespace MedicineStorage.Controllers
 
             var userToReturn = _mapper.Map<UserKnownDTO>(user);
 
+            bool success = await _unitOfWork.Complete();
             return Ok(userToReturn);
         }
     }

@@ -11,7 +11,8 @@ namespace MedicineStorage.Helpers
             CreateMap<User, UserKnownDTO>();
 
             CreateMap<UserRegistrationDTO, User>();
-
         }
     }
+
+
 }

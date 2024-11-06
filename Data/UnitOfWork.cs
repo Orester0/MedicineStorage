@@ -1,25 +1,50 @@
-﻿using MedicineStorage.Models;
+﻿using MedicineStorage.Data.Interfaces;
+using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
-using MedicineStorage.Services.Interfaces;
 
 namespace MedicineStorage.Data
 {
-    public class UnitOfWork : IUnitOfWork
+    public class UnitOfWork(
+        AppDbContext _context, 
+        IAuditRepository _auditRepository, 
+        IMedicineRepository _medicineRepository,
+        IMedicineRequestRepository _medicineRequestRepository,
+        IMedicineUsageRepository _medicineUsageRepository,
+        ITenderProposalRepository _tenderProposalRepository,
+        ITenderRepository _tenderRepository,
+        IUserRepository _userRepository) : IUnitOfWork
     {
-        public IUserRepository UserRepository => throw new NotImplementedException();
+        public IAuditRepository AuditRepository => _auditRepository;
 
-        public IMedicineRequestRepository MedicineRequestRepository => throw new NotImplementedException();
-        public IMedicineRepository MedicineRepository => throw new NotImplementedException();
+        public IMedicineRepository MedicineRepository => _medicineRepository;
 
-        public IStockRepository StockRepository => throw new NotImplementedException();
+        public IMedicineRequestRepository MedicineRequestRepository => _medicineRequestRepository;
+
+        public IMedicineUsageRepository MedicineUsageRepository => _medicineUsageRepository;
 
 
-        public Task<bool> Complete()
+        public ITenderProposalRepository TenderProposalRepository => _tenderProposalRepository;
+
+        public ITenderRepository TenderRepository => _tenderRepository;
+
+        public IUserRepository UserRepository => _userRepository;
+
+        public void BeginTransaction()
         {
             throw new NotImplementedException();
         }
 
+        public async Task<bool> Complete()
+        {
+            return await _context.SaveChangesAsync() > 0;
+        }
+
         public bool HasChanges()
+        {
+            return _context.ChangeTracker.HasChanges();
+        }
+
+        public Task Rollback()
         {
             throw new NotImplementedException();
         }

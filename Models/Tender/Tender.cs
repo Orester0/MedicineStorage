@@ -10,6 +10,10 @@ namespace MedicineStorage.Models.TenderModels
         [Key]
         public int Id { get; set; }
         [Required]
+        [ForeignKey("CreatedByUser")]
+        public int CreatedByUserId { get; set; }
+
+        [Required]
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
@@ -19,10 +23,7 @@ namespace MedicineStorage.Models.TenderModels
         public DateTime DeadlineDate { get; set; }
         [Required]
         public TenderStatus Status { get; set; }
-        [Required]
-        [ForeignKey("CreatedByUser")]
-        public int CreatedByUserId { get; set; }
-
+        
         // Navigation properties
         public virtual User CreatedByUser { get; set; }
         public virtual ICollection<TenderItem> Items { get; set; }

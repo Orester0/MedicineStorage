@@ -9,14 +9,15 @@ namespace MedicineStorage.Models.AuditModels
         [Key]
         [Required]
         public int Id { get; set; }
-        [ForeignKey("ConductedByUser")]
         [Required]
+        [ForeignKey("ConductedByUser")]
         public int ConductedByUserId { get; set; }
         [Required]
         public DateTime AuditDate { get; set; }
         public string? Notes { get; set; }
         [Required]
         public AuditStatus Status { get; set; }
+
 
         public virtual User ConductedByUser { get; set; }
         public virtual ICollection<AuditItem> AuditItems { get; set; }

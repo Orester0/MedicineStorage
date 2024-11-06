@@ -16,12 +16,12 @@ namespace MedicineStorage.Models.TenderModels
         [Required]
         [ForeignKey("Medicine")]
         public int MedicineId { get; set; }
+
         [Required]
         public decimal UnitPrice { get; set; }
         [Required]
         public decimal Quantity { get; set; }
-
-        // Navigation properties
+        
         public virtual TenderProposal Proposal { get; set; }
         public virtual Medicine Medicine { get; set; }
     }

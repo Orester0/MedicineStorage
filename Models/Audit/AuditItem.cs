@@ -9,11 +9,13 @@ namespace MedicineStorage.Models.AuditModels
         [Key]
         [Required]
         public int Id { get; set; }
+
+        [Required]
         [ForeignKey("Audit")]
-        [Required]
         public int AuditId { get; set; }
-        [ForeignKey("Medicine")]
+
         [Required]
+        [ForeignKey("Medicine")]
         public int MedicineId { get; set; }
         [Required]
         public decimal ExpectedQuantity { get; set; }
@@ -21,6 +23,7 @@ namespace MedicineStorage.Models.AuditModels
         public decimal ActualQuantity { get; set; }
 
         public virtual Audit Audit { get; set; }
+
         public virtual Medicine Medicine { get; set; }
     }
 }

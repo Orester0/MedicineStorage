@@ -15,6 +15,7 @@ namespace MedicineStorage.Models.TenderModels
         [Required]
         [ForeignKey("Distributor")]
         public int DistributorId { get; set; }
+
         [Required]
         public decimal TotalPrice { get; set; }
         [Required]
@@ -22,7 +23,6 @@ namespace MedicineStorage.Models.TenderModels
         [Required]
         public ProposalStatus Status { get; set; }
 
-        // Navigation properties
         public virtual Tender Tender { get; set; }
         public virtual User Distributor { get; set; }
         public virtual ICollection<TenderProposalItem> Items { get; set; }

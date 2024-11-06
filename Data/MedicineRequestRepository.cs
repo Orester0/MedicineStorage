@@ -1,40 +1,115 @@
-﻿using MedicineStorage.Helpers;
+﻿using MedicineStorage.Data.Interfaces;
+using MedicineStorage.Helpers;
 using MedicineStorage.Models.MedicineModels;
-using MedicineStorage.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace MedicineStorage.Data
 {
-    public class MedicineRequestRepository : IMedicineRequestRepository
+    public class MedicineRequestRepository(AppDbContext _context) : IMedicineRequestRepository
     {
-        public Task AddAsync(MedicineRequest entity)
+        public async Task<MedicineRequest?> GetByIdAsync(int id)
         {
-            throw new NotImplementedException();
+            return await _context.MedicineRequests
+                .Include(r => r.Medicine)
+                .Include(r => r.RequestedByUser)
+                .Include(r => r.ApprovedByUser)
+                .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public Task DeleteAsync(MedicineRequest entity)
+        public async Task<List<MedicineRequest>> GetAllAsync()
         {
-            throw new NotImplementedException();
+            return await _context.MedicineRequests
+                .Include(r => r.Medicine)
+                .Include(r => r.RequestedByUser)
+                .ToListAsync();
         }
 
-        public Task<IEnumerable<MedicineRequest>> GetAllAsync()
+        public async Task<List<MedicineRequest>> GetPendingRequestsAsync()
         {
-            throw new NotImplementedException();
+            return await _context.MedicineRequests
+                .Include(r => r.Medicine)
+                .Include(r => r.RequestedByUser)
+                .Where(r => r.Status == RequestStatus.Pending || r.Status == RequestStatus.ApprovalRequired)
+                .ToListAsync();
         }
 
-        public Task<IEnumerable<MedicineRequest>> GetByConditionAsync(Expression<Func<MedicineRequest, bool>> expression)
+        public async Task<List<MedicineRequest>> GetRequestsByUserAsync(int userId)
         {
-            throw new NotImplementedException();
+            return await _context.MedicineRequests
+                .Include(r => r.Medicine)
+                .Where(r => r.RequestedByUserId == userId)
+                .ToListAsync();
         }
 
-        public Task<MedicineRequest> GetByIdAsync(int id)
+        public async Task<List<MedicineRequest>> GetRequestsByStatusAsync(RequestStatus status)
         {
-            throw new NotImplementedException();
+            return await _context.MedicineRequests
+                .Include(r => r.Medicine)
+                .Include(r => r.RequestedByUser)
+                .Where(r => r.Status == status)
+                .ToListAsync();
         }
 
-        public Task Update(MedicineRequest entity)
+        public async Task<bool> CreateRequestAsync(MedicineRequest request)
         {
-            throw new NotImplementedException();
+            try
+            {
+                request.RequestDate = DateTime.UtcNow;
+                request.Status = request.Medicine.RequiresSpecialApproval ?
+                    RequestStatus.ApprovalRequired : RequestStatus.Pending;
+
+                _context.MedicineRequests.Add(request);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> UpdateRequestStatusAsync(int requestId, RequestStatus status, int? approvedByUserId = null)
+        {
+            var request = await _context.MedicineRequests.FindAsync(requestId);
+            if (request == null) return false;
+
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                request.Status = status;
+                if (status == RequestStatus.Approved)
+                {
+                    request.ApprovalDate = DateTime.UtcNow;
+                    request.ApprovedByUserId = approvedByUserId;
+                }
+
+                await _context.SaveChangesAsync();
+                await transaction.CommitAsync();
+                return true;
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                return false;
+            }
+        }
+
+        public async Task<bool> DeleteRequestAsync(int id)
+        {
+            var request = await _context.MedicineRequests.FindAsync(id);
+            if (request == null) return false;
+
+            try
+            {
+                _context.MedicineRequests.Remove(request);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

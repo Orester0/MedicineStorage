@@ -15,7 +15,6 @@ namespace MedicineStorage.Data
     {
 
         public DbSet<Medicine> Medicines { get; set; }
-        public DbSet<Stock> Stocks { get; set; }
         public DbSet<MedicineRequest> MedicineRequests { get; set; }
         public DbSet<Tender> Tenders { get; set; }
         public DbSet<TenderItem> TenderItems { get; set; }
@@ -27,9 +26,12 @@ namespace MedicineStorage.Data
         public DbSet<UserRole> UserRoles { get; set; }
         public DbSet<AppRole> AppRoles { get; set; }
 
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+
 
             // User configurations
             modelBuilder.Entity<User>(entity =>
@@ -62,6 +64,53 @@ namespace MedicineStorage.Data
                     .IsRequired();
             });
 
+            modelBuilder.Entity<AuditItem>(entity =>
+            {
+                entity.Property(e => e.ActualQuantity)
+                    .HasPrecision(10, 0);
+                entity.Property(e => e.ExpectedQuantity)
+                    .HasPrecision(10, 0);
+            });
+
+            modelBuilder.Entity<Medicine>(entity =>
+            {
+                entity.Property(e => e.MinimumStock)
+                    .HasPrecision(12, 0);
+                entity.Property(e => e.Stock)
+                    .HasPrecision(12, 0);
+            });
+
+            modelBuilder.Entity<MedicineRequest>(entity =>
+            {
+                entity.Property(e => e.Quantity)
+                    .HasPrecision(10, 0);
+            });
+
+            modelBuilder.Entity<MedicineUsage>(entity =>
+            {
+                entity.Property(e => e.Quantity)
+                    .HasPrecision(10, 0);
+            });
+
+
+            modelBuilder.Entity<TenderProposal>(entity =>
+            {
+                entity.Property(e => e.TotalPrice)
+                    .HasPrecision(12, 0);
+            });
+
+            modelBuilder.Entity<TenderProposalItem>(entity =>
+            {
+                entity.Property(e => e.Quantity)
+                    .HasPrecision(10, 0);
+            });
+
+            modelBuilder.Entity<TenderProposalItem>(entity =>
+            {
+                entity.Property(e => e.UnitPrice)
+                    .HasPrecision(12, 2);
+            });
+
             modelBuilder.Entity<Audit>()
             .HasOne(a => a.ConductedByUser)
             .WithMany()
@@ -83,9 +132,9 @@ namespace MedicineStorage.Data
 
             // Medicine configurations
             modelBuilder.Entity<Medicine>()
-                .HasMany(m => m.StockRecords)
-                .WithOne(s => s.Medicine)
-                .HasForeignKey(s => s.MedicineId)
+                .HasMany(m => m.Requests)
+                .WithOne(r => r.Medicine)
+                .HasForeignKey(r => r.MedicineId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<Medicine>()
@@ -121,9 +170,9 @@ namespace MedicineStorage.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<MedicineUsage>()
-                .HasOne(mu => mu.Stock)
+                .HasOne(mu => mu.UsedByUser)
                 .WithMany()
-                .HasForeignKey(mu => mu.StockId)
+                .HasForeignKey(mu => mu.UsedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
 
             // Tender configurations
