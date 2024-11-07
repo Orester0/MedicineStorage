@@ -16,11 +16,8 @@ namespace MedicineStorage.Models.MedicineModels
         public string Category { get; set; }
         [Required]
         public bool RequiresSpecialApproval { get; set; }
-
-
         [Required]
         public decimal MinimumStock { get; set; }
-        [Required]
         public decimal Stock { get; set; }
         [Required]
         public bool RequiresStrictAudit { get; set; }

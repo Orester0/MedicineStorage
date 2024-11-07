@@ -18,16 +18,8 @@ namespace MedicineStorage.Controllers
         {
             try
             {
-                // Map DTO to entity
-                var request = new MedicineRequest
-                {
-                    RequestedByUserId = createRequestDto.RequestedByUserId,
-                    MedicineId = createRequestDto.MedicineId,
-                    Quantity = createRequestDto.Quantity,
-                    RequiredByDate = createRequestDto.RequiredByDate,
-                    Justification = createRequestDto.Justification,
-                    RequestDate = DateTime.UtcNow
-                };
+                var request = _mapper.Map<MedicineRequest>(createRequestDto);
+                
 
                 var success = await _unitOfWork.MedicineRequestRepository.CreateRequestAsync(request);
                 if (!success)
@@ -35,7 +27,6 @@ namespace MedicineStorage.Controllers
 
                 await _unitOfWork.Complete();
 
-                // Get the created request with related data
                 var createdRequest = await _unitOfWork.MedicineRequestRepository.GetByIdAsync(request.Id);
                 var responseDto = _mapper.Map<MedicineRequestDTO>(createdRequest);
 
@@ -130,14 +121,8 @@ namespace MedicineStorage.Controllers
         {
             try
             {
-                var usage = new MedicineUsage
-                {
-                    MedicineId = createUsageDto.MedicineId,
-                    Quantity = createUsageDto.Quantity,
-                    UsedByUserId = createUsageDto.RequestedByUserId,
-                    Notes = createUsageDto.Notes,
-                    UsageDate = DateTime.UtcNow
-                };
+                var usage = _mapper.Map<MedicineUsage>(createUsageDto);
+                
 
                 var success = await _unitOfWork.MedicineUsageRepository.RecordUsageAsync(usage);
                 if (!success)

@@ -98,7 +98,6 @@ app.Run();
 
 static void SeedTestData(AppDbContext context)
 {
-
     var medicine1 = new Medicine { Name = "Paracetamol", Description = "Pain relief medication", Stock = 100, Category = "Antiemetics", RequiresSpecialApproval = false, MinimumStock = 50, RequiresStrictAudit = false, AuditFrequencyDays = 30 };
     var medicine2 = new Medicine { Name = "Ibuprofen", Description = "Pain relief medication", Stock = 150, Category = "Anesthetics", RequiresSpecialApproval = true, MinimumStock = 60, RequiresStrictAudit = true, AuditFrequencyDays = 30 };
     var medicine3 = new Medicine { Name = "Islamint", Description = "Pain relief medication", Stock = 160, Category = "Antiparasitics", RequiresSpecialApproval = false, MinimumStock = 70, RequiresStrictAudit = false, AuditFrequencyDays = 30 };

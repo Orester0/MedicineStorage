@@ -1,4 +1,6 @@
-﻿using MedicineStorage.Data.Interfaces;
+﻿using AutoMapper;
+using MedicineStorage.Data.Interfaces;
+using MedicineStorage.DTOs;
 using MedicineStorage.Helpers;
 using MedicineStorage.Models.MedicineModels;
 using Microsoft.EntityFrameworkCore;
@@ -6,7 +8,7 @@ using System.Linq.Expressions;
 
 namespace MedicineStorage.Data
 {
-    public class MedicineRepository(AppDbContext _context) : IMedicineRepository
+    public class MedicineRepository(AppDbContext _context, IMapper _mapper) : IMedicineRepository
     {
         public async Task<Medicine?> GetByIdAsync(int id)
         {
