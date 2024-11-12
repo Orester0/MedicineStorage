@@ -1,18 +1,19 @@
-﻿using MedicineStorage.Data.Interfaces;
+﻿using MedicineStorage.Data;
 using MedicineStorage.Models;
+using MedicineStorage.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace MedicineStorage.Data
+namespace MedicineStorage.Services.Implementations
 {
-    public class UserRepository(UserManager<User> _userManager, RoleManager<AppRole> _roleManager, AppDbContext _context) : IUserRepository
+    public class UserService(UserManager<User> _userManager, RoleManager<AppRole> _roleManager, AppDbContext _context) : IUserService
     {
         public async Task<User?> GetByIdAsync(int id)
         {
             return await _userManager.Users
                 .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
+                .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 
@@ -20,7 +21,7 @@ namespace MedicineStorage.Data
         {
             return await _userManager.Users
                 .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
+                .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.NormalizedUserName == username.ToUpper());
         }
 
@@ -28,7 +29,7 @@ namespace MedicineStorage.Data
         {
             return await _userManager.Users
                 .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
+                .ThenInclude(ur => ur.Role)
                 .ToListAsync();
         }
 
@@ -39,7 +40,7 @@ namespace MedicineStorage.Data
 
             return await _userManager.Users
                 .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
+                .ThenInclude(ur => ur.Role)
                 .Where(u => u.UserRoles.Any(ur => ur.Role.Name == roleName))
                 .ToListAsync();
         }
@@ -136,9 +137,18 @@ namespace MedicineStorage.Data
         {
             return await _userManager.Users
                 .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
+                .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
+        public async Task<bool> UserExists(string login)
+        {
+            return await _userManager.Users.AnyAsync(x => x.NormalizedUserName == login.ToUpper());
+        }
+        public async Task<bool> EmailTaken(string email)
+        {
+            return await _userManager.Users.AnyAsync(x => x.NormalizedEmail == email.ToUpper());
+        }
+
     }
 }
 

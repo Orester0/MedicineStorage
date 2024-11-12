@@ -2,9 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
-namespace MedicineStorage.Data.Interfaces
+namespace MedicineStorage.Services.Interfaces
 {
-    public interface IUserRepository
+    public interface IUserService
     {
         Task<User?> GetByIdAsync(int id);
         Task<User?> GetByUserNameAsync(string username);
@@ -18,5 +18,8 @@ namespace MedicineStorage.Data.Interfaces
         Task<List<string>> GetUserRolesAsync(int userId);
         Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword);
         Task<User?> GetUserByEmailAsync(string email);
+
+        Task<bool> UserExists(string login);
+        Task<bool> EmailTaken(string email);
     }
 }

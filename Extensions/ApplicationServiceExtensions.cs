@@ -31,7 +31,7 @@ namespace MedicineStorage.Extensions
             services.AddScoped<IMedicineUsageRepository, MedicineUsageRepository>();
             services.AddScoped<ITenderProposalRepository, TenderProposalRepository>();
             services.AddScoped<ITenderRepository, TenderRepository>();
-            services.AddScoped<IUserRepository, UserRepository>();
+            services.AddScoped<IUserService, UserService>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 

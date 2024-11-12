@@ -1,16 +1,34 @@
-﻿using MedicineStorage.Models.TenderModels;
+﻿using MedicineStorage.Models;
+using MedicineStorage.Models.TenderModels;
+using System.ComponentModel.DataAnnotations.Schema;
+using System.ComponentModel.DataAnnotations;
 
 namespace MedicineStorage.DTOs
 {
-    public class TenderDTO
+    public class CreateTenderDTO
     {
-        public int Id { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime PublishDate { get; set; }
         public DateTime DeadlineDate { get; set; }
         public TenderStatus Status { get; set; }
         public int CreatedByUserId { get; set; }
+        public virtual ICollection<TenderItem> Items { get; set; }
+    }
+
+    public class ReturnTenderDTO
+    {
+        public int Id { get; set; }
+        
+        public string Title { get; set; }
+        public string Description { get; set; }
+        public DateTime PublishDate { get; set; }
+        public DateTime DeadlineDate { get; set; }
+        public TenderStatus Status { get; set; }
+        public int CreatedByUserId { get; set; }
+
+        public virtual ICollection<TenderItem> Items { get; set; }
+        public virtual ICollection<TenderProposal> Proposals { get; set; }
     }
 
     public class TenderItemDto

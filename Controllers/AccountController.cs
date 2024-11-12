@@ -14,8 +14,9 @@ using System.Text;
 namespace MedicineStorage.Controllers
 {
     public class AccountController(
-        UserManager<User> _userManager, 
-        RoleManager<AppRole> _roleManager, 
+        IUserService _userService,
+        //UserManager<User> _userManager, 
+        //RoleManager<AppRole> _roleManager, 
         ITokenService _tokenService, 
         IMapper _mapper,
         IEmailService _emailservice) : BaseApiController
@@ -23,22 +24,29 @@ namespace MedicineStorage.Controllers
         [HttpPost("register")] 
         public async Task<ActionResult<UserReturnDTO>> Register([FromBody]UserRegistrationDTO registerDto)
         {
-            if (await UserExists(registerDto.UserName))
+            if (await _userService.UserExists(registerDto.UserName))
             {
                 return BadRequest($"/{registerDto.UserName}/ is taken");
             }
 
-            if (await EmailTaken(registerDto.Email))
+            if (await _userService.EmailTaken(registerDto.Email))
             {
                 return BadRequest($"/{registerDto.Email}/ is taken");
             }
 
             foreach (var role in registerDto.Roles)
             {
+                if(role == "Admin" || role == "SupremeAdmin")
+                {
+                    return BadRequest($"Cannot register as '{role}'.");
+                }
+
                 if (!await _roleManager.RoleExistsAsync(role))
                 {
                     return BadRequest($"Role '{role}' does not exist.");
                 }
+
+
             }
 
             var user = _mapper.Map<User>(registerDto);
@@ -56,7 +64,7 @@ namespace MedicineStorage.Controllers
                 return BadRequest(roleResult.Errors);
             }
 
-            await _emailservice.SendEmailAsync(user.Email, "Registration", "Succesfull registration");
+            //await _emailservice.SendEmailAsync(user.Email, "Registration", "Succesfull registration");
 
             return new UserReturnDTO
             {
@@ -87,15 +95,6 @@ namespace MedicineStorage.Controllers
                 UserName = user.UserName,
                 Token = await _tokenService.CreateToken(user),
             };
-        }
-
-        private async Task<bool> UserExists(string login)
-        {
-            return await _userManager.Users.AnyAsync(x => x.NormalizedUserName == login.ToUpper());
-        }
-        private async Task<bool> EmailTaken(string email)
-        {
-            return await _userManager.Users.AnyAsync(x => x.NormalizedEmail == email.ToUpper());
         }
 
     }

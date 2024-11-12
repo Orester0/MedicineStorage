@@ -1,6 +1,7 @@
 ﻿using MedicineStorage.Data.Interfaces;
 using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Services.Interfaces;
 
 namespace MedicineStorage.Data
 {
@@ -12,7 +13,7 @@ namespace MedicineStorage.Data
         IMedicineUsageRepository _medicineUsageRepository,
         ITenderProposalRepository _tenderProposalRepository,
         ITenderRepository _tenderRepository,
-        IUserRepository _userRepository) : IUnitOfWork
+        IUserService _userRepository) : IUnitOfWork
     {
         public IAuditRepository AuditRepository => _auditRepository;
 
@@ -27,7 +28,7 @@ namespace MedicineStorage.Data
 
         public ITenderRepository TenderRepository => _tenderRepository;
 
-        public IUserRepository UserRepository => _userRepository;
+        public IUserService UserRepository => _userRepository;
 
         public void BeginTransaction()
         {
