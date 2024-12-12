@@ -2,7 +2,7 @@
 using MedicineStorage.Models.AuditModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace MedicineStorage.Data
+namespace MedicineStorage.Data.Implementations
 {
     public class AuditRepository(AppDbContext _context) : IAuditRepository
     {

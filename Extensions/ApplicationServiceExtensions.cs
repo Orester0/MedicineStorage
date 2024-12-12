@@ -1,4 +1,5 @@
 ﻿using MedicineStorage.Data;
+using MedicineStorage.Data.Implementations;
 using MedicineStorage.Data.Interfaces;
 using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
@@ -22,6 +23,7 @@ namespace MedicineStorage.Extensions
             services.AddSwaggerGen();
             services.AddDbContext<AppDbContext>(
                     options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
+
             services.AddScoped<ITokenService, TokenService>();
 
 
@@ -29,12 +31,13 @@ namespace MedicineStorage.Extensions
             services.AddScoped<IMedicineRepository, MedicineRepository>();
             services.AddScoped<IMedicineRequestRepository, MedicineRequestRepository>();
             services.AddScoped<IMedicineUsageRepository, MedicineUsageRepository>();
-            services.AddScoped<ITenderProposalRepository, TenderProposalRepository>();
-            services.AddScoped<ITenderRepository, TenderRepository>();
-            services.AddScoped<IUserService, UserService>();
 
+            
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IMedicineService, MedicineService>();
+            services.AddScoped<IMedicineOperationsService, MedicineOperationsService>();
 
 
 

@@ -2,9 +2,8 @@
 using MedicineStorage.Helpers;
 using MedicineStorage.Models.MedicineModels;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
-namespace MedicineStorage.Data
+namespace MedicineStorage.Data.Implementations
 {
     public class MedicineRequestRepository(AppDbContext _context) : IMedicineRequestRepository
     {
@@ -51,65 +50,52 @@ namespace MedicineStorage.Data
                 .ToListAsync();
         }
 
-        public async Task<bool> CreateRequestAsync(MedicineRequest request)
+        public async Task<MedicineRequest> AddRequestAsync(MedicineRequest request)
         {
-            try
-            {
-                request.RequestDate = DateTime.UtcNow;
-                request.Status = request.Medicine.RequiresSpecialApproval ?
-                    RequestStatus.ApprovalRequired : RequestStatus.Pending;
-
-                _context.MedicineRequests.Add(request);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            request.RequestDate = DateTime.UtcNow;
+            _context.MedicineRequests.Add(request);
+            await _context.SaveChangesAsync();
+            return request;
         }
 
-        public async Task<bool> UpdateRequestStatusAsync(int requestId, RequestStatus status, int? approvedByUserId = null)
+        public async Task<MedicineRequest> UpdateRequestAsync(MedicineRequest request)
+        {
+            _context.MedicineRequests.Update(request);
+            await _context.SaveChangesAsync();
+
+            // Reload the entity to get the updated version with includes
+            return await GetByIdAsync(request.Id) ?? request;
+        }
+
+        public async Task<MedicineRequest> UpdateRequestStatusAsync(int requestId, RequestStatus status, int? approvedByUserId = null)
         {
             var request = await _context.MedicineRequests.FindAsync(requestId);
-            if (request == null) return false;
+            if (request == null)
+                throw new InvalidOperationException("Request not found.");
 
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            request.Status = status;
+            if (status == RequestStatus.Approved)
             {
-                request.Status = status;
-                if (status == RequestStatus.Approved)
-                {
-                    request.ApprovalDate = DateTime.UtcNow;
-                    request.ApprovedByUserId = approvedByUserId;
-                }
+                request.ApprovalDate = DateTime.UtcNow;
+                request.ApprovedByUserId = approvedByUserId;
+            }
 
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-                return true;
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                return false;
-            }
+            await _context.SaveChangesAsync();
+
+            // Reload the entity to get the updated version with includes
+            return await GetByIdAsync(requestId) ?? request;
         }
 
         public async Task<bool> DeleteRequestAsync(int id)
         {
             var request = await _context.MedicineRequests.FindAsync(id);
-            if (request == null) return false;
-
-            try
+            if (request != null)
             {
                 _context.MedicineRequests.Remove(request);
                 await _context.SaveChangesAsync();
                 return true;
             }
-            catch
-            {
-                return false;
-            }
+            return false;
         }
     }
 }

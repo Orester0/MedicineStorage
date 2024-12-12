@@ -10,8 +10,6 @@ namespace MedicineStorage.Data.Interfaces
         IMedicineRepository MedicineRepository { get; }
         IMedicineRequestRepository MedicineRequestRepository { get; }
         IMedicineUsageRepository MedicineUsageRepository { get; }
-        ITenderProposalRepository TenderProposalRepository { get; }
-        ITenderRepository TenderRepository { get; }
         IUserService UserRepository { get; }
 
         Task<bool> Complete();

@@ -2,7 +2,7 @@
 using MedicineStorage.Models.MedicineModels;
 using Microsoft.EntityFrameworkCore;
 
-namespace MedicineStorage.Data
+namespace MedicineStorage.Data.Implementations
 {
     public class MedicineUsageRepository(AppDbContext _context) : IMedicineUsageRepository
     {
@@ -25,88 +25,58 @@ namespace MedicineStorage.Data
         public async Task<List<MedicineUsage>> GetUsagesByMedicineAsync(int medicineId)
         {
             return await _context.MedicineUsages
-                .Include(u => u.UsedByUser)
                 .Where(u => u.MedicineId == medicineId)
+                .Include(u => u.UsedByUser)
                 .ToListAsync();
         }
 
         public async Task<List<MedicineUsage>> GetUsagesByUserAsync(int userId)
         {
             return await _context.MedicineUsages
-                .Include(u => u.Medicine)
                 .Where(u => u.UsedByUserId == userId)
+                .Include(u => u.Medicine)
                 .ToListAsync();
         }
 
         public async Task<List<MedicineUsage>> GetUsagesByDateRangeAsync(DateTime startDate, DateTime endDate)
         {
             return await _context.MedicineUsages
+                .Where(u => u.UsageDate >= startDate && u.UsageDate <= endDate)
                 .Include(u => u.Medicine)
                 .Include(u => u.UsedByUser)
-                .Where(u => u.UsageDate >= startDate && u.UsageDate <= endDate)
                 .ToListAsync();
         }
 
-        public async Task<bool> RecordUsageAsync(MedicineUsage usage)
+        public async Task<MedicineUsage> AddUsageAsync(MedicineUsage usage)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
-            {
-                var medicine = await _context.Medicines
-                    .FirstOrDefaultAsync(m => m.Id == usage.MedicineId);
-
-                if (medicine == null || medicine.Stock < usage.Quantity)
-                    return false;
-
-                medicine.Stock -= usage.Quantity;
-
-                usage.UsageDate = DateTime.UtcNow;
-                _context.MedicineUsages.Add(usage);
-
-                await _context.SaveChangesAsync();
-                await transaction.CommitAsync();
-                return true;
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                return false;
-            }
+            usage.UsageDate = DateTime.UtcNow;
+            _context.MedicineUsages.Add(usage);
+            await _context.SaveChangesAsync();
+            return usage;
         }
 
-
-        public async Task<bool> UpdateUsageAsync(MedicineUsage usage)
+        public async Task<MedicineUsage> UpdateUsageAsync(MedicineUsage usage)
         {
-            try
-            {
-                _context.MedicineUsages.Update(usage);
-                await _context.SaveChangesAsync();
-                return true;
-            }
-            catch
-            {
-                return false;
-            }
+            _context.MedicineUsages.Update(usage);
+            await _context.SaveChangesAsync();
+
+            // Reload the entity to get the updated version with includes
+            return await GetByIdAsync(usage.Id) ?? usage;
         }
 
         public async Task<bool> DeleteUsageAsync(int id)
         {
             var usage = await _context.MedicineUsages.FindAsync(id);
-            if (usage == null) return false;
-
-            try
+            if (usage != null)
             {
                 _context.MedicineUsages.Remove(usage);
                 await _context.SaveChangesAsync();
                 return true;
             }
-            catch
-            {
-                return false;
-            }
+            return false;
         }
 
-        public async Task<decimal> GetTotalUsageForMedicineAsync(int medicineId, DateTime? startDate = null, DateTime? endDate = null)
+        public async Task<decimal> GetTotalUsageQuantityAsync(int medicineId, DateTime? startDate = null, DateTime? endDate = null)
         {
             var query = _context.MedicineUsages
                 .Where(u => u.MedicineId == medicineId);

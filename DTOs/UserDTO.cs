@@ -33,6 +33,37 @@ namespace MedicineStorage.DTOs
         public string Password { get; set; }
     }
 
+    public class UserDTO
+    {
+        public int Id { get; set; }
+        [Required]
+        [StringLength(100)]
+        public string FirstName { get; set; } = string.Empty;
+        [Required]
+        [StringLength(100)]
+        public string LastName { get; set; } = string.Empty;
+        [Required]
+        [StringLength(100)]
+        public string UserName { get; set; } = string.Empty;
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+        public List<string> Roles { get; set; } = new List<string>();
+    }
+
+    public class UserUpdateDTO
+    {
+        [Required]
+        [StringLength(100)]
+        public string FirstName { get; set; } = string.Empty;
+        [Required]
+        [StringLength(100)]
+        public string LastName { get; set; } = string.Empty;
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+    }
+
     public class UserReturnDTO
     {
         [Required]  

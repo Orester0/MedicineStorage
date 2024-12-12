@@ -1,4 +1,6 @@
-﻿using MedicineStorage.Data;
+﻿using AutoMapper;
+using MedicineStorage.Data;
+using MedicineStorage.DTOs;
 using MedicineStorage.Models;
 using MedicineStorage.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
@@ -7,8 +9,22 @@ using System.Linq.Expressions;
 
 namespace MedicineStorage.Services.Implementations
 {
-    public class UserService(UserManager<User> _userManager, RoleManager<AppRole> _roleManager, AppDbContext _context) : IUserService
+    public class UserService : IUserService
     {
+        private readonly UserManager<User> _userManager;
+        private readonly RoleManager<AppRole> _roleManager;
+        private readonly AppDbContext _context;
+        private readonly IMapper _mapper;
+
+        public UserService(UserManager<User> userManager, RoleManager<AppRole> roleManager,
+            AppDbContext context, IMapper mapper)
+        {
+            _userManager = userManager;
+            _roleManager = roleManager;
+            _context = context;
+            _mapper = mapper;
+        }
+
         public async Task<User?> GetByIdAsync(int id)
         {
             return await _userManager.Users
@@ -45,74 +61,135 @@ namespace MedicineStorage.Services.Implementations
                 .ToListAsync();
         }
 
-        public async Task<bool> CreateUserAsync(User user, string password, string roleName)
+        public async Task<ServiceResult<User>> CreateUserAsync(UserRegistrationDTO registerDto)
         {
+            var result = new ServiceResult<User>();
+            var user = _mapper.Map<User>(registerDto);
+
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                var result = await _userManager.CreateAsync(user, password);
-                if (!result.Succeeded)
-                    return false;
+                var createResult = await _userManager.CreateAsync(user, registerDto.Password);
+                if (!createResult.Succeeded)
+                {
+                    result.Errors.AddRange(createResult.Errors.Select(e => e.Description));
+                    return result;
+                }
 
-                var roleResult = await _userManager.AddToRoleAsync(user, roleName);
+                var roleResult = await _userManager.AddToRolesAsync(user, registerDto.Roles);
                 if (!roleResult.Succeeded)
                 {
+                    result.Errors.AddRange(roleResult.Errors.Select(e => e.Description));
                     await transaction.RollbackAsync();
-                    return false;
+                    return result;
                 }
 
                 await transaction.CommitAsync();
-                return true;
+                result.Data = user;
+                return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                return false;
+                result.Errors.Add(ex.Message);
+                return result;
             }
         }
 
-        public async Task<bool> UpdateUserAsync(User user)
+        public async Task<ServiceResult<bool>> UpdateUserAsync(User user)
         {
+            var result = new ServiceResult<bool>();
             var existingUser = await _userManager.FindByIdAsync(user.Id.ToString());
-            if (existingUser == null) return false;
 
-            existingUser.FirstName = user.FirstName;
-            existingUser.LastName = user.LastName;
-            existingUser.Email = user.Email;
-            existingUser.PhoneNumber = user.PhoneNumber;
+            if (existingUser == null)
+            {
+                result.Errors.Add("User not found");
+                return result;
+            }
 
-            var result = await _userManager.UpdateAsync(existingUser);
-            return result.Succeeded;
+            _mapper.Map(user, existingUser);
+            var updateResult = await _userManager.UpdateAsync(existingUser);
+
+            if (!updateResult.Succeeded)
+            {
+                result.Errors.AddRange(updateResult.Errors.Select(e => e.Description));
+                return result;
+            }
+
+            result.Data = true;
+            return result;
         }
 
-        public async Task<bool> DeleteUserAsync(int id)
+        public async Task<ServiceResult<bool>> DeleteUserAsync(int id)
         {
+            var result = new ServiceResult<bool>();
             var user = await _userManager.FindByIdAsync(id.ToString());
-            if (user == null) return false;
 
-            var result = await _userManager.DeleteAsync(user);
-            return result.Succeeded;
+            if (user == null)
+            {
+                result.Errors.Add("User not found");
+                return result;
+            }
+
+            var deleteResult = await _userManager.DeleteAsync(user);
+            if (!deleteResult.Succeeded)
+            {
+                result.Errors.AddRange(deleteResult.Errors.Select(e => e.Description));
+                return result;
+            }
+
+            result.Data = true;
+            return result;
         }
 
-        public async Task<bool> AssignRoleAsync(int userId, string roleName)
+        public async Task<ServiceResult<bool>> AssignRoleAsync(int userId, string roleName)
         {
+            var result = new ServiceResult<bool>();
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null) return false;
+
+            if (user == null)
+            {
+                result.Errors.Add("User not found");
+                return result;
+            }
 
             if (!await _roleManager.RoleExistsAsync(roleName))
-                return false;
+            {
+                result.Errors.Add("Role does not exist");
+                return result;
+            }
 
-            var result = await _userManager.AddToRoleAsync(user, roleName);
-            return result.Succeeded;
+            var roleResult = await _userManager.AddToRoleAsync(user, roleName);
+            if (!roleResult.Succeeded)
+            {
+                result.Errors.AddRange(roleResult.Errors.Select(e => e.Description));
+                return result;
+            }
+
+            result.Data = true;
+            return result;
         }
 
-        public async Task<bool> RemoveRoleAsync(int userId, string roleName)
+        public async Task<ServiceResult<bool>> RemoveRoleAsync(int userId, string roleName)
         {
+            var result = new ServiceResult<bool>();
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null) return false;
 
-            var result = await _userManager.RemoveFromRoleAsync(user, roleName);
-            return result.Succeeded;
+            if (user == null)
+            {
+                result.Errors.Add("User not found");
+                return result;
+            }
+
+            var roleResult = await _userManager.RemoveFromRoleAsync(user, roleName);
+            if (!roleResult.Succeeded)
+            {
+                result.Errors.AddRange(roleResult.Errors.Select(e => e.Description));
+                return result;
+            }
+
+            result.Data = true;
+            return result;
         }
 
         public async Task<List<string>> GetUserRolesAsync(int userId)
@@ -124,13 +201,26 @@ namespace MedicineStorage.Services.Implementations
             return roles.ToList();
         }
 
-        public async Task<bool> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
+        public async Task<ServiceResult<bool>> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
         {
+            var result = new ServiceResult<bool>();
             var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null) return false;
 
-            var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
-            return result.Succeeded;
+            if (user == null)
+            {
+                result.Errors.Add("User not found");
+                return result;
+            }
+
+            var passwordResult = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+            if (!passwordResult.Succeeded)
+            {
+                result.Errors.AddRange(passwordResult.Errors.Select(e => e.Description));
+                return result;
+            }
+
+            result.Data = true;
+            return result;
         }
 
         public async Task<User?> GetUserByEmailAsync(string email)
@@ -140,15 +230,26 @@ namespace MedicineStorage.Services.Implementations
                 .ThenInclude(ur => ur.Role)
                 .FirstOrDefaultAsync(u => u.Email == email);
         }
+
+        public async Task<bool> VerifyPasswordAsync(User user, string password)
+        {
+            return await _userManager.CheckPasswordAsync(user, password);
+        }
+
+        public async Task<bool> RoleExistsAsync(string roleName)
+        {
+            return await _roleManager.RoleExistsAsync(roleName);
+        }
+
         public async Task<bool> UserExists(string login)
         {
             return await _userManager.Users.AnyAsync(x => x.NormalizedUserName == login.ToUpper());
         }
+
         public async Task<bool> EmailTaken(string email)
         {
             return await _userManager.Users.AnyAsync(x => x.NormalizedEmail == email.ToUpper());
         }
-
     }
 }
 

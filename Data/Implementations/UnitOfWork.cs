@@ -3,16 +3,14 @@ using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Services.Interfaces;
 
-namespace MedicineStorage.Data
+namespace MedicineStorage.Data.Implementations
 {
     public class UnitOfWork(
-        AppDbContext _context, 
-        IAuditRepository _auditRepository, 
+        AppDbContext _context,
+        IAuditRepository _auditRepository,
         IMedicineRepository _medicineRepository,
         IMedicineRequestRepository _medicineRequestRepository,
         IMedicineUsageRepository _medicineUsageRepository,
-        ITenderProposalRepository _tenderProposalRepository,
-        ITenderRepository _tenderRepository,
         IUserService _userRepository) : IUnitOfWork
     {
         public IAuditRepository AuditRepository => _auditRepository;
@@ -22,11 +20,6 @@ namespace MedicineStorage.Data
         public IMedicineRequestRepository MedicineRequestRepository => _medicineRequestRepository;
 
         public IMedicineUsageRepository MedicineUsageRepository => _medicineUsageRepository;
-
-
-        public ITenderProposalRepository TenderProposalRepository => _tenderProposalRepository;
-
-        public ITenderRepository TenderRepository => _tenderRepository;
 
         public IUserService UserRepository => _userRepository;
 

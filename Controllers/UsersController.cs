@@ -11,39 +11,51 @@ using Microsoft.AspNetCore.Authorization;
 using MedicineStorage.DTOs;
 using AutoMapper;
 using MedicineStorage.Data.Interfaces;
+using NuGet.Protocol;
+using MedicineStorage.Services.Interfaces;
 
 namespace MedicineStorage.Controllers
 {
-
-    public class UsersController(IUnitOfWork _unitOfWork, IMapper _mapper) : BaseApiController
+    public class UsersController(IUnitOfWork _unitOfWork,
+        IUserService _userService,
+        ITokenService _tokenService,
+        ILogger<AccountController> _logger
+        ) : BaseApiController
     {
-        // GET: api/Users
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<UserKnownDTO>>> GetUsers()
+        [HttpPost("add-user")]
+        public async Task<ActionResult<UserReturnDTO>> AddUser([FromBody] UserRegistrationDTO registerDto)
         {
-            var users = await _unitOfWork.UserRepository.GetAllAsync();
+            _logger.LogInformation($"Incoming registration request: \n{registerDto.ToJson()}");
 
-            var usersToReturn = _mapper.Map<IEnumerable<UserKnownDTO>>(users);
-
-            bool success = await _unitOfWork.Complete();
-            return Ok(usersToReturn); 
-        }
-
-        // GET: api/Users/5
-        [HttpGet("{username}")]
-        public async Task<ActionResult<UserKnownDTO>> GetUser(string username)
-        {
-            var user = await _unitOfWork.UserRepository.GetByUserNameAsync(username);
-
-            if (user == null)
+            if (await _userService.UserExists(registerDto.UserName))
             {
-                return NotFound();
+                return BadRequest(new { Errors = new[] { $"Username '{registerDto.UserName}' is taken" } });
             }
 
-            var userToReturn = _mapper.Map<UserKnownDTO>(user);
+            if (await _userService.EmailTaken(registerDto.Email))
+            {
+                return BadRequest(new { Errors = new[] { $"Email '{registerDto.Email}' is taken" } });
+            }
 
-            bool success = await _unitOfWork.Complete();
-            return Ok(userToReturn);
+            foreach (var role in registerDto.Roles)
+            {
+                if (!await _userService.RoleExistsAsync(role))
+                {
+                    return BadRequest(new { Errors = new[] { $"Role '{role}' does not exist" } });
+                }
+            }
+
+            var result = await _userService.CreateUserAsync(registerDto);
+            if (!result.Success)
+            {
+                return BadRequest(new { Errors = result.Errors });
+            }
+
+            return Ok(new UserReturnDTO
+            {
+                UserName = result.Data.UserName,
+                Token = await _tokenService.CreateToken(result.Data)
+            });
         }
     }
 }
