@@ -1,6 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using MedicineStorage.Models.MedicineModels;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.TenderModels
 {
@@ -23,7 +22,7 @@ namespace MedicineStorage.Models.TenderModels
         public DateTime DeadlineDate { get; set; }
         [Required]
         public TenderStatus Status { get; set; }
-        
+
         // Navigation properties
         public virtual User CreatedByUser { get; set; }
         public virtual ICollection<TenderItem> Items { get; set; }

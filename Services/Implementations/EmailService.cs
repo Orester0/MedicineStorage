@@ -1,9 +1,6 @@
-﻿using MedicineStorage.Services.Interfaces;
-using System.Net.Mail;
-using System.Net;
+﻿using MailKit.Security;
+using MedicineStorage.Services.Interfaces;
 using MimeKit;
-using MailKit.Net.Smtp;
-using MailKit.Security;
 
 namespace MedicineStorage.Services.Implementations
 {

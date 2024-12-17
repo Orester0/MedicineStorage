@@ -1,6 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using MedicineStorage.Models.MedicineModels;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.AuditModels
 {
@@ -30,4 +29,6 @@ namespace MedicineStorage.Models.AuditModels
         Completed,
         RequiresFollowUp
     }
+
+
 }

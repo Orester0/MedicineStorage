@@ -9,7 +9,7 @@
 
         public int PageSize
         {
-            get => _pagesize; 
+            get => _pagesize;
             set => _pagesize = (value > MaxPageSize) ? MaxPageSize : value;
         }
 

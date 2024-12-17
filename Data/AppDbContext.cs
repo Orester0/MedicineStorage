@@ -1,12 +1,10 @@
-﻿using MedicineStorage.Models.AuditModels;
+﻿using MedicineStorage.Models;
+using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.TenderModels;
-using MedicineStorage.Models;
-using Microsoft.EntityFrameworkCore;
-using System.Reflection;
-using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.General;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data
 {

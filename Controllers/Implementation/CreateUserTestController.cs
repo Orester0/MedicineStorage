@@ -1,22 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using MedicineStorage.Controllers.Interface;
+using MedicineStorage.Data.Interfaces;
+using MedicineStorage.DTOs;
+using MedicineStorage.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using MedicineStorage.Data;
-using MedicineStorage.Models;
-using Microsoft.AspNetCore.Authorization;
-using MedicineStorage.DTOs;
-using AutoMapper;
-using MedicineStorage.Data.Interfaces;
 using NuGet.Protocol;
-using MedicineStorage.Services.Interfaces;
 
-namespace MedicineStorage.Controllers
+namespace MedicineStorage.Controllers.Implementation
 {
-    public class UsersController(IUnitOfWork _unitOfWork,
+    public class CreateUserTestController(
         IUserService _userService,
         ITokenService _tokenService,
         ILogger<AccountController> _logger
@@ -25,7 +17,7 @@ namespace MedicineStorage.Controllers
         [HttpPost("add-user")]
         public async Task<ActionResult<UserReturnDTO>> AddUser([FromBody] UserRegistrationDTO registerDto)
         {
-            _logger.LogInformation($"Incoming registration request: \n{registerDto.ToJson()}");
+            _logger.LogInformation($"Incoming create user request: \n{registerDto.ToJson()}");
 
             if (await _userService.UserExists(registerDto.UserName))
             {
@@ -48,7 +40,7 @@ namespace MedicineStorage.Controllers
             var result = await _userService.CreateUserAsync(registerDto);
             if (!result.Success)
             {
-                return BadRequest(new { Errors = result.Errors });
+                return BadRequest(new { result.Errors });
             }
 
             return Ok(new UserReturnDTO

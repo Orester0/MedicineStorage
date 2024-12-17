@@ -17,7 +17,7 @@ namespace MedicineStorage.Middleware
             this.env = env;
         }
 
-        public async Task InvokeAsync(HttpContext context) 
+        public async Task InvokeAsync(HttpContext context)
         {
             try
             {

@@ -2,7 +2,6 @@
 using MedicineStorage.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -16,9 +15,9 @@ namespace MedicineStorage.Extensions
             {
                 opt.Password.RequireDigit = true;
                 opt.Password.RequiredLength = 6;
-                opt.Password.RequireNonAlphanumeric = false;    
-                opt.Password.RequireUppercase = false;         
-                opt.Password.RequireLowercase = false;           
+                opt.Password.RequireNonAlphanumeric = false;
+                opt.Password.RequireUppercase = false;
+                opt.Password.RequireLowercase = false;
             })
                 .AddRoles<AppRole>()
                 .AddRoleManager<RoleManager<AppRole>>()
@@ -43,13 +42,13 @@ namespace MedicineStorage.Extensions
                     };
                 });
 
-                services.AddAuthorization(options =>
-                {
-                    options.AddPolicy("SupremeAdmin", policy => policy.RequireRole("SupremeAdmin"));
-                    options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
-                    options.AddPolicy("Member", policy => policy.RequireRole("Member"));
-                    options.AddPolicy("Distributor", policy => policy.RequireRole("Distributor"));
-                });
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("SupremeAdmin", policy => policy.RequireRole("SupremeAdmin"));
+                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
+                options.AddPolicy("Member", policy => policy.RequireRole("Member"));
+                options.AddPolicy("Distributor", policy => policy.RequireRole("Distributor"));
+            });
 
             return services;
         }

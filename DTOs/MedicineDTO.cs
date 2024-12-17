@@ -101,20 +101,21 @@ namespace MedicineStorage.DTOs
         public string? Notes { get; set; }
     }
 
+
+
+
+
+
+
+
     public class CreateMedicineRequestDTO
     {
         [Required]
-        public int RequestedByUserId { get; set; }
-
-        [Required]
         public int MedicineId { get; set; }
-
         [Required, Range(0.1, double.MaxValue)]
         public decimal Quantity { get; set; }
-
         [Required]
         public DateTime RequiredByDate { get; set; }
-
         [MaxLength(1000)]
         public string? Justification { get; set; }
     }
@@ -123,29 +124,20 @@ namespace MedicineStorage.DTOs
     {
         [Required]
         public RequestStatus NewStatus { get; set; }
-        [Required]
-        public int UpdatedByUserId { get; set; }
     }
 
     public class SpecialApprovalDTO
     {
         [Required]
         public bool IsApproved { get; set; }
-        [Required]
-        public int ApprovedByUserId { get; set; }
     }
 
     public class CreateMedicineUsageDTO
     {
         [Required]
-        public int RequestedByUserId { get; set; }
-
-        [Required]
         public int MedicineId { get; set; }
-
         [Required, Range(0.1, double.MaxValue)]
         public decimal Quantity { get; set; }
-
         [MaxLength(1000)]
         public string? Notes { get; set; }
     }

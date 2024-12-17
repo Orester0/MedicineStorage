@@ -1,5 +1,4 @@
-﻿using MedicineStorage.Models;
-using MedicineStorage.Models.MedicineModels;
+﻿using MedicineStorage.Data.Implementations;
 using MedicineStorage.Services.Interfaces;
 
 namespace MedicineStorage.Data.Interfaces
@@ -10,7 +9,9 @@ namespace MedicineStorage.Data.Interfaces
         IMedicineRepository MedicineRepository { get; }
         IMedicineRequestRepository MedicineRequestRepository { get; }
         IMedicineUsageRepository MedicineUsageRepository { get; }
-        IUserService UserRepository { get; }
+        ITenderRepository TenderRepository { get; }
+        ITenderProposalRepository TenderProposalRepository { get; }
+
 
         Task<bool> Complete();
 

@@ -5,7 +5,6 @@ using MedicineStorage.Models;
 using MedicineStorage.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace MedicineStorage.Services.Implementations
 {
@@ -25,40 +24,94 @@ namespace MedicineStorage.Services.Implementations
             _mapper = mapper;
         }
 
-        public async Task<User?> GetByIdAsync(int id)
+        public async Task<ServiceResult<User?>> GetByIdAsync(int id)
         {
-            return await _userManager.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.Id == id);
+            var result = new ServiceResult<User?>();
+            try
+            {
+                result.Data = await _userManager.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .FirstOrDefaultAsync(u => u.Id == id);
+
+                if (result.Data == null)
+                {
+                    result.Errors.Add("User not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add($"An error occurred: {ex.Message}");
+            }
+
+            return result;
         }
 
-        public async Task<User?> GetByUserNameAsync(string username)
+        public async Task<ServiceResult<User?>> GetByUserNameAsync(string username)
         {
-            return await _userManager.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .FirstOrDefaultAsync(u => u.NormalizedUserName == username.ToUpper());
+            var result = new ServiceResult<User?>();
+            try
+            {
+                result.Data = await _userManager.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .FirstOrDefaultAsync(u => u.NormalizedUserName == username.ToUpper());
+
+                if (result.Data == null)
+                {
+                    result.Errors.Add("User not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add($"An error occurred: {ex.Message}");
+            }
+
+            return result;
         }
 
-        public async Task<List<User>> GetAllAsync()
+        public async Task<ServiceResult<List<User>>> GetAllAsync()
         {
-            return await _userManager.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .ToListAsync();
+            var result = new ServiceResult<List<User>>();
+            try
+            {
+                result.Data = await _userManager.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add($"An error occurred: {ex.Message}");
+            }
+
+            return result;
         }
 
-        public async Task<List<User>> GetUsersByRoleAsync(string roleName)
+        public async Task<ServiceResult<List<User>>> GetUsersByRoleAsync(string roleName)
         {
-            var role = await _roleManager.FindByNameAsync(roleName);
-            if (role == null) return new List<User>();
+            var result = new ServiceResult<List<User>>();
+            try
+            {
+                var role = await _roleManager.FindByNameAsync(roleName);
+                if (role == null)
+                {
+                    result.Errors.Add("Role not found.");
+                    return result;
+                }
 
-            return await _userManager.Users
-                .Include(u => u.UserRoles)
-                .ThenInclude(ur => ur.Role)
-                .Where(u => u.UserRoles.Any(ur => ur.Role.Name == roleName))
-                .ToListAsync();
+                result.Data = await _userManager.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .Where(u => u.UserRoles.Any(ur => ur.Role.Name == roleName))
+                    .ToListAsync();
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add($"An error occurred: {ex.Message}");
+            }
+
+            return result;
         }
 
         public async Task<ServiceResult<User>> CreateUserAsync(UserRegistrationDTO registerDto)
@@ -192,14 +245,29 @@ namespace MedicineStorage.Services.Implementations
             return result;
         }
 
-        public async Task<List<string>> GetUserRolesAsync(int userId)
+        public async Task<ServiceResult<List<string>>> GetUserRolesAsync(int userId)
         {
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-            if (user == null) return new List<string>();
+            var result = new ServiceResult<List<string>>();
+            try
+            {
+                var user = await _userManager.FindByIdAsync(userId.ToString());
+                if (user == null)
+                {
+                    result.Errors.Add("User not found.");
+                    return result;
+                }
 
-            var roles = await _userManager.GetRolesAsync(user);
-            return roles.ToList();
+                var roles = await _userManager.GetRolesAsync(user);
+                result.Data = roles.ToList();
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add($"An error occurred: {ex.Message}");
+            }
+
+            return result;
         }
+
 
         public async Task<ServiceResult<bool>> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
         {
@@ -249,6 +317,41 @@ namespace MedicineStorage.Services.Implementations
         public async Task<bool> EmailTaken(string email)
         {
             return await _userManager.Users.AnyAsync(x => x.NormalizedEmail == email.ToUpper());
+        }
+
+        public async Task<ServiceResult<User>> ValidateAndCreateUserAsync(UserRegistrationDTO registerDto)
+        {
+            var result = new ServiceResult<User>();
+
+            if (await UserExists(registerDto.UserName))
+            {
+                result.Errors.Add($"Username '{registerDto.UserName}' is taken");
+            }
+
+            if (await EmailTaken(registerDto.Email))
+            {
+                result.Errors.Add($"Email '{registerDto.Email}' is taken");
+            }
+
+            foreach (var role in registerDto.Roles)
+            {
+                if (role is "Admin" or "SupremeAdmin")
+                {
+                    result.Errors.Add($"Cannot register as '{role}'");
+                }
+
+                if (!await RoleExistsAsync(role))
+                {
+                    result.Errors.Add($"Role '{role}' does not exist");
+                }
+            }
+
+            if (result.Errors.Any())
+            {
+                return result;
+            }
+
+            return await CreateUserAsync(registerDto);
         }
     }
 }

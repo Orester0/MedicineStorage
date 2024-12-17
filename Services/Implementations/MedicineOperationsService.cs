@@ -25,7 +25,7 @@ namespace MedicineStorage.Services.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<MedicineRequest>> CreateRequestAsync(CreateMedicineRequestDTO createRequestDTO)
+        public async Task<ServiceResult<MedicineRequest>> CreateRequestAsync(CreateMedicineRequestDTO createRequestDTO, int userId)
         {
             var result = new ServiceResult<MedicineRequest>();
             try
@@ -37,7 +37,9 @@ namespace MedicineStorage.Services.Implementations
                     return result;
                 }
 
+
                 var request = _mapper.Map<MedicineRequest>(createRequestDTO);
+                request.RequestedByUserId = userId;
                 request.RequestDate = DateTime.UtcNow;
 
                 // Determine initial status based on medicine's approval requirements
@@ -85,7 +87,7 @@ namespace MedicineStorage.Services.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<MedicineUsage>> CreateUsageAsync(CreateMedicineUsageDTO createUsageDTO)
+        public async Task<ServiceResult<MedicineUsage>> CreateUsageAsync(CreateMedicineUsageDTO createUsageDTO, int userId)
         {
             var result = new ServiceResult<MedicineUsage>();
             try
@@ -104,6 +106,7 @@ namespace MedicineStorage.Services.Implementations
                 }
 
                 var usage = _mapper.Map<MedicineUsage>(createUsageDTO);
+                usage.UsedByUserId = userId;
                 var createdUsage = await _unitOfWork.MedicineUsageRepository.AddUsageAsync(usage);
 
                 medicine.Stock -= createUsageDTO.Quantity;
@@ -120,7 +123,7 @@ namespace MedicineStorage.Services.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<MedicineRequestDTO>> ApproveRequestAsync(int requestId, int approvedByUserId)
+        public async Task<ServiceResult<MedicineRequestDTO>> ApproveRequestAsync(int requestId, int userId)
         {
             var result = new ServiceResult<MedicineRequestDTO>();
             try
@@ -152,7 +155,7 @@ namespace MedicineStorage.Services.Implementations
                 }
 
                 request.Status = RequestStatus.Approved;
-                request.ApprovedByUserId = approvedByUserId;
+                request.ApprovedByUserId = userId;
                 request.ApprovalDate = DateTime.UtcNow;
 
                 var usage = new MedicineUsage
@@ -167,7 +170,7 @@ namespace MedicineStorage.Services.Implementations
                 await _unitOfWork.MedicineUsageRepository.AddUsageAsync(usage);
                 medicine.Stock -= request.Quantity;
 
-                _unitOfWork.MedicineRequestRepository.UpdateRequestAsync(request);
+                await _unitOfWork.MedicineRequestRepository.UpdateRequestAsync(request);
                 _unitOfWork.MedicineRepository.Update(medicine);
                 await _unitOfWork.Complete();
 
@@ -198,7 +201,7 @@ namespace MedicineStorage.Services.Implementations
         }
 
 
-        public async Task<ServiceResult<MedicineRequestDTO>> ProcessSpecialApprovalRequestAsync(int requestId, bool isApproved, int approvedByUserId)
+        public async Task<ServiceResult<MedicineRequestDTO>> ProcessSpecialApprovalRequestAsync(int requestId, bool isApproved, int userId)
         {
             var result = new ServiceResult<MedicineRequestDTO>();
             try
@@ -232,7 +235,7 @@ namespace MedicineStorage.Services.Implementations
                     }
 
                     request.Status = RequestStatus.Completed;
-                    request.ApprovedByUserId = approvedByUserId;
+                    request.ApprovedByUserId = userId;
                     request.ApprovalDate = DateTime.UtcNow;
 
                     var usage = new MedicineUsage
@@ -251,7 +254,7 @@ namespace MedicineStorage.Services.Implementations
                 else
                 {
                     request.Status = RequestStatus.Rejected;
-                    request.ApprovedByUserId = approvedByUserId;
+                    request.ApprovedByUserId = userId;
                     request.ApprovalDate = DateTime.UtcNow;
                 }
 
@@ -322,7 +325,7 @@ namespace MedicineStorage.Services.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<MedicineRequestDTO>> UpdateRequestStatusAsync(int requestId, UpdateRequestStatusDTO statusDto)
+        public async Task<ServiceResult<MedicineRequestDTO>> UpdateRequestStatusAsync(int requestId, RequestStatus newStatus, int userId)
         {
             var result = new ServiceResult<MedicineRequestDTO>();
             try
@@ -334,11 +337,11 @@ namespace MedicineStorage.Services.Implementations
                     return result;
                 }
 
-                request.Status = statusDto.NewStatus;
-                request.ApprovedByUserId = statusDto.UpdatedByUserId;
+                request.Status = newStatus;
+                request.ApprovedByUserId = userId;
                 request.ApprovalDate = DateTime.UtcNow;
 
-                _unitOfWork.MedicineRequestRepository.UpdateRequestAsync(request);
+                await _unitOfWork.MedicineRequestRepository.UpdateRequestAsync(request);
                 await _unitOfWork.Complete();
 
                 result.Data = _mapper.Map<MedicineRequestDTO>(request);

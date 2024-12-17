@@ -11,26 +11,29 @@ namespace MedicineStorage.Data.Implementations
             return await _context.Audits.ToListAsync();
         }
 
-        public async Task<Audit> GetAuditByIdAsync(int auditId)
+        public async Task<Audit?> GetAuditByIdAsync(int auditId)
         {
             return await _context.Audits.FindAsync(auditId);
         }
 
-        public async Task<Audit> CreateAuditAsync(Audit audit)
+        public async Task<IEnumerable<AuditItem>> GetAuditItemsByAuditIdAsync(int auditId)
+        {
+            return await _context.AuditItems.Where(ai => ai.AuditId == auditId).ToListAsync();
+        }
+
+        public async Task AddAsync(Audit audit)
         {
             _context.Audits.Add(audit);
             await _context.SaveChangesAsync();
-            return audit;
         }
 
-        public async Task<Audit> UpdateAuditAsync(Audit audit)
+        public async Task UpdateAsync(Audit audit)
         {
             _context.Audits.Update(audit);
             await _context.SaveChangesAsync();
-            return audit;
         }
 
-        public async Task DeleteAuditAsync(int auditId)
+        public async Task DeleteAsync(int auditId)
         {
             var audit = await _context.Audits.FindAsync(auditId);
             if (audit != null)
@@ -40,23 +43,16 @@ namespace MedicineStorage.Data.Implementations
             }
         }
 
-        public async Task<IEnumerable<AuditItem>> GetAuditItemsByAuditIdAsync(int auditId)
-        {
-            return await _context.AuditItems.Where(ai => ai.AuditId == auditId).ToListAsync();
-        }
-
-        public async Task<AuditItem> CreateAuditItemAsync(AuditItem auditItem)
+        public async Task AddAuditItemAsync(AuditItem auditItem)
         {
             _context.AuditItems.Add(auditItem);
             await _context.SaveChangesAsync();
-            return auditItem;
         }
 
-        public async Task<AuditItem> UpdateAuditItemAsync(AuditItem auditItem)
+        public async Task UpdateAuditItemAsync(AuditItem auditItem)
         {
             _context.AuditItems.Update(auditItem);
             await _context.SaveChangesAsync();
-            return auditItem;
         }
 
         public async Task DeleteAuditItemAsync(int auditItemId)

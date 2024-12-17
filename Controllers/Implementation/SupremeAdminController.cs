@@ -1,20 +1,15 @@
 ﻿using AutoMapper;
+using MedicineStorage.Controllers.Interface;
 using MedicineStorage.DTOs;
-using MedicineStorage.Models;
 using MedicineStorage.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Protocol;
 
-namespace MedicineStorage.Controllers
+namespace MedicineStorage.Controllers.Implementation
 {
     //[Authorize(Policy = "SupremeAdmin")]
     public class SupremeAdminController(
          IUserService _userService,
-         IMedicineService _medicineService,
-         ITokenService _tokenService, 
          IMapper _mapper,
          ILogger<SupremeAdminController> _logger) : BaseApiController
     {
@@ -22,18 +17,22 @@ namespace MedicineStorage.Controllers
         [HttpGet("users")]
         public async Task<IActionResult> GetAllUsers()
         {
-            var users = await _userService.GetAllAsync();
-            var userDtos = _mapper.Map<List<UserDTO>>(users);
+            var result = await _userService.GetAllAsync();
+            if (!result.Success)
+                return BadRequest(result.Errors);
+
+            var userDtos = _mapper.Map<List<UserDTO>>(result.Data);
             return Ok(userDtos);
         }
 
         [HttpGet("users/{id:int}")]
         public async Task<IActionResult> GetUserById(int id)
         {
-            var user = await _userService.GetByIdAsync(id);
-            if (user == null) return NotFound("User not found");
+            var result = await _userService.GetByIdAsync(id);
+            if (!result.Success)
+                return NotFound(result.Errors);
 
-            var userDto = _mapper.Map<UserDTO>(user);
+            var userDto = _mapper.Map<UserDTO>(result.Data);
             return Ok(userDto);
         }
 
@@ -47,19 +46,20 @@ namespace MedicineStorage.Controllers
                 return BadRequest(result.Errors);
 
             var userDto = _mapper.Map<UserDTO>(result.Data);
-            return CreatedAtAction(nameof(GetUserById), new { id = result.Data.Id }, userDto);
+            return CreatedAtAction(nameof(GetUserById), new { id = result.Data!.Id }, userDto);
         }
 
         [HttpPut("users/{id:int}")]
         public async Task<IActionResult> UpdateUser(int id, [FromBody] UserUpdateDTO updateDto)
         {
             _logger.LogInformation($"Incoming user update request: \n{updateDto.ToJson()}");
-            
-            var user = await _userService.GetByIdAsync(id);
-            if (user == null) return NotFound("User not found");
 
-            _mapper.Map(updateDto, user);
-            var result = await _userService.UpdateUserAsync(user);
+            var userResult = await _userService.GetByIdAsync(id);
+            if (!userResult.Success)
+                return NotFound(userResult.Errors);
+
+            _mapper.Map(updateDto, userResult.Data);
+            var result = await _userService.UpdateUserAsync(userResult.Data);
 
             if (!result.Success)
                 return BadRequest(result.Errors);
@@ -104,8 +104,12 @@ namespace MedicineStorage.Controllers
         [HttpGet("users/{id:int}/roles")]
         public async Task<IActionResult> GetUserRoles(int id)
         {
-            var roles = await _userService.GetUserRolesAsync(id);
-            return Ok(roles);
+            var result = await _userService.GetUserRolesAsync(id);
+
+            if (!result.Success)
+                return BadRequest(result.Errors);
+
+            return Ok(result.Data);
         }
     }
 }

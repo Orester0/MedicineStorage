@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.MedicineModels
 {
@@ -23,7 +23,7 @@ namespace MedicineStorage.Models.MedicineModels
         [Required]
         public DateTime UsageDate { get; set; }
         public string? Notes { get; set; }
-        
+
 
         public virtual Medicine Medicine { get; set; }
         public virtual User UsedByUser { get; set; }

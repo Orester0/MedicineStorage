@@ -26,11 +26,11 @@ namespace MedicineStorage.Helpers
                 .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
 
             CreateMap<UserUpdateDTO, User>()
-                .ForMember(dest => dest.UserName, opt => opt.Ignore()) 
+                .ForMember(dest => dest.UserName, opt => opt.Ignore())
                 .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
         }
 
-        
+
     }
 
 

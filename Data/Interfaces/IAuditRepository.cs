@@ -1,21 +1,25 @@
 ﻿using MedicineStorage.Models.AuditModels;
-using MedicineStorage.Models.MedicineModels;
 
 namespace MedicineStorage.Data.Interfaces
 {
     public interface IAuditRepository
     {
-        Task<Audit> GetAuditByIdAsync(int auditId);
-        Task<IEnumerable<Audit>> GetAllAuditsAsync();
-        Task<Audit> CreateAuditAsync(Audit audit);
-        Task<Audit> UpdateAuditAsync(Audit audit);
-        Task DeleteAuditAsync(int auditId);
+        public Task<IEnumerable<Audit>> GetAllAuditsAsync();
 
+        public Task<Audit?> GetAuditByIdAsync(int auditId);
 
+        public Task<IEnumerable<AuditItem>> GetAuditItemsByAuditIdAsync(int auditId);
 
-        Task<IEnumerable<AuditItem>> GetAuditItemsByAuditIdAsync(int auditId);
-        Task<AuditItem> CreateAuditItemAsync(AuditItem auditItem);
-        Task<AuditItem> UpdateAuditItemAsync(AuditItem auditItem);
-        Task DeleteAuditItemAsync(int auditItemId);
+        public Task AddAsync(Audit audit);
+
+        public Task UpdateAsync(Audit audit);
+
+        public Task DeleteAsync(int auditId);
+
+        public Task AddAuditItemAsync(AuditItem auditItem);
+
+        public Task UpdateAuditItemAsync(AuditItem auditItem);
+
+        public Task DeleteAuditItemAsync(int auditItemId);
     }
 }

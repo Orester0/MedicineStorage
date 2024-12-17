@@ -1,10 +1,10 @@
-﻿using MedicineStorage.DTOs;
+﻿using MedicineStorage.Controllers.Interface;
+using MedicineStorage.DTOs;
 using MedicineStorage.Models;
 using MedicineStorage.Services.Interfaces;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MedicineStorage.Controllers
+namespace MedicineStorage.Controllers.Implementation
 {
     //[Authorize(Policy = "Admin")]
     public class MedicinesController(IMedicineService _medicineService, ILogger<MedicinesController> _logger) : BaseApiController

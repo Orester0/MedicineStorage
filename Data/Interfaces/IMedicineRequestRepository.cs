@@ -1,7 +1,4 @@
 ﻿using MedicineStorage.Models.MedicineModels;
-using MedicineStorage.Models.TenderModels;
-using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace MedicineStorage.Data.Interfaces
 {

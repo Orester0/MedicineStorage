@@ -1,5 +1,4 @@
 ﻿using MedicineStorage.Models.MedicineModels;
-using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Interfaces
 {

@@ -2,18 +2,9 @@ using MedicineStorage.Data;
 using MedicineStorage.Extensions;
 using MedicineStorage.Middleware;
 using MedicineStorage.Models;
-using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
-using MedicineStorage.Models.TenderModels;
-using MedicineStorage.Services.Implementations;
-using MedicineStorage.Services.Interfaces;
 using MedicineStorage.SignalR;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.IdentityModel.Tokens;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,9 +12,9 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowLocalhost", policy =>
     {
-        policy.AllowAnyOrigin()  
-              .AllowAnyHeader()                   
-              .AllowAnyMethod();                  
+        policy.AllowAnyOrigin()
+              .AllowAnyHeader()
+              .AllowAnyMethod();
     });
 });
 
@@ -53,7 +44,7 @@ app.MapControllers();
 app.MapHub<PresenceHub>("hubs/presence");
 
 
-using(var scope = app.Services.CreateScope())
+using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
