@@ -15,16 +15,19 @@ namespace MedicineStorage.Models.MedicineModels
         [ForeignKey("UsedByUser")]
         public int UsedByUserId { get; set; }
         [Required]
-        [ForeignKey("Stock")]
-        public int StockId { get; set; }
+        [ForeignKey("MedicineRequest")]
+        public int MedicineRequestId { get; set; }
+
+
 
         [Required]
         public decimal Quantity { get; set; }
         [Required]
         public DateTime UsageDate { get; set; }
         public string? Notes { get; set; }
+        
 
-
+        public virtual MedicineRequest MedicineRequest { get; set; }
         public virtual Medicine Medicine { get; set; }
         public virtual User UsedByUser { get; set; }
     }

@@ -12,8 +12,8 @@ namespace MedicineStorage.Models.TenderModels
         [ForeignKey("Tender")]
         public int TenderId { get; set; }
         [Required]
-        [ForeignKey("Distributor")]
-        public int DistributorId { get; set; }
+        [ForeignKey("CreatedByUser")]
+        public int CreatedByUserId { get; set; }
 
         [Required]
         public decimal TotalPrice { get; set; }
@@ -23,7 +23,7 @@ namespace MedicineStorage.Models.TenderModels
         public ProposalStatus Status { get; set; }
 
         public virtual Tender Tender { get; set; }
-        public virtual User Distributor { get; set; }
+        public virtual User CreatedByUser { get; set; }
         public virtual ICollection<TenderProposalItem> Items { get; set; }
     }
 
@@ -32,7 +32,6 @@ namespace MedicineStorage.Models.TenderModels
     public enum ProposalStatus
     {
         Submitted,
-        UnderReview,
         Accepted,
         Rejected
     }

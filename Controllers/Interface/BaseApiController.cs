@@ -16,6 +16,15 @@ namespace MedicineStorage.Controllers.Interface
             }
             return userId;
         }
+        protected List<string> GetUserRolesFromClaims()
+        {
+            var roles = User.FindAll(ClaimTypes.Role).Select(role => role.Value).ToList();
+            if (roles.Count == 0)
+            {
+                throw new UnauthorizedAccessException("No roles found for the user in the token");
+            }
+            return roles;
+        }
 
     }
 }

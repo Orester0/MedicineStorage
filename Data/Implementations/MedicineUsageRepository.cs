@@ -89,5 +89,17 @@ namespace MedicineStorage.Data.Implementations
 
             return await query.SumAsync(u => u.Quantity);
         }
+
+
+        public async Task<List<MedicineUsage>> GetUsagesByRequestIdAsync(int requestId)
+        {
+            return await _context.MedicineUsages
+                .Where(u => u.MedicineRequestId == requestId)
+                .Include(u => u.Medicine)
+                .Include(u => u.UsedByUser)
+                .ToListAsync();
+        }
+
+
     }
 }

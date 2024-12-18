@@ -30,21 +30,19 @@ namespace MedicineStorage.Models.MedicineModels
         public DateTime? ApprovalDate { get; set; }
 
 
-
         public virtual User RequestedByUser { get; set; }
-
         public virtual User? ApprovedByUser { get; set; }
-
         public virtual Medicine Medicine { get; set; }
-    }
+        public virtual ICollection<MedicineUsage> MedicineUsages { get; set; } = new List<MedicineUsage>();
+    
+    }   
 
 
     public enum RequestStatus
     {
         Pending,
-        ApprovalRequired,
+        PedingWithSpecial,
         Approved,
-        Rejected,
-        Completed
+        Rejected
     }
 }

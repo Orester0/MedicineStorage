@@ -8,19 +8,11 @@ namespace MedicineStorage.Helpers
     {
         public AutoMapperMedicines()
         {
-            CreateMap<Medicine, MedicineDTO>();
+            CreateMap<Medicine, ReturnMedicineDTO>();
+            CreateMap<ReturnMedicineDTO, Medicine>();
+
             CreateMap<CreateMedicineDTO, Medicine>();
-            CreateMap<MedicineDTO, Medicine>();
-
-            CreateMap<MedicineUsage, MedicineUsageDTO>();
-            CreateMap<CreateMedicineUsageDTO, MedicineUsage>();
-
-            CreateMap<MedicineRequest, MedicineRequestDTO>();
-            CreateMap<CreateMedicineRequestDTO, MedicineRequest>();
-            CreateMap<MedicineRequestDTO, MedicineRequest>();
-
-
-
+            CreateMap<Medicine, CreateMedicineDTO>();
         }
     }
 }

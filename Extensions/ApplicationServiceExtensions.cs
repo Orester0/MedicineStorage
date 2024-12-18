@@ -12,6 +12,17 @@ namespace MedicineStorage.Extensions
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
 
+            services.AddCors(options =>
+            {
+                options.AddPolicy("AllowLocalhost", policy =>
+                {
+                    policy.AllowAnyOrigin()
+                          .AllowAnyHeader()
+                          .AllowAnyMethod();
+                });
+            });
+
+
             services.AddControllers();
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
@@ -27,6 +38,8 @@ namespace MedicineStorage.Extensions
             services.AddScoped<IMedicineUsageRepository, MedicineUsageRepository>();
             services.AddScoped<ITenderProposalRepository, TenderProposalRepository>();
             services.AddScoped<ITenderRepository, TenderRepository>();
+            services.AddScoped<ITenderProposalItemRepository, TenderProposalItemRepository>();
+            services.AddScoped<ITenderItemRepository, TenderItemRepository>();
 
 
 
@@ -37,12 +50,12 @@ namespace MedicineStorage.Extensions
             services.AddScoped<IMedicineOperationsService, MedicineOperationsService>();
             services.AddScoped<IAuditService, AuditService>();
             services.AddScoped<ITenderService, TenderService>();
-
+            services.AddScoped<IEmailService, EmailService>();
 
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
             services.AddSignalR();
-            services.AddScoped<IEmailService, EmailService>();
+
 
             return services;
         }

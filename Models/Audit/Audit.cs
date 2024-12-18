@@ -9,16 +9,24 @@ namespace MedicineStorage.Models.AuditModels
         [Required]
         public int Id { get; set; }
         [Required]
-        [ForeignKey("ConductedByUser")]
-        public int ConductedByUserId { get; set; }
+        [ForeignKey("PlannedByUser")]
+        public int PlannedByUserId { get; set; }
+
+        [ForeignKey("ExecutedByUser")]
+        public int ExecutedByUserId { get; set; }
         [Required]
-        public DateTime AuditDate { get; set; }
+        public DateTime PlannedDate { get; set; }
+
+        public DateTime? StartDate { get; set; }
+
+        public DateTime? EndDate { get; set; }
         public string? Notes { get; set; }
         [Required]
         public AuditStatus Status { get; set; }
 
 
-        public virtual User ConductedByUser { get; set; }
+        public virtual User PlannedByUser { get; set; }
+        public virtual User ExecutedByUser { get; set; }
         public virtual ICollection<AuditItem> AuditItems { get; set; }
     }
 
@@ -27,7 +35,8 @@ namespace MedicineStorage.Models.AuditModels
         Planned,
         InProgress,
         Completed,
-        RequiresFollowUp
+        RequiresFollowUp,
+        Cancelled
     }
 
 

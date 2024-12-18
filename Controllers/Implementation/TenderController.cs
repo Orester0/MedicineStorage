@@ -20,6 +20,8 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 var userId = GetUserIdFromClaims();
                 var result = await _tenderService.CreateTenderAsync(tenderDto, userId);
+
+
                 if (!result.Success) return BadRequest(result.Errors);
                 return Ok(result.Data);
             }
@@ -30,40 +32,54 @@ namespace MedicineStorage.Controllers.Implementation
         }
 
         [Authorize(Roles = "Admin,SupremeAdmin")]
-        [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateTender(int id, [FromBody] ReturnTenderDTO tenderDto)
-        {
-            tenderDto.Id = id;
-            var result = await _tenderService.UpdateTenderAsync(tenderDto);
-            if (!result.Success) return BadRequest(result.Errors);
-            return Ok(result.Data);
-        }
-
-        [Authorize(Roles = "Admin,SupremeAdmin")]
         [HttpPost("{id}/publish")]
         public async Task<IActionResult> PublishTender(int id)
         {
-            var result = await _tenderService.PublishTenderAsync(id);
-            if (!result.Success) return BadRequest(result.Errors);
-            return Ok(result.Data);
+            try
+            {
+                var userId = GetUserIdFromClaims();
+                var result = await _tenderService.PublishTenderAsync(id, userId);
+                if (!result.Success) return BadRequest(result.Errors);
+                return Ok(result.Data);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
         }
 
         [Authorize(Roles = "Admin,SupremeAdmin")]
         [HttpPost("{id}/close")]
         public async Task<IActionResult> CloseTender(int id)
         {
-            var result = await _tenderService.CloseTenderAsync(id);
-            if (!result.Success) return BadRequest(result.Errors);
-            return Ok(result.Data);
+            try
+            {
+                var userId = GetUserIdFromClaims();
+                var result = await _tenderService.CloseTenderAsync(id, userId);
+                if (!result.Success) return BadRequest(result.Errors);
+                return Ok(result.Data);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
         }
 
         [Authorize(Roles = "Admin,SupremeAdmin")]
-        [HttpGet]
-        public async Task<IActionResult> GetAllTenders()
+        [HttpPost("{id}/select-proposal")]
+        public async Task<IActionResult> SelectWinningProposal(int id, [FromBody] int proposalId)
         {
-            var result = await _tenderService.GetAllTendersAsync();
-            if (!result.Success) return BadRequest(result.Errors);
-            return Ok(result.Data);
+            try
+            {
+                var userId = GetUserIdFromClaims();
+                var result = await _tenderService.SelectWinningProposalAsync(proposalId, userId);
+                if (!result.Success) return BadRequest(result.Errors);
+                return Ok(result.Data);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
         }
 
         [Authorize(Roles = "Admin,SupremeAdmin")]
@@ -76,24 +92,15 @@ namespace MedicineStorage.Controllers.Implementation
         }
 
         [Authorize(Roles = "Admin,SupremeAdmin")]
-        [HttpPost("{id}/select-proposal")]
-        public async Task<IActionResult> SelectWinningProposal(int id, [FromBody] int proposalId)
+        [HttpGet("status/{status}")]
+        public async Task<IActionResult> GetTendersByStatus(TenderStatus status)
         {
-            var result = await _tenderService.SelectWinningProposalAsync(proposalId);
+            var result = await _tenderService.GetTendersByStatusAsync(status);
             if (!result.Success) return BadRequest(result.Errors);
             return Ok(result.Data);
         }
 
         // Distributor Actions
-
-        [Authorize(Roles = "Distributor")]
-        [HttpGet("published")]
-        public async Task<IActionResult> GetPublishedTenders()
-        {
-            var result = await _tenderService.GetTendersByStatusAsync(TenderStatus.Published);
-            if (!result.Success) return BadRequest(result.Errors);
-            return Ok(result.Data);
-        }
 
         [Authorize(Roles = "Distributor")]
         [HttpPost("{id}/proposals")]
@@ -103,42 +110,7 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 proposalDto.TenderId = id;
                 var userId = GetUserIdFromClaims();
-                var result = await _tenderService.SubmitProposalAsync(proposalDto, userId);
-                if (!result.Success) return BadRequest(result.Errors);
-                return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-        }
-
-        [Authorize(Roles = "Distributor")]
-        [HttpPut("proposals/{id}")]
-        public async Task<IActionResult> UpdateProposal(int id, [FromBody] ReturnTenderProposalDTO proposalDto)
-        {
-            try
-            {
-                proposalDto.Id = id;
-                var userId = GetUserIdFromClaims();
-                var result = await _tenderService.UpdateProposalAsync(proposalDto, userId);
-                if (!result.Success) return BadRequest(result.Errors);
-                return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-        }
-
-        [Authorize(Roles = "Distributor")]
-        [HttpDelete("proposals/{id}")]
-        public async Task<IActionResult> WithdrawProposal(int id)
-        {
-            try
-            {
-                var userId = GetUserIdFromClaims();
-                var result = await _tenderService.WithdrawProposalAsync(id, userId);
+                var result = await _tenderService.SubmitProposalAsync(proposalDto, new List<CreateTenderProposalItemDTO>(), userId);
                 if (!result.Success) return BadRequest(result.Errors);
                 return Ok(result.Data);
             }
@@ -155,7 +127,7 @@ namespace MedicineStorage.Controllers.Implementation
             try
             {
                 var userId = GetUserIdFromClaims();
-                var result = await _tenderService.GetTendersByUserAsync(userId);
+                var result = await _tenderService.GetProposalsForTenderAsync(userId);
                 if (!result.Success) return BadRequest(result.Errors);
                 return Ok(result.Data);
             }

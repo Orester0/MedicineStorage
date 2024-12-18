@@ -9,7 +9,7 @@ namespace MedicineStorage.Data.Implementations
         public async Task<Tender> GetByIdAsync(int id)
         {
             return await _context.Tenders
-                .Include(t => t.CreatedByUser)
+                .Include(t => t.OpenedByUser)
                 .Include(t => t.Items)
                 .Include(t => t.Proposals)
                 .FirstOrDefaultAsync(t => t.Id == id);
@@ -18,7 +18,7 @@ namespace MedicineStorage.Data.Implementations
         public async Task<IEnumerable<Tender>> GetAllAsync()
         {
             return await _context.Tenders
-                .Include(t => t.CreatedByUser)
+                .Include(t => t.OpenedByUser)
                 .ToListAsync();
         }
 
@@ -49,7 +49,7 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.Tenders
                 .Where(t => t.Status == status)
-                .Include(t => t.CreatedByUser)
+                .Include(t => t.OpenedByUser)
                 .ToListAsync();
         }
 
@@ -57,7 +57,7 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.Tenders
                 .Where(t => t.CreatedByUserId == userId)
-                .Include(t => t.CreatedByUser)
+                .Include(t => t.OpenedByUser)
                 .ToListAsync();
         }
     }

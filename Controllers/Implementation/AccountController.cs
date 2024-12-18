@@ -14,6 +14,8 @@ namespace MedicineStorage.Controllers.Implementation
         ILogger<AccountController> _logger
         ) : BaseApiController
     {
+
+
         [HttpPost("register")]
         public async Task<ActionResult<UserReturnDTO>> Register([FromBody] UserRegistrationDTO registerDto)
         {

@@ -22,5 +22,7 @@ namespace MedicineStorage.Data.Interfaces
 
         public Task<decimal> GetTotalUsageQuantityAsync(int medicineId, DateTime? startDate = null, DateTime? endDate = null);
 
+        public Task<List<MedicineUsage>> GetUsagesByRequestIdAsync(int requestId);
+
     }
 }

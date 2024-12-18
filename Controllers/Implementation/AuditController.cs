@@ -11,6 +11,27 @@ namespace MedicineStorage.Controllers.Implementation
     [Authorize]
     public class AuditController(IAuditService _auditService) : BaseApiController
     {
+        [HttpPost("create")]
+        [Authorize(Roles = "Admin,SupremeAdmin")]
+        public async Task<IActionResult> CreateAudit([FromBody] CreateAuditRequest request)
+        {
+            try
+            {
+                var userId = GetUserIdFromClaims();
+                var result = await _auditService.CreateAuditAsync(userId, request);
+
+                if (result.Errors.Any())
+                {
+                    return BadRequest(result.Errors);
+                }
+
+                return CreatedAtAction(nameof(GetAuditById), new { auditId = result.Data.Id }, result.Data);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+        }
 
         [HttpPost("start")]
         [Authorize(Roles = "Admin,SupremeAdmin")]
@@ -19,7 +40,7 @@ namespace MedicineStorage.Controllers.Implementation
             try
             {
                 var userId = GetUserIdFromClaims();
-                var result = await _auditService.StartAuditAsync(userId, request.MedicineIds);
+                var result = await _auditService.StartAuditAsync(userId, request);
 
                 if (result.Errors.Any())
                 {
@@ -41,7 +62,7 @@ namespace MedicineStorage.Controllers.Implementation
             try
             {
                 var userId = GetUserIdFromClaims();
-                var result = await _auditService.UpdateAuditItemsAsync(auditId, request.ActualQuantities, userId);
+                var result = await _auditService.UpdateAuditItemsAsync(userId, request);
 
                 if (result.Errors.Any())
                 {
@@ -57,12 +78,12 @@ namespace MedicineStorage.Controllers.Implementation
         }
         [HttpPut("{auditId}/close")]
         [Authorize(Roles = "Admin,SupremeAdmin")]
-        public async Task<IActionResult> CloseAudit(int auditId)
+        public async Task<IActionResult> CloseAudit(CloseAuditRequest request)
         {
             try
             {
                 var userId = GetUserIdFromClaims();
-                var result = await _auditService.CloseAuditAsync(auditId, userId);
+                var result = await _auditService.CloseAuditAsync(userId, request);
 
                 if (result.Errors.Any())
                 {
@@ -103,20 +124,6 @@ namespace MedicineStorage.Controllers.Implementation
             }
 
             return Ok(result.Data);
-        }
-
-        [HttpPost("create")]
-        [Authorize(Roles = "Admin,SupremeAdmin")]
-        public async Task<IActionResult> CreateAudit([FromBody] Audit audit)
-        {
-            var result = await _auditService.CreateAuditAsync(audit);
-
-            if (result.Errors.Any())
-            {
-                return BadRequest(result.Errors);
-            }
-
-            return CreatedAtAction(nameof(GetAuditById), new { auditId = audit.Id }, result.Data);
         }
 
         [HttpPut("{auditId}/update")]

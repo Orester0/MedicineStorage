@@ -13,6 +13,10 @@ namespace MedicineStorage.Data.Interfaces
         ITenderProposalRepository TenderProposalRepository { get; }
 
 
+        ITenderProposalItemRepository TenderProposalItemRepository { get; }
+        ITenderItemRepository TenderItemRepository { get; }
+
+
         Task<bool> Complete();
 
         bool HasChanges();

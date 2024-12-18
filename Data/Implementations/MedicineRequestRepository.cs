@@ -28,7 +28,7 @@ namespace MedicineStorage.Data.Implementations
             return await _context.MedicineRequests
                 .Include(r => r.Medicine)
                 .Include(r => r.RequestedByUser)
-                .Where(r => r.Status == RequestStatus.Pending || r.Status == RequestStatus.ApprovalRequired)
+                .Where(r => r.Status == RequestStatus.Pending || r.Status == RequestStatus.PedingWithSpecial)
                 .ToListAsync();
         }
 
@@ -95,6 +95,16 @@ namespace MedicineStorage.Data.Implementations
                 return true;
             }
             return false;
+        }
+
+        public async Task<MedicineRequest?> GetRequestByUsageIdAsync(int usageId)
+        {
+            var usage = await _context.MedicineUsages
+                .Where(u => u.Id == usageId)
+                .Include(u => u.MedicineRequest)
+                .FirstOrDefaultAsync();
+
+            return usage?.MedicineRequest;
         }
     }
 }

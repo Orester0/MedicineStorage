@@ -6,29 +6,35 @@ namespace MedicineStorage.Services.Interfaces
 {
     public interface IMedicineOperationsService
     {
-        public Task<ServiceResult<IEnumerable<MedicineRequestDTO>>> GetAllRequestsAsync();
+        public Task<ServiceResult<IEnumerable<ReturnMedicineUsageDTO>>> GetAllUsagesAsync();
+        public Task<ServiceResult<ReturnMedicineRequestDTO>> GetRequestByIdAsync(int id);
 
-        public Task<ServiceResult<MedicineRequest>> CreateRequestAsync(CreateMedicineRequestDTO createRequestDTO, int userId);
+        public Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetRequestsByUserAsync(int userId);
 
-        public Task<ServiceResult<MedicineUsage>> CreateUsageAsync(CreateMedicineUsageDTO createUsageDTO, int userId);
+        public Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetRequestsByStatusAsync(RequestStatus status);
 
-        public Task<ServiceResult<MedicineRequestDTO>> ApproveRequestAsync(int requestId, int userId);
+        public Task<ServiceResult<ReturnMedicineUsageDTO>> GetUsageByIdAsync(int id);
 
-        public Task<ServiceResult<IEnumerable<MedicineUsageDTO>>> GetAllUsagesAsync();
+        public Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetAllRequestsAsync();
+        public Task<ServiceResult<IEnumerable<ReturnMedicineUsageDTO>>> GetUsagesByRequestIdAsync(int requestId);
 
 
-        public Task<ServiceResult<MedicineRequestDTO>> ProcessSpecialApprovalRequestAsync(int requestId, bool isApproved, int userId);
+        public Task<ServiceResult<ReturnMedicineRequestDTO>> GetRequestByUsageIdAsync(int usageId);
 
-        public Task<ServiceResult<MedicineRequestDTO>> GetRequestByIdAsync(int id);
 
-        public Task<ServiceResult<IEnumerable<MedicineRequestDTO>>> GetRequestsByUserAsync(int userId);
 
-        public Task<ServiceResult<IEnumerable<MedicineRequestDTO>>> GetRequestsByStatusAsync(RequestStatus status);
 
-        public Task<ServiceResult<MedicineRequestDTO>> UpdateRequestStatusAsync(int requestId, RequestStatus newStatus, int userId);
+
+
+
+        public Task<ServiceResult<ReturnMedicineRequestDTO>> CreateRequestAsync(CreateMedicineRequestDTO createRequestDTO, int userId);
+
+        public Task<ServiceResult<ReturnMedicineRequestDTO>> ApproveRequestAsync(int requestId, int userId, bool isSpecialApproval = false);
+
+        public Task<ServiceResult<ReturnMedicineUsageDTO>> CreateUsageAsync(CreateMedicineUsageDTO createUsageDTO, int userId);
+
+        public Task<ServiceResult<ReturnMedicineRequestDTO>> RejectRequestAsync(int requestId, int userId, bool isSpecialApproval = false);
 
         public Task<ServiceResult<bool>> DeleteRequestAsync(int requestId);
-
-        public Task<ServiceResult<MedicineUsageDTO>> GetUsageByIdAsync(int id);
     }
 }

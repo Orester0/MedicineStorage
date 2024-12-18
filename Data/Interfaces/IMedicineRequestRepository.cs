@@ -22,5 +22,8 @@ namespace MedicineStorage.Data.Interfaces
         public Task<MedicineRequest> UpdateRequestStatusAsync(int requestId, RequestStatus status, int? approvedByUserId = null);
 
         public Task<bool> DeleteRequestAsync(int id);
+
+
+        public Task<MedicineRequest?> GetRequestByUsageIdAsync(int usageId);
     }
 }

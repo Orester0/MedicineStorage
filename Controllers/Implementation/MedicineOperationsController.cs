@@ -3,40 +3,13 @@ using MedicineStorage.DTOs;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 namespace MedicineStorage.Controllers.Implementation
 {
     //[Authorize(Policy = "Admin")]
     public class MedicineOperationsController(IMedicineOperationsService _operationsService) : BaseApiController
     {
-
-        [HttpPut("requests/special-approval/{id:int}")]
-        public async Task<IActionResult> ProcessSpecialApprovalRequest(int id, [FromBody] SpecialApprovalDTO approvalDto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            try
-            {
-                var userId = GetUserIdFromClaims();
-                var result = await _operationsService.ProcessSpecialApprovalRequestAsync(
-                    id,
-                    approvalDto.IsApproved,
-                    userId
-                );
-
-                if (!result.Success)
-                    return result.Errors.Contains("Not found")
-                        ? NotFound(result.Errors)
-                        : BadRequest(result.Errors);
-
-                return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(ex.Message);
-            }
-        }
 
         [HttpGet("requests")]
         public async Task<IActionResult> GetAllRequests()
@@ -76,6 +49,16 @@ namespace MedicineStorage.Controllers.Implementation
             }
         }
 
+        [HttpGet("requests/user/{id:int}")]
+        public async Task<IActionResult> GetRequestsByUser(int id)
+        {
+            var result = await _operationsService.GetRequestsByUserAsync(id);
+            if (!result.Success)
+                return BadRequest(result.Errors);
+
+            return Ok(result.Data);
+        }
+
         [HttpGet("requests/status/{status}")]
         public async Task<IActionResult> GetRequestsByStatus(RequestStatus status)
         {
@@ -108,22 +91,43 @@ namespace MedicineStorage.Controllers.Implementation
             }
         }
 
-        [HttpPut("requests/{id:int}/status")]
-        public async Task<IActionResult> UpdateRequestStatus(int id, [FromBody] UpdateRequestStatusDTO statusDto)
+        [HttpPut("requests/{id:int}/approve")]
+        public async Task<IActionResult> ApproveRequest(int id)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
             try
             {
                 var userId = GetUserIdFromClaims();
-                var result = await _operationsService.UpdateRequestStatusAsync(id, statusDto.NewStatus, userId);
+                var userRoles = GetUserRolesFromClaims();
+                bool isSupremeAdmin = userRoles.Contains("SupremeAdmin");
+                var result = await _operationsService.ApproveRequestAsync(id, userId, isSupremeAdmin);
                 if (!result.Success)
                     return result.Errors.Contains("Not found")
                         ? NotFound(result.Errors)
                         : BadRequest(result.Errors);
 
-                return NoContent();
+                return Ok(result.Data);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                return Unauthorized(ex.Message);
+            }
+        }
+
+        [HttpPut("requests/{id:int}/reject")]
+        public async Task<IActionResult> RejectRequest(int id)
+        {
+            try
+            {
+                var userId = GetUserIdFromClaims();
+                var userRoles = GetUserRolesFromClaims();
+                bool isSupremeAdmin = userRoles.Contains("SupremeAdmin");
+                var result = await _operationsService.RejectRequestAsync(id, userId, isSupremeAdmin);
+                if (!result.Success)
+                    return result.Errors.Contains("Not found")
+                        ? NotFound(result.Errors)
+                        : BadRequest(result.Errors);
+
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -157,6 +161,26 @@ namespace MedicineStorage.Controllers.Implementation
         public async Task<IActionResult> GetUsageById(int id)
         {
             var result = await _operationsService.GetUsageByIdAsync(id);
+            if (!result.Success)
+                return NotFound(result.Errors);
+
+            return Ok(result.Data);
+        }
+
+        [HttpGet("usage/request/{requestId:int}")]
+        public async Task<IActionResult> GetUsagesByRequestId(int requestId)
+        {
+            var result = await _operationsService.GetUsagesByRequestIdAsync(requestId);
+            if (!result.Success)
+                return BadRequest(result.Errors);
+
+            return Ok(result.Data);
+        }
+
+        [HttpGet("usage/request/from-usage/{usageId:int}")]
+        public async Task<IActionResult> GetRequestByUsageId(int usageId)
+        {
+            var result = await _operationsService.GetRequestByUsageIdAsync(usageId);
             if (!result.Success)
                 return NotFound(result.Errors);
 

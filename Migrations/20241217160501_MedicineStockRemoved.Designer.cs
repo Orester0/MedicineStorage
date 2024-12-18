@@ -4,6 +4,7 @@ using MedicineStorage.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MedicineStorage.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241217160501_MedicineStockRemoved")]
+    partial class MedicineStockRemoved
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,32 +63,26 @@ namespace MedicineStorage.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("EndDate")
+                    b.Property<DateTime>("AuditDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ExecutedByUserId")
+                    b.Property<int>("ClosedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CreatedByUserId")
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("PlannedByUserId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("PlannedDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<DateTime?>("StartDate")
-                        .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ExecutedByUserId");
+                    b.HasIndex("ClosedByUserId");
 
-                    b.HasIndex("PlannedByUserId");
+                    b.HasIndex("CreatedByUserId");
 
                     b.ToTable("Audits");
                 });
@@ -223,9 +220,6 @@ namespace MedicineStorage.Migrations
                     b.Property<int>("MedicineId")
                         .HasColumnType("int");
 
-                    b.Property<int>("MedicineRequestId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Notes")
                         .HasColumnType("nvarchar(max)");
 
@@ -242,8 +236,6 @@ namespace MedicineStorage.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MedicineId");
-
-                    b.HasIndex("MedicineRequestId");
 
                     b.HasIndex("UsedByUserId");
 
@@ -589,21 +581,21 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("MedicineStorage.Models.AuditModels.Audit", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.User", "ExecutedByUser")
+                    b.HasOne("MedicineStorage.Models.User", "ClosedByUser")
                         .WithMany()
-                        .HasForeignKey("ExecutedByUserId")
+                        .HasForeignKey("ClosedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.User", "PlannedByUser")
+                    b.HasOne("MedicineStorage.Models.User", "CreatedByUser")
                         .WithMany()
-                        .HasForeignKey("PlannedByUserId")
+                        .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ExecutedByUser");
+                    b.Navigation("ClosedByUser");
 
-                    b.Navigation("PlannedByUser");
+                    b.Navigation("CreatedByUser");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.AuditModels.AuditItem", b =>
@@ -659,12 +651,6 @@ namespace MedicineStorage.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.MedicineModels.MedicineRequest", "MedicineRequest")
-                        .WithMany("MedicineUsages")
-                        .HasForeignKey("MedicineRequestId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("MedicineStorage.Models.User", "UsedByUser")
                         .WithMany()
                         .HasForeignKey("UsedByUserId")
@@ -672,8 +658,6 @@ namespace MedicineStorage.Migrations
                         .IsRequired();
 
                     b.Navigation("Medicine");
-
-                    b.Navigation("MedicineRequest");
 
                     b.Navigation("UsedByUser");
                 });
@@ -844,11 +828,6 @@ namespace MedicineStorage.Migrations
                     b.Navigation("Requests");
 
                     b.Navigation("UsageRecords");
-                });
-
-            modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineRequest", b =>
-                {
-                    b.Navigation("MedicineUsages");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.Tender", b =>

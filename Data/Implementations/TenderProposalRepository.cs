@@ -10,7 +10,7 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.TenderProposals
                 .Include(tp => tp.Tender)
-                .Include(tp => tp.Distributor)
+                .Include(tp => tp.CreatedByUser)
                 .Include(tp => tp.Items)
                 .FirstOrDefaultAsync(tp => tp.Id == id);
         }
@@ -19,7 +19,7 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.TenderProposals
                 .Include(tp => tp.Tender)
-                .Include(tp => tp.Distributor)
+                .Include(tp => tp.CreatedByUser)
                 .ToListAsync();
         }
 
@@ -51,16 +51,16 @@ namespace MedicineStorage.Data.Implementations
             return await _context.TenderProposals
                 .Where(tp => tp.TenderId == tenderId)
                 .Include(tp => tp.Tender)
-                .Include(tp => tp.Distributor)
+                .Include(tp => tp.CreatedByUser)
                 .ToListAsync();
         }
 
         public async Task<IEnumerable<TenderProposal>> GetProposalsByDistributorAsync(int distributorId)
         {
             return await _context.TenderProposals
-                .Where(tp => tp.DistributorId == distributorId)
+                .Where(tp => tp.CreatedByUserId == distributorId)
                 .Include(tp => tp.Tender)
-                .Include(tp => tp.Distributor)
+                .Include(tp => tp.CreatedByUser)
                 .ToListAsync();
         }
 
@@ -69,7 +69,7 @@ namespace MedicineStorage.Data.Implementations
             return await _context.TenderProposals
                 .Where(tp => tp.Status == status)
                 .Include(tp => tp.Tender)
-                .Include(tp => tp.Distributor)
+                .Include(tp => tp.CreatedByUser)
                 .ToListAsync();
         }
     }
