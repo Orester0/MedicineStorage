@@ -1,4 +1,5 @@
-﻿using MedicineStorage.Models.MedicineModels;
+﻿using MedicineStorage.Helpers.Params;
+using MedicineStorage.Models.MedicineModels;
 
 namespace MedicineStorage.Data.Interfaces
 {
@@ -7,15 +8,12 @@ namespace MedicineStorage.Data.Interfaces
 
         public Task<Medicine?> GetByIdAsync(int id);
 
-        public Task<IEnumerable<Medicine>> GetAllAsync();
-        public Task<IEnumerable<Medicine>> GetLowStockMedicinesAsync();
+        public Task<(IEnumerable<Medicine>, int)> GetAllAsync(MedicineParams parameters);
 
-        public Task<IEnumerable<Medicine>> GetMedicinesRequiringAuditAsync();
+        public Task<Medicine?> CreateMedicineAsync(Medicine medicine);
 
-        public Task<Medicine?> AddAsync(Medicine medicine);
+        public Task UpdateMedicineAsync(Medicine medicine);
 
-        public void Update(Medicine medicine);
-
-        public void Delete(Medicine medicine);
+        public Task DeleteMedicineAsync(Medicine medicine);
     }
 }

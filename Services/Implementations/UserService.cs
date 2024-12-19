@@ -24,7 +24,7 @@ namespace MedicineStorage.Services.Implementations
             _mapper = mapper;
         }
 
-        public async Task<ServiceResult<User?>> GetByIdAsync(int id)
+        public async Task<ServiceResult<User?>> GetUserByIdAsync(int id)
         {
             var result = new ServiceResult<User?>();
             try
@@ -335,7 +335,7 @@ namespace MedicineStorage.Services.Implementations
 
             foreach (var role in registerDto.Roles)
             {
-                if (role is "Admin" or "SupremeAdmin")
+                if (role is "Manager" or "Admin")
                 {
                     result.Errors.Add($"Cannot register as '{role}'");
                 }

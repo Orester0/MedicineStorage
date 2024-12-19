@@ -44,9 +44,9 @@ namespace MedicineStorage.Extensions
 
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("SupremeAdmin", policy => policy.RequireRole("SupremeAdmin"));
                 options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
-                options.AddPolicy("Member", policy => policy.RequireRole("Member"));
+                options.AddPolicy("Manager", policy => policy.RequireRole("Manager"));
+                options.AddPolicy("Doctor", policy => policy.RequireRole("Doctor"));
                 options.AddPolicy("Distributor", policy => policy.RequireRole("Distributor"));
             });
 

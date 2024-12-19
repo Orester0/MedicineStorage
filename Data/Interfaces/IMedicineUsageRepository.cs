@@ -1,4 +1,5 @@
-﻿using MedicineStorage.Models.MedicineModels;
+﻿using MedicineStorage.Helpers.Params;
+using MedicineStorage.Models.MedicineModels;
 
 namespace MedicineStorage.Data.Interfaces
 {
@@ -6,21 +7,17 @@ namespace MedicineStorage.Data.Interfaces
     {
         public Task<MedicineUsage?> GetByIdAsync(int id);
 
-        public Task<List<MedicineUsage>> GetAllAsync();
+        public Task<(IEnumerable<MedicineUsage>, int)> GetAllAsync(MedicineUsageParams parameters);
 
-        public Task<List<MedicineUsage>> GetUsagesByMedicineAsync(int medicineId);
+        public Task<List<MedicineUsage>> GetUsagesByMedicineIdAsync(int medicineId);
 
-        public Task<List<MedicineUsage>> GetUsagesByUserAsync(int userId);
+        public Task<List<MedicineUsage>> GetUsagesByUserIdAsync(int userId);
 
-        public Task<List<MedicineUsage>> GetUsagesByDateRangeAsync(DateTime startDate, DateTime endDate);
-
-        public Task<MedicineUsage> AddUsageAsync(MedicineUsage usage);
+        public Task<MedicineUsage> CreateUsageAsync(MedicineUsage usage);
 
         public Task<MedicineUsage> UpdateUsageAsync(MedicineUsage usage);
 
         public Task<bool> DeleteUsageAsync(int id);
-
-        public Task<decimal> GetTotalUsageQuantityAsync(int medicineId, DateTime? startDate = null, DateTime? endDate = null);
 
         public Task<List<MedicineUsage>> GetUsagesByRequestIdAsync(int requestId);
 

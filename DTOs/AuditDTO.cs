@@ -9,20 +9,17 @@
 
     public class StartAuditRequest
     {
-        public int AuditId { get; set; }
         public string? Notes { get; set; }
     }
 
     public class UpdateAuditItemsRequest
     {
-        public int AuditId { get; set; }
         public Dictionary<int, decimal> ActualQuantities { get; set; }
         public string? Notes { get; set; }
     }
 
     public class CloseAuditRequest
     {
-        public int AuditId { get; set; }
         public string? Notes { get; set; }
     }
 }

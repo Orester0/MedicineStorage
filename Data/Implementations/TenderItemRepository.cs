@@ -20,27 +20,30 @@ namespace MedicineStorage.Data.Implementations
             return await _context.TenderItems.ToListAsync();
         }
 
-        public async Task<IEnumerable<TenderItem>> GetByTenderIdAsync(int tenderId)
+        public async Task<IEnumerable<TenderItem>> GetItemsByTenderIdAsync(int tenderId)
         {
             return await _context.TenderItems
                 .Where(ti => ti.TenderId == tenderId)
                 .ToListAsync();
         }
 
-        public async Task<TenderItem> AddAsync(TenderItem tenderItem)
+        public async Task<TenderItem> CreateTenderItemAsync(TenderItem tenderItem)
         {
-            await _context.TenderItems.AddAsync(tenderItem);
+            _context.TenderItems.Add(tenderItem);
+            await _context.SaveChangesAsync();
             return tenderItem;
         }
 
-        public async Task UpdateAsync(TenderItem tenderItem)
+        public async Task UpdateTenderItemAsync(TenderItem tenderItem)
         {
             _context.TenderItems.Update(tenderItem);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(TenderItem tenderItem)
+        public async Task DeleteTenderItemAsync(TenderItem tenderItem)
         {
             _context.TenderItems.Remove(tenderItem);
+            await _context.SaveChangesAsync();
         }
     }
 }

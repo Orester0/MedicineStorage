@@ -1,4 +1,5 @@
 ﻿using MedicineStorage.Data.Interfaces;
+using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models.AuditModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -6,9 +7,34 @@ namespace MedicineStorage.Data.Implementations
 {
     public class AuditRepository(AppDbContext _context) : IAuditRepository
     {
-        public async Task<IEnumerable<Audit>> GetAllAuditsAsync()
+        public async Task<(IEnumerable<Audit>, int)> GetAllAuditsAsync(AuditParams auditParams)
         {
-            return await _context.Audits.ToListAsync();
+            var query = _context.Audits.AsQueryable();
+
+            if (auditParams.FromDate.HasValue)
+                query = query.Where(x => x.PlannedDate >= auditParams.FromDate);
+
+            if (auditParams.ToDate.HasValue)
+                query = query.Where(x => x.PlannedDate <= auditParams.ToDate);
+
+            if (auditParams.Status.HasValue)
+                query = query.Where(x => x.Status == auditParams.Status);
+
+            query = auditParams.OrderBy switch
+            {
+                "date" => query.OrderBy(x => x.PlannedDate),
+                "dateDesc" => query.OrderByDescending(x => x.PlannedDate),
+                "status" => query.OrderBy(x => x.Status),
+                _ => query.OrderByDescending(x => x.PlannedDate)
+            };
+
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((auditParams.PageNumber - 1) * auditParams.PageSize)
+                .Take(auditParams.PageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
         }
 
         public async Task<Audit?> GetAuditByIdAsync(int auditId)
@@ -21,19 +47,31 @@ namespace MedicineStorage.Data.Implementations
             return await _context.AuditItems.Where(ai => ai.AuditId == auditId).ToListAsync();
         }
 
-        public async Task AddAsync(Audit audit)
+
+        public async Task<IEnumerable<Audit>> GetAuditsByPlannedUserIdAsync(int userId)
+        {
+            return await _context.Audits.Where(ai => ai.ExecutedByUserId == userId).ToListAsync();
+        }
+
+
+        public async Task<IEnumerable<Audit>> GetAuditsByExecutedUserIdAsync(int userId)
+        {
+            return await _context.Audits.Where(ai => ai.PlannedByUserId == userId).ToListAsync();
+        }
+
+        public async Task CreateAuditAsync(Audit audit)
         {
             _context.Audits.Add(audit);
             await _context.SaveChangesAsync();
         }
 
-        public async Task UpdateAsync(Audit audit)
+        public async Task UpdateAuditAsync(Audit audit)
         {
             _context.Audits.Update(audit);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(int auditId)
+        public async Task DeleteAuditAsync(int auditId)
         {
             var audit = await _context.Audits.FindAsync(auditId);
             if (audit != null)

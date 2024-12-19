@@ -1,5 +1,7 @@
 ﻿using MedicineStorage.Controllers.Interface;
 using MedicineStorage.DTOs;
+using MedicineStorage.Extensions;
+using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
@@ -8,21 +10,46 @@ using System.Security.Claims;
 
 namespace MedicineStorage.Controllers.Implementation
 {
-    [Authorize]
     public class AuditController(IAuditService _auditService) : BaseApiController
     {
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllAudits([FromQuery] AuditParams auditParams)
+        {
+            var result = await _auditService.GetAllAuditsAsync(auditParams);
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(result.Data);
+        }
+
+        [HttpGet("{auditId:int}")]
+        public async Task<IActionResult> GetAuditById(int auditId)
+        {
+            var result = await _auditService.GetAuditByIdAsync(auditId);
+
+            if (!result.Success)
+            {
+                return NotFound(result.Errors);
+            }
+
+            return Ok(result.Data);
+        }
+
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         [HttpPost("create")]
-        [Authorize(Roles = "Admin,SupremeAdmin")]
         public async Task<IActionResult> CreateAudit([FromBody] CreateAuditRequest request)
         {
             try
             {
-                var userId = GetUserIdFromClaims();
+                var userId = User.GetUserIdFromClaims();
                 var result = await _auditService.CreateAuditAsync(userId, request);
 
-                if (result.Errors.Any())
+                if (!result.Success)
                 {
-                    return BadRequest(result.Errors);
+                    return BadRequest(new { result.Errors });
                 }
 
                 return CreatedAtAction(nameof(GetAuditById), new { auditId = result.Data.Id }, result.Data);
@@ -33,18 +60,17 @@ namespace MedicineStorage.Controllers.Implementation
             }
         }
 
-        [HttpPost("start")]
-        [Authorize(Roles = "Admin,SupremeAdmin")]
-        public async Task<IActionResult> StartAudit([FromBody] StartAuditRequest request)
+        [HttpPut("start/{auditId:int}")]
+        public async Task<IActionResult> StartAudit(int auditId, [FromBody] StartAuditRequest request)
         {
             try
             {
-                var userId = GetUserIdFromClaims();
-                var result = await _auditService.StartAuditAsync(userId, request);
+                var userId = User.GetUserIdFromClaims();
+                var result = await _auditService.StartAuditAsync(userId, auditId, request);
 
-                if (result.Errors.Any())
+                if (!result.Success)
                 {
-                    return BadRequest(result.Errors);
+                    return BadRequest(new { result.Errors });
                 }
 
                 return Ok(result.Data);
@@ -55,18 +81,17 @@ namespace MedicineStorage.Controllers.Implementation
             }
         }
 
-        [HttpPut("{auditId}/update-items")]
-        [Authorize(Roles = "Admin,SupremeAdmin")]
+        [HttpPut("update-items/{auditId:int}")]
         public async Task<IActionResult> UpdateAuditItems(int auditId, [FromBody] UpdateAuditItemsRequest request)
         {
             try
             {
-                var userId = GetUserIdFromClaims();
-                var result = await _auditService.UpdateAuditItemsAsync(userId, request);
+                var userId = User.GetUserIdFromClaims();
+                var result = await _auditService.UpdateAuditItemsAsync(userId, auditId, request);
 
-                if (result.Errors.Any())
+                if (!result.Success)
                 {
-                    return BadRequest(result.Errors);
+                    return BadRequest(new { result.Errors });
                 }
 
                 return Ok(result.Data);
@@ -76,18 +101,18 @@ namespace MedicineStorage.Controllers.Implementation
                 return Unauthorized(ex.Message);
             }
         }
-        [HttpPut("{auditId}/close")]
-        [Authorize(Roles = "Admin,SupremeAdmin")]
-        public async Task<IActionResult> CloseAudit(CloseAuditRequest request)
+
+        [HttpPut("close/{auditId:int}")]
+        public async Task<IActionResult> CloseAudit(int auditId, [FromBody] CloseAuditRequest request)
         {
             try
             {
-                var userId = GetUserIdFromClaims();
-                var result = await _auditService.CloseAuditAsync(userId, request);
+                var userId = User.GetUserIdFromClaims();
+                var result = await _auditService.CloseAuditAsync(userId, auditId, request);
 
-                if (result.Errors.Any())
+                if (!result.Success)
                 {
-                    return BadRequest(result.Errors);
+                    return BadRequest(new { result.Errors });
                 }
 
                 return Ok(result.Data);
@@ -98,36 +123,7 @@ namespace MedicineStorage.Controllers.Implementation
             }
         }
 
-        [HttpGet("all")]
-        [Authorize(Roles = "Admin,SupremeAdmin")]
-        public async Task<IActionResult> GetAllAudits()
-        {
-            var result = await _auditService.GetAllAuditsAsync();
-
-            if (result.Errors.Any())
-            {
-                return BadRequest(result.Errors);
-            }
-
-            return Ok(result.Data);
-        }
-
-        [HttpGet("{auditId}")]
-        [Authorize(Roles = "Admin,SupremeAdmin")]
-        public async Task<IActionResult> GetAuditById(int auditId)
-        {
-            var result = await _auditService.GetAuditByIdAsync(auditId);
-
-            if (result.Errors.Any())
-            {
-                return NotFound(result.Errors);
-            }
-
-            return Ok(result.Data);
-        }
-
-        [HttpPut("{auditId}/update")]
-        [Authorize(Roles = "Admin,SupremeAdmin")]
+        [HttpPut("update/{auditId:int}")]
         public async Task<IActionResult> UpdateAudit(int auditId, [FromBody] Audit audit)
         {
             if (auditId != audit.Id)
@@ -137,28 +133,26 @@ namespace MedicineStorage.Controllers.Implementation
 
             var result = await _auditService.UpdateAuditAsync(audit);
 
-            if (result.Errors.Any())
+            if (!result.Success)
             {
-                return BadRequest(result.Errors);
+                return BadRequest(new { result.Errors });
             }
 
             return Ok(result.Data);
         }
 
-        [HttpDelete("{auditId}")]
-        [Authorize(Roles = "Admin,SupremeAdmin")]
+        [HttpDelete("{auditId:int}")]
         public async Task<IActionResult> DeleteAudit(int auditId)
         {
             var result = await _auditService.DeleteAuditAsync(auditId);
 
-            if (result.Errors.Any())
+            if (!result.Success)
             {
-                return BadRequest(result.Errors);
+                return BadRequest(new { result.Errors });
             }
 
             return NoContent();
         }
-
     }
 
 }

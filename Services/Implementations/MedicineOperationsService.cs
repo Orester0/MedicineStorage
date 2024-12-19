@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using MedicineStorage.Data.Interfaces;
 using MedicineStorage.DTOs;
+using MedicineStorage.Helpers.Params;
+using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Services.Interfaces;
@@ -10,7 +12,69 @@ namespace MedicineStorage.Services.Implementations
     public class MedicineOperationsService(IUnitOfWork _unitOfWork, IMapper _mapper) : IMedicineOperationsService
     {
 
-        // USAGES
+        public async Task<ServiceResult<PagedList<ReturnMedicineRequestDTO>>> GetAllRequestsAsync(MedicineRequestParams parameters)
+        {
+            var result = new ServiceResult<PagedList<ReturnMedicineRequestDTO>>();
+            try
+            {
+                var (requests, totalCount) = await _unitOfWork.MedicineRequestRepository.GetAllAsync(parameters);
+                var requestDtos = _mapper.Map<List<ReturnMedicineRequestDTO>>(requests);
+                result.Data = new PagedList<ReturnMedicineRequestDTO>(
+                    requestDtos,
+                    totalCount,
+                    parameters.PageNumber,
+                    parameters.PageSize
+                );
+            }
+            catch (Exception)
+            {
+                result.Errors.Add("Failed to retrieve requests");
+            }
+            return result;
+        }
+
+
+        public async Task<ServiceResult<PagedList<ReturnMedicineUsageDTO>>> GetAllUsagesAsync(MedicineUsageParams parameters)
+        {
+            var result = new ServiceResult<PagedList<ReturnMedicineUsageDTO>>();
+            try
+            {
+                var (usages, totalCount) = await _unitOfWork.MedicineUsageRepository.GetAllAsync(parameters);
+                var usageDtos = _mapper.Map<List<ReturnMedicineUsageDTO>>(usages);
+                result.Data = new PagedList<ReturnMedicineUsageDTO>(
+                    usageDtos,
+                    totalCount,
+                    parameters.PageNumber,
+                    parameters.PageSize
+                );
+            }
+            catch (Exception)
+            {
+                result.Errors.Add("Failed to retrieve usages");
+            }
+            return result;
+        }
+
+        public async Task<ServiceResult<ReturnMedicineRequestDTO>> GetRequestByIdAsync(int id)
+        {
+            var result = new ServiceResult<ReturnMedicineRequestDTO>();
+            try
+            {
+                var request = await _unitOfWork.MedicineRequestRepository.GetByIdAsync(id);
+                if (request == null)
+                {
+                    result.Errors.Add("Request not found");
+                    return result;
+                }
+
+                result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
+            }
+            catch (Exception)
+            {
+                result.Errors.Add("Failed to retrieve request");
+            }
+            return result;
+        }
         public async Task<ServiceResult<ReturnMedicineUsageDTO>> GetUsageByIdAsync(int id)
         {
             var result = new ServiceResult<ReturnMedicineUsageDTO>();
@@ -25,27 +89,77 @@ namespace MedicineStorage.Services.Implementations
 
                 result.Data = _mapper.Map<ReturnMedicineUsageDTO>(usage);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to retrieve usage record");
             }
             return result;
         }
-        public async Task<ServiceResult<IEnumerable<ReturnMedicineUsageDTO>>> GetAllUsagesAsync()
+
+        public async Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetRequestsRequestedByUserId(int userId)
         {
-            var result = new ServiceResult<IEnumerable<ReturnMedicineUsageDTO>>();
+            var result = new ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>();
             try
             {
-                var usages = await _unitOfWork.MedicineUsageRepository.GetAllAsync();
-                result.Data = _mapper.Map<IEnumerable<ReturnMedicineUsageDTO>>(usages);
+                var requests = await _unitOfWork.MedicineRequestRepository.GetRequestsRequestedByUserIdAsync(userId);
+                result.Data = _mapper.Map<IEnumerable<ReturnMedicineRequestDTO>>(requests);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add("Failed to retrieve usages");
+                result.Errors.Add("Failed to retrieve user requests");
             }
             return result;
         }
 
+        public async Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetRequestsApprovedByUserId(int userId)
+        {
+            var result = new ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>();
+            try
+            {
+                var requests = await _unitOfWork.MedicineRequestRepository.GetRequestsApprovedByUserIdAsync(userId);
+                result.Data = _mapper.Map<IEnumerable<ReturnMedicineRequestDTO>>(requests);
+            }
+            catch (Exception)
+            {
+                result.Errors.Add("Failed to retrieve user requests");
+            }
+            return result;
+        }
+
+        public async Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetRequestsForMedicineId(int medicineId)
+        {
+            var result = new ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>();
+            try
+            {
+                var requests = await _unitOfWork.MedicineRequestRepository.GetRequestsForMedicineIdAsync(medicineId);
+                result.Data = _mapper.Map<IEnumerable<ReturnMedicineRequestDTO>>(requests);
+            }
+            catch (Exception)
+            {
+                result.Errors.Add("Failed to retrieve user requests");
+            }
+            return result;
+        }
+        public async Task<ServiceResult<ReturnMedicineRequestDTO>> GetRequestByUsageIdAsync(int usageId)
+        {
+            var result = new ServiceResult<ReturnMedicineRequestDTO>();
+            try
+            {
+                var request = await _unitOfWork.MedicineRequestRepository.GetRequestByUsageIdAsync(usageId);
+                if (request == null)
+                {
+                    result.Errors.Add("Request not found for the given usage");
+                    return result;
+                }
+
+                result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
+            }
+            catch (Exception)
+            {
+                result.Errors.Add("Failed to retrieve request by usage");
+            }
+            return result;
+        }
         public async Task<ServiceResult<IEnumerable<ReturnMedicineUsageDTO>>> GetUsagesByRequestIdAsync(int requestId)
         {
             var result = new ServiceResult<IEnumerable<ReturnMedicineUsageDTO>>();
@@ -54,7 +168,7 @@ namespace MedicineStorage.Services.Implementations
                 var usages = await _unitOfWork.MedicineUsageRepository.GetUsagesByRequestIdAsync(requestId);
                 result.Data = _mapper.Map<IEnumerable<ReturnMedicineUsageDTO>>(usages);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to retrieve usages for request");
             }
@@ -62,6 +176,25 @@ namespace MedicineStorage.Services.Implementations
         }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // USAGES
         public async Task<ServiceResult<ReturnMedicineUsageDTO>> CreateUsageAsync(
             CreateMedicineUsageDTO createUsageDTO,
             int userId)
@@ -96,15 +229,15 @@ namespace MedicineStorage.Services.Implementations
                 usage.UsedByUserId = userId;
                 usage.UsageDate = DateTime.UtcNow;
 
-                var createdUsage = await _unitOfWork.MedicineUsageRepository.AddUsageAsync(usage);
+                var createdUsage = await _unitOfWork.MedicineUsageRepository.CreateUsageAsync(usage);
 
                 medicine.Stock -= createUsageDTO.Quantity;
-                _unitOfWork.MedicineRepository.Update(medicine);
+                _unitOfWork.MedicineRepository.UpdateMedicineAsync(medicine);
 
                 await _unitOfWork.Complete();
                 result.Data = _mapper.Map<ReturnMedicineUsageDTO>(createdUsage);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to create usage");
             }
@@ -113,94 +246,6 @@ namespace MedicineStorage.Services.Implementations
 
 
         // REQUESTS
-
-        public async Task<ServiceResult<ReturnMedicineRequestDTO>> GetRequestByIdAsync(int id)
-        {
-            var result = new ServiceResult<ReturnMedicineRequestDTO>();
-            try
-            {
-                var request = await _unitOfWork.MedicineRequestRepository.GetByIdAsync(id);
-                if (request == null)
-                {
-                    result.Errors.Add("Request not found");
-                    return result;
-                }
-
-                result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
-            }
-            catch (Exception ex)
-            {
-                result.Errors.Add("Failed to retrieve request");
-            }
-            return result;
-        }
-
-        public async Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetRequestsByUserAsync(int userId)
-        {
-            var result = new ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>();
-            try
-            {
-                var requests = await _unitOfWork.MedicineRequestRepository.GetRequestsByUserAsync(userId);
-                result.Data = _mapper.Map<IEnumerable<ReturnMedicineRequestDTO>>(requests);
-            }
-            catch (Exception ex)
-            {
-                result.Errors.Add("Failed to retrieve user requests");
-            }
-            return result;
-        }
-
-        public async Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetRequestsByStatusAsync(RequestStatus status)
-        {
-            var result = new ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>();
-            try
-            {
-                var requests = await _unitOfWork.MedicineRequestRepository.GetRequestsByStatusAsync(status);
-                result.Data = _mapper.Map<IEnumerable<ReturnMedicineRequestDTO>>(requests);
-            }
-            catch (Exception ex)
-            {
-                result.Errors.Add("Failed to retrieve requests by status");
-            }
-            return result;
-        }
-
-
-        public async Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetAllRequestsAsync()
-        {
-            var result = new ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>();
-            try
-            {
-                var requests = await _unitOfWork.MedicineRequestRepository.GetAllAsync();
-                result.Data = _mapper.Map<IEnumerable<ReturnMedicineRequestDTO>>(requests);
-            }
-            catch (Exception ex)
-            {
-                result.Errors.Add("Failed to retrieve requests");
-            }
-            return result;
-        }
-
-        public async Task<ServiceResult<ReturnMedicineRequestDTO>> GetRequestByUsageIdAsync(int usageId)
-        {
-            var result = new ServiceResult<ReturnMedicineRequestDTO>();
-            try
-            {
-                var request = await _unitOfWork.MedicineRequestRepository.GetRequestByUsageIdAsync(usageId);
-                if (request == null)
-                {
-                    result.Errors.Add("Request not found for the given usage");
-                    return result;
-                }
-
-                result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
-            }
-            catch (Exception ex)
-            { 
-                result.Errors.Add("Failed to retrieve request by usage");
-            }
-            return result;
-        }
 
         public async Task<ServiceResult<ReturnMedicineRequestDTO>> CreateRequestAsync(
         CreateMedicineRequestDTO createRequestDTO,
@@ -226,12 +271,12 @@ namespace MedicineStorage.Services.Implementations
                     ? RequestStatus.PedingWithSpecial
                     : RequestStatus.Pending;
 
-                var createdRequest = await _unitOfWork.MedicineRequestRepository.AddRequestAsync(request);
+                var createdRequest = await _unitOfWork.MedicineRequestRepository.CreateRequestAsync(request);
                 await _unitOfWork.Complete();
 
                 result.Data = _mapper.Map<ReturnMedicineRequestDTO>(createdRequest);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to create request");
             }
@@ -284,14 +329,14 @@ namespace MedicineStorage.Services.Implementations
                 request.ApprovalDate = DateTime.UtcNow;
 
                 medicine.Stock -= request.Quantity;
-                _unitOfWork.MedicineRepository.Update(medicine);
+                _unitOfWork.MedicineRepository.UpdateMedicineAsync(medicine);
 
                 await _unitOfWork.MedicineRequestRepository.UpdateRequestAsync(request);
                 await _unitOfWork.Complete();
 
                 result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to approve request");
             }
@@ -342,7 +387,7 @@ namespace MedicineStorage.Services.Implementations
 
                 result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to reject request");
             }
@@ -372,7 +417,7 @@ namespace MedicineStorage.Services.Implementations
 
                 result.Data = true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to delete request");
             }

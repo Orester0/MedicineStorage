@@ -3,7 +3,7 @@ using MedicineStorage.Extensions;
 using MedicineStorage.Middleware;
 using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
-using MedicineStorage.SignalR;
+using MedicineStorage.Services.SignalR;
 using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -32,7 +32,7 @@ app.UseAuthorization();
 
 
 app.MapControllers();
-app.MapHub<PresenceHub>("hubs/presence");
+app.MapHub<UserHub>("/userHub");
 
 
 using (var scope = app.Services.CreateScope())
@@ -44,9 +44,9 @@ using (var scope = app.Services.CreateScope())
 
         var roles = new List<AppRole>()
         {
-            new() {Name = "Member"},
+            new() {Name = "Doctor"},
+            new() {Name = "Manager"},
             new() {Name = "Admin"},
-            new() {Name = "SupremeAdmin"},
             new() {Name = "Distributor"},
         };
 
@@ -65,36 +65,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 
-using (var scope = app.Services.CreateScope())
-{
-    var services = scope.ServiceProvider;
-    try
-    {
-        var context = services.GetRequiredService<AppDbContext>();
-        context.Database.EnsureCreated(); // Ensure the database is created
-        //SeedTestData(context); // Call the seeding method here
-    }
-    catch (Exception ex)
-    {
-        var logger = services.GetRequiredService<ILogger<Program>>();
-        logger.LogError(ex, "An error occurred seeding the database.");
-    }
-}
-
 
 app.Run();
 
-
-
-
-
-
-
-static void SeedTestData(AppDbContext context)
-{
-    var medicine1 = new Medicine { Name = "Paracetamol", Description = "Pain relief medication", Stock = 100, Category = "Antiemetics", RequiresSpecialApproval = false, MinimumStock = 50, RequiresStrictAudit = false, AuditFrequencyDays = 30 };
-    var medicine2 = new Medicine { Name = "Ibuprofen", Description = "Pain relief medication", Stock = 150, Category = "Anesthetics", RequiresSpecialApproval = true, MinimumStock = 60, RequiresStrictAudit = true, AuditFrequencyDays = 30 };
-    var medicine3 = new Medicine { Name = "Islamint", Description = "Pain relief medication", Stock = 160, Category = "Antiparasitics", RequiresSpecialApproval = false, MinimumStock = 70, RequiresStrictAudit = false, AuditFrequencyDays = 30 };
-    context.Medicines.AddRange(medicine1, medicine2, medicine3);
-    context.SaveChanges();
-}

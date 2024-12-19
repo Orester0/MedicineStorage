@@ -17,6 +17,10 @@ namespace MedicineStorage.Data.Interfaces
         ITenderItemRepository TenderItemRepository { get; }
 
 
+        IMedicineSupplyRepository InventoryTransactionRepository { get; }
+
+
+
         Task<bool> Complete();
 
         bool HasChanges();

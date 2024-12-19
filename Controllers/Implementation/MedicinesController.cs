@@ -1,5 +1,6 @@
 ﻿using MedicineStorage.Controllers.Interface;
 using MedicineStorage.DTOs;
+using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models;
 using MedicineStorage.Services.Implementations;
 using MedicineStorage.Services.Interfaces;
@@ -7,44 +8,27 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MedicineStorage.Controllers.Implementation
 {
-    //[Authorize(Policy = "Admin")]
-    public class MedicinesController(IMedicineService _medicineService, ILogger<MedicinesController> _logger) : BaseApiController
+    public class MedicinesController(IMedicineService _medicineService) : BaseApiController
     {
         [HttpGet]
-        public async Task<IActionResult> GetAllMedicines()
+        public async Task<IActionResult> GetMedicines([FromQuery] MedicineParams parameters)
         {
-            var result = await _medicineService.GetAllMedicinesAsync();
+            var result = await _medicineService.GetMedicinesAsync(parameters);
             return result.Success
                 ? Ok(result.Data)
                 : StatusCode(500, result.Errors);
         }
 
-        [HttpGet("{id:int}")]
-        public async Task<IActionResult> GetMedicine(int id)
+        [HttpGet("{medicineId:int}")]
+        public async Task<IActionResult> GetMedicineById(int medicineId)
         {
-            var result = await _medicineService.GetMedicineByIdAsync(id);
+            var result = await _medicineService.GetMedicineByIdAsync(medicineId);
             return result.Success
                 ? Ok(result.Data)
                 : StatusCode(404, result.Errors);
         }
 
-        [HttpGet("low-stock")]
-        public async Task<IActionResult> GetLowStockMedicines()
-        {
-            var result = await _medicineService.GetLowStockMedicinesAsync();
-            return result.Success
-                ? Ok(result.Data)
-                : StatusCode(404, result.Errors);
-        }
-
-        [HttpGet("audit-required")]
-        public async Task<IActionResult> GetMedicinesRequiringAudit()
-        {
-            var result = await _medicineService.GetMedicinesRequiringAuditAsync();
-            return result.Success
-                ? Ok(result.Data)
-                : StatusCode(404, result.Errors);
-        }
+        //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost]
         public async Task<IActionResult> CreateMedicine([FromBody] CreateMedicineDTO createMedicineDTO)
@@ -54,27 +38,27 @@ namespace MedicineStorage.Controllers.Implementation
 
             var result = await _medicineService.CreateMedicineAsync(createMedicineDTO);
             return result.Success
-                ? CreatedAtAction(nameof(GetMedicine), new { id = result.Data.Id }, result.Data)
+                ? CreatedAtAction(nameof(GetMedicineById), new { id = result.Data.Id }, result.Data)
                 : StatusCode(400, result.Errors);
         }
 
-        [HttpPut("{id:int}")]
-        public async Task<IActionResult> UpdateMedicine(int id, [FromBody] CreateMedicineDTO medicineDTO)
+        [HttpPut("{medicineId:int}")]
+        public async Task<IActionResult> UpdateMedicine(int medicineId, [FromBody] CreateMedicineDTO medicineDTO)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
 
-            var result = await _medicineService.UpdateMedicineAsync(id, medicineDTO);
+            var result = await _medicineService.UpdateMedicineAsync(medicineId, medicineDTO);
             return result.Success
                 ? NoContent()
                 : StatusCode(400, result.Errors);
         }
 
-        [HttpDelete("{id:int}")]
-        public async Task<IActionResult> DeleteMedicine(int id)
+        [HttpDelete("{medicineId:int}")]
+        public async Task<IActionResult> DeleteMedicine(int medicineId)
         {
-            var result = await _medicineService.DeleteMedicineAsync(id);
+            var result = await _medicineService.DeleteMedicineAsync(medicineId);
             return result.Success
                 ? NoContent()
                 : StatusCode(400, result.Errors);

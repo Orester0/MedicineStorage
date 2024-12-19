@@ -26,6 +26,8 @@ namespace MedicineStorage.Models.TenderModels
         public string Description { get; set; }
         [Required]
         public DateTime PublishDate { get; set; }
+        public DateTime ClosingDate { get; set; }
+
         [Required]
         public DateTime DeadlineDate { get; set; }
         [Required]
@@ -48,6 +50,8 @@ namespace MedicineStorage.Models.TenderModels
         Published,
         Closed,
         Awarded,
+        Executing,
+        Executed,
         Cancelled
     }
 }

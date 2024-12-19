@@ -1,4 +1,5 @@
 ﻿using MedicineStorage.Data.Interfaces;
+using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models.MedicineModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -15,24 +16,45 @@ namespace MedicineStorage.Data.Implementations
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public async Task<List<MedicineRequest>> GetAllAsync()
+        public async Task<(IEnumerable<MedicineRequest>, int)> GetAllAsync(MedicineRequestParams parameters)
         {
-            return await _context.MedicineRequests
+            var query = _context.MedicineRequests
                 .Include(r => r.Medicine)
                 .Include(r => r.RequestedByUser)
-                .ToListAsync();
+                .AsQueryable();
+
+            if (parameters.FromDate.HasValue)
+                query = query.Where(r => r.RequestDate >= parameters.FromDate);
+
+            if (parameters.ToDate.HasValue)
+                query = query.Where(r => r.RequestDate <= parameters.ToDate);
+
+            if (parameters.Status.HasValue)
+                query = query.Where(r => r.Status == parameters.Status);
+
+            var totalCount = await query.CountAsync();
+
+            if (!string.IsNullOrEmpty(parameters.SortBy))
+            {
+                query = parameters.SortBy.ToLower() switch
+                {
+                    "date" => parameters.IsDescending ?
+                        query.OrderByDescending(r => r.RequestDate) :
+                        query.OrderBy(r => r.RequestDate),
+                    "status" => parameters.IsDescending ?
+                        query.OrderByDescending(r => r.Status) :
+                        query.OrderBy(r => r.Status),
+                    _ => query.OrderByDescending(r => r.RequestDate)
+                };
+            }
+
+            query = query.Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                         .Take(parameters.PageSize);
+
+            return (await query.ToListAsync(), totalCount);
         }
 
-        public async Task<List<MedicineRequest>> GetPendingRequestsAsync()
-        {
-            return await _context.MedicineRequests
-                .Include(r => r.Medicine)
-                .Include(r => r.RequestedByUser)
-                .Where(r => r.Status == RequestStatus.Pending || r.Status == RequestStatus.PedingWithSpecial)
-                .ToListAsync();
-        }
-
-        public async Task<List<MedicineRequest>> GetRequestsByUserAsync(int userId)
+        public async Task<List<MedicineRequest>> GetRequestsRequestedByUserIdAsync(int userId)
         {
             return await _context.MedicineRequests
                 .Include(r => r.Medicine)
@@ -40,18 +62,36 @@ namespace MedicineStorage.Data.Implementations
                 .ToListAsync();
         }
 
-        public async Task<List<MedicineRequest>> GetRequestsByStatusAsync(RequestStatus status)
+        public async Task<List<MedicineRequest>> GetRequestsApprovedByUserIdAsync(int userId)
         {
             return await _context.MedicineRequests
                 .Include(r => r.Medicine)
-                .Include(r => r.RequestedByUser)
-                .Where(r => r.Status == status)
+                .Where(r => r.ApprovedByUserId == userId)
                 .ToListAsync();
         }
 
-        public async Task<MedicineRequest> AddRequestAsync(MedicineRequest request)
+        public async Task<List<MedicineRequest>> GetRequestsForMedicineIdAsync(int medicineId)
         {
-            request.RequestDate = DateTime.UtcNow;
+            return await _context.MedicineRequests
+                .Include(r => r.Medicine)
+                .Where(r => r.MedicineId == medicineId)
+                .ToListAsync();
+        }
+
+        public async Task<MedicineRequest?> GetRequestByUsageIdAsync(int usageId)
+        {
+            var usage = await _context.MedicineUsages
+                .Where(u => u.Id == usageId)
+                .Include(u => u.MedicineRequest)
+                .FirstOrDefaultAsync();
+
+            return usage?.MedicineRequest;
+        }
+
+
+
+        public async Task<MedicineRequest> CreateRequestAsync(MedicineRequest request)
+        {
             _context.MedicineRequests.Add(request);
             await _context.SaveChangesAsync();
             return request;
@@ -62,27 +102,7 @@ namespace MedicineStorage.Data.Implementations
             _context.MedicineRequests.Update(request);
             await _context.SaveChangesAsync();
 
-            // Reload the entity to get the updated version with includes
             return await GetByIdAsync(request.Id) ?? request;
-        }
-
-        public async Task<MedicineRequest> UpdateRequestStatusAsync(int requestId, RequestStatus status, int? approvedByUserId = null)
-        {
-            var request = await _context.MedicineRequests.FindAsync(requestId);
-            if (request == null)
-                throw new InvalidOperationException("Request not found.");
-
-            request.Status = status;
-            if (status == RequestStatus.Approved)
-            {
-                request.ApprovalDate = DateTime.UtcNow;
-                request.ApprovedByUserId = approvedByUserId;
-            }
-
-            await _context.SaveChangesAsync();
-
-            // Reload the entity to get the updated version with includes
-            return await GetByIdAsync(requestId) ?? request;
         }
 
         public async Task<bool> DeleteRequestAsync(int id)
@@ -97,14 +117,5 @@ namespace MedicineStorage.Data.Implementations
             return false;
         }
 
-        public async Task<MedicineRequest?> GetRequestByUsageIdAsync(int usageId)
-        {
-            var usage = await _context.MedicineUsages
-                .Where(u => u.Id == usageId)
-                .Include(u => u.MedicineRequest)
-                .FirstOrDefaultAsync();
-
-            return usage?.MedicineRequest;
-        }
     }
 }

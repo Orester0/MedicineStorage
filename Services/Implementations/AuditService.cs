@@ -1,5 +1,7 @@
 ﻿using MedicineStorage.Data.Interfaces;
 using MedicineStorage.DTOs;
+using MedicineStorage.Helpers.Params;
+using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Services.Interfaces;
@@ -8,6 +10,97 @@ namespace MedicineStorage.Services.Implementations
 {
     public class AuditService(IUnitOfWork _unitOfWork, IUserService _userService) : IAuditService
     {
+
+        public async Task<ServiceResult<PagedList<Audit>>> GetAllAuditsAsync(AuditParams auditParams)
+        {
+            var result = new ServiceResult<PagedList<Audit>>();
+            try
+            {
+                var (audits, totalCount) = await _unitOfWork.AuditRepository.GetAllAuditsAsync(auditParams);
+                result.Data = new PagedList<Audit>(audits.ToList(), totalCount, auditParams.PageNumber, auditParams.PageSize);
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add($"Error retrieving audits: {ex.Message}");
+            }
+            return result;
+        }
+
+
+        public async Task<ServiceResult<Audit>> GetAuditByIdAsync(int auditId)
+        {
+            var result = new ServiceResult<Audit>();
+
+            try
+            {
+                var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(auditId);
+                if (audit == null)
+                {
+                    result.Errors.Add($"Audit with ID {auditId} not found");
+                }
+                else
+                {
+                    result.Data = audit;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add($"Error retrieving audits: {ex.Message}");
+            }
+
+            return result;
+        }
+
+        public async Task<ServiceResult<IEnumerable<Audit>>> GetAuditsPlannedByUserId(int userId)
+        {
+            var result = new ServiceResult<IEnumerable<Audit>>();
+
+            try
+            {
+                var audits = await _unitOfWork.AuditRepository.GetAuditsByPlannedUserIdAsync(userId);
+                if (audits == null)
+                {
+                    result.Errors.Add($"Audits for planned user ID {userId} not found");
+                }
+                else
+                {
+                    result.Data = audits;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add($"Error retrieving audits: {ex.Message}");
+            }
+
+            return result;
+        }
+
+
+        public async Task<ServiceResult<IEnumerable<Audit>>> GetAuditsExecutedByUserId(int userId)
+        {
+            var result = new ServiceResult<IEnumerable<Audit>>();
+
+            try
+            {
+                var audits = await _unitOfWork.AuditRepository.GetAuditsByExecutedUserIdAsync(userId);
+                if (audits == null)
+                {
+                    result.Errors.Add($"Audits for executed user ID {userId} not found");
+                }
+                else
+                {
+                    result.Data = audits;
+                }
+            }
+            catch (Exception ex)
+            {
+                result.Errors.Add($"Error retrieving audits: {ex.Message}");
+            }
+
+            return result;
+        }
+
+
         public async Task<ServiceResult<Audit>> CreateAuditAsync(int userId, CreateAuditRequest request)
         {
             var result = new ServiceResult<Audit>();
@@ -23,7 +116,7 @@ namespace MedicineStorage.Services.Implementations
                 var medicinesNeedingSpecialAudit = await CheckMedicinesRequireSpecialAuditAsync(request.MedicineIds, userRolesResult.Data ?? new List<string>());
                 if (medicinesNeedingSpecialAudit.Any())
                 {
-                    result.Errors.Add("Some medicines require Supreme Admin for audit planning");
+                    result.Errors.Add("Some medicines require Supreme Manager for audits planning");
                     return result;
                 }
 
@@ -35,7 +128,7 @@ namespace MedicineStorage.Services.Implementations
                     Notes = request.Notes
                 };
 
-                await _unitOfWork.AuditRepository.AddAsync(audit);
+                await _unitOfWork.AuditRepository.CreateAuditAsync(audit);
                 await _unitOfWork.Complete();
 
                 var auditItems = new List<AuditItem>();
@@ -52,7 +145,7 @@ namespace MedicineStorage.Services.Implementations
                     {
                         AuditId = audit.Id,
                         MedicineId = medicineId,
-                        ExpectedQuantity = medicine.Stock,
+                        ExpectedQuantity = medicine.MinimumStock,
                         ActualQuantity = 0
                     };
                     auditItems.Add(auditItem);
@@ -70,19 +163,19 @@ namespace MedicineStorage.Services.Implementations
             }
             catch (Exception ex)
             {
-                result.Errors.Add($"Error creating audit: {ex.Message}");
+                result.Errors.Add($"Error creating audits: {ex.Message}");
                 return result;
             }
         }
-        public async Task<ServiceResult<Audit>> StartAuditAsync(int userId, StartAuditRequest request)
+        public async Task<ServiceResult<Audit>> StartAuditAsync(int userId, int auditId, StartAuditRequest request)
         {
             var result = new ServiceResult<Audit>();
             try
             {
-                var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(request.AuditId);
+                var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(auditId);
                 if (audit == null)
                 {
-                    result.Errors.Add($"Audit with ID {request.AuditId} not found");
+                    result.Errors.Add($"Audit with ID {auditId} not found");
                     return result;
                 }
 
@@ -99,13 +192,13 @@ namespace MedicineStorage.Services.Implementations
                     return result;
                 }
 
-                var auditItems = await _unitOfWork.AuditRepository.GetAuditItemsByAuditIdAsync(request.AuditId);
+                var auditItems = await _unitOfWork.AuditRepository.GetAuditItemsByAuditIdAsync(auditId);
                 var medicineIds = auditItems.Select(ai => ai.MedicineId).ToArray();
 
                 var medicinesNeedingSpecialAudit = await CheckMedicinesRequireSpecialAuditAsync(medicineIds, userRolesResult.Data ?? new List<string>());
                 if (medicinesNeedingSpecialAudit.Any())
                 {
-                    result.Errors.Add("Some medicines require Supreme Admin for audit execution");
+                    result.Errors.Add("Some medicines require Supreme Manager for audits execution");
                     return result;
                 }
 
@@ -114,7 +207,7 @@ namespace MedicineStorage.Services.Implementations
                 audit.Status = AuditStatus.InProgress;
                 audit.Notes = request.Notes;
 
-                await _unitOfWork.AuditRepository.UpdateAsync(audit);
+                await _unitOfWork.AuditRepository.UpdateAuditAsync(audit);
                 await _unitOfWork.Complete();
 
                 result.Data = audit;
@@ -122,30 +215,30 @@ namespace MedicineStorage.Services.Implementations
             }
             catch (Exception ex)
             {
-                result.Errors.Add($"Error starting audit: {ex.Message}");
+                result.Errors.Add($"Error starting audits: {ex.Message}");
                 return result;
             }
         }
 
-        public async Task<ServiceResult<Audit>> UpdateAuditItemsAsync(int userId, UpdateAuditItemsRequest request)
+        public async Task<ServiceResult<Audit>> UpdateAuditItemsAsync(int userId, int auditId, UpdateAuditItemsRequest request)
         {
             var result = new ServiceResult<Audit>();
             try
             {
-                var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(request.AuditId);
+                var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(auditId);
                 if (audit == null)
                 {
-                    result.Errors.Add($"Audit with ID {request.AuditId} not found");
+                    result.Errors.Add($"Audit with ID {auditId} not found");
                     return result;
                 }
 
                 if (audit.Status != AuditStatus.InProgress)
                 {
-                    result.Errors.Add("Audit items can only be updated when audit is in progress");
+                    result.Errors.Add("Audit items can only be updated when audits is in progress");
                     return result;
                 }
 
-                var auditItems = await _unitOfWork.AuditRepository.GetAuditItemsByAuditIdAsync(request.AuditId);
+                var auditItems = await _unitOfWork.AuditRepository.GetAuditItemsByAuditIdAsync(auditId);
 
                 foreach (var auditItem in auditItems)
                 {
@@ -171,7 +264,7 @@ namespace MedicineStorage.Services.Implementations
 
                 audit.Notes = request.Notes;
 
-                await _unitOfWork.AuditRepository.UpdateAsync(audit);
+                await _unitOfWork.AuditRepository.UpdateAuditAsync(audit);
                 await _unitOfWork.Complete();
 
                 result.Data = audit;
@@ -179,7 +272,7 @@ namespace MedicineStorage.Services.Implementations
             }
             catch (Exception ex)
             {
-                result.Errors.Add($"Error updating audit items: {ex.Message}");
+                result.Errors.Add($"Error updating audits items: {ex.Message}");
                 return result;
             }
         }
@@ -195,7 +288,7 @@ namespace MedicineStorage.Services.Implementations
                 if (medicine == null)
                     continue;
 
-                if (medicine.RequiresStrictAudit && !userRoles.Contains("SupremeAdmin"))
+                if (medicine.RequiresStrictAudit && !userRoles.Contains("Admin"))
                 {
                     specialAuditMedicines.Add(medicineId);
                 }
@@ -204,15 +297,15 @@ namespace MedicineStorage.Services.Implementations
             return specialAuditMedicines;
         }
 
-        public async Task<ServiceResult<Audit>> CloseAuditAsync(int userId, CloseAuditRequest request)
+        public async Task<ServiceResult<Audit>> CloseAuditAsync(int userId, int auditId, CloseAuditRequest request)
         {
             var result = new ServiceResult<Audit>();
             try
             {
-                var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(request.AuditId);
+                var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(auditId);
                 if (audit == null)
                 {
-                    result.Errors.Add($"Audit with ID {request.AuditId} not found");
+                    result.Errors.Add($"Audit with ID {auditId} not found");
                     return result;
                 }
 
@@ -228,7 +321,7 @@ namespace MedicineStorage.Services.Implementations
 
                 audit.Notes = request.Notes;
 
-                await _unitOfWork.AuditRepository.UpdateAsync(audit);
+                await _unitOfWork.AuditRepository.UpdateAuditAsync(audit);
                 await _unitOfWork.Complete();
 
                 result.Data = audit;
@@ -236,50 +329,9 @@ namespace MedicineStorage.Services.Implementations
             }
             catch (Exception ex)
             {
-                result.Errors.Add($"Error closing audit: {ex.Message}");
+                result.Errors.Add($"Error closing audits: {ex.Message}");
                 return result;
             }
-        }
-
-        public async Task<ServiceResult<IEnumerable<Audit>>> GetAllAuditsAsync()
-        {
-            var result = new ServiceResult<IEnumerable<Audit>>();
-
-            try
-            {
-                var audits = await _unitOfWork.AuditRepository.GetAllAuditsAsync();
-                result.Data = audits;
-            }
-            catch (Exception ex)
-            {
-                result.Errors.Add($"Error retrieving audits: {ex.Message}");
-            }
-
-            return result;
-        }
-
-        public async Task<ServiceResult<Audit>> GetAuditByIdAsync(int auditId)
-        {
-            var result = new ServiceResult<Audit>();
-
-            try
-            {
-                var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(auditId);
-                if (audit == null)
-                {
-                    result.Errors.Add($"Audit with ID {auditId} not found");
-                }
-                else
-                {
-                    result.Data = audit;
-                }
-            }
-            catch (Exception ex)
-            {
-                result.Errors.Add($"Error retrieving audit: {ex.Message}");
-            }
-
-            return result;
         }
 
         public async Task<ServiceResult<Audit>> CreateAuditAsync(Audit audit)
@@ -288,13 +340,13 @@ namespace MedicineStorage.Services.Implementations
 
             try
             {
-                await _unitOfWork.AuditRepository.AddAsync(audit);
+                await _unitOfWork.AuditRepository.CreateAuditAsync(audit);
                 await _unitOfWork.Complete();
                 result.Data = audit;
             }
             catch (Exception ex)
             {
-                result.Errors.Add($"Error creating audit: {ex.Message}");
+                result.Errors.Add($"Error creating audits: {ex.Message}");
             }
 
             return result;
@@ -313,13 +365,13 @@ namespace MedicineStorage.Services.Implementations
                     return result;
                 }
 
-                await _unitOfWork.AuditRepository.UpdateAsync(audit);
+                await _unitOfWork.AuditRepository.UpdateAuditAsync(audit);
                 await _unitOfWork.Complete();
                 result.Data = audit;
             }
             catch (Exception ex)
             {
-                result.Errors.Add($"Error updating audit: {ex.Message}");
+                result.Errors.Add($"Error updating audits: {ex.Message}");
             }
 
             return result;
@@ -339,13 +391,13 @@ namespace MedicineStorage.Services.Implementations
                     return result;
                 }
 
-                await _unitOfWork.AuditRepository.DeleteAsync(auditId);
+                await _unitOfWork.AuditRepository.DeleteAuditAsync(auditId);
                 await _unitOfWork.Complete(); // Commit changes
                 result.Data = true;
             }
             catch (Exception ex)
             {
-                result.Errors.Add($"Error deleting audit: {ex.Message}");
+                result.Errors.Add($"Error deleting audits: {ex.Message}");
                 result.Data = false;
             }
 

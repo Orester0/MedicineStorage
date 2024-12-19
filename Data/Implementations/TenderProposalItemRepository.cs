@@ -19,27 +19,30 @@ namespace MedicineStorage.Data.Implementations
             return await _context.TenderProposalItems.ToListAsync();
         }
 
-        public async Task<IEnumerable<TenderProposalItem>> GetByProposalIdAsync(int proposalId)
+        public async Task<IEnumerable<TenderProposalItem>> GetItemsByProposalIdAsync(int proposalId)
         {
             return await _context.TenderProposalItems
                 .Where(tpi => tpi.TenderProposalId == proposalId)
                 .ToListAsync();
         }
 
-        public async Task<TenderProposalItem> AddAsync(TenderProposalItem tenderProposalItem)
+        public async Task<TenderProposalItem> CreateTenderProposalItemAsync(TenderProposalItem tenderProposalItem)
         {
-            await _context.TenderProposalItems.AddAsync(tenderProposalItem);
+            _context.TenderProposalItems.Add(tenderProposalItem);
+            await _context.SaveChangesAsync();
             return tenderProposalItem;
         }
 
-        public async Task UpdateAsync(TenderProposalItem tenderProposalItem)
+        public async Task UpdateTenderProposalItemAsync(TenderProposalItem tenderProposalItem)
         {
             _context.TenderProposalItems.Update(tenderProposalItem);
+            await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteAsync(TenderProposalItem tenderProposalItem)
+        public async Task DeleteTenderProposalItemAsync(TenderProposalItem tenderProposalItem)
         {
             _context.TenderProposalItems.Remove(tenderProposalItem);
+            await _context.SaveChangesAsync();
         }
 
     }

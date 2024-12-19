@@ -40,6 +40,7 @@ namespace MedicineStorage.Extensions
             services.AddScoped<ITenderRepository, TenderRepository>();
             services.AddScoped<ITenderProposalItemRepository, TenderProposalItemRepository>();
             services.AddScoped<ITenderItemRepository, TenderItemRepository>();
+            services.AddScoped<IMedicineSupplyRepository, MedicineSupplyRepository>();
 
 
 

@@ -1,4 +1,5 @@
 ﻿using MedicineStorage.Data.Interfaces;
+using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models.MedicineModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -13,16 +14,42 @@ namespace MedicineStorage.Data.Implementations
                 .Include(u => u.UsedByUser)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
-
-        public async Task<List<MedicineUsage>> GetAllAsync()
+        public async Task<(IEnumerable<MedicineUsage>, int)> GetAllAsync(MedicineUsageParams parameters)
         {
-            return await _context.MedicineUsages
+            var query = _context.MedicineUsages
                 .Include(u => u.Medicine)
                 .Include(u => u.UsedByUser)
-                .ToListAsync();
+                .AsQueryable();
+
+            if (parameters.FromDate.HasValue)
+                query = query.Where(u => u.UsageDate >= parameters.FromDate);
+
+            if (parameters.ToDate.HasValue)
+                query = query.Where(u => u.UsageDate <= parameters.ToDate);
+
+            var totalCount = await query.CountAsync();
+
+            if (!string.IsNullOrEmpty(parameters.SortBy))
+            {
+                query = parameters.SortBy.ToLower() switch
+                {
+                    "date" => parameters.IsDescending ?
+                        query.OrderByDescending(u => u.UsageDate) :
+                        query.OrderBy(u => u.UsageDate),
+                    "quantity" => parameters.IsDescending ?
+                        query.OrderByDescending(u => u.Quantity) :
+                        query.OrderBy(u => u.Quantity),
+                    _ => query.OrderByDescending(u => u.UsageDate)
+                };
+            }
+
+            query = query.Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                         .Take(parameters.PageSize);
+
+            return (await query.ToListAsync(), totalCount);
         }
 
-        public async Task<List<MedicineUsage>> GetUsagesByMedicineAsync(int medicineId)
+        public async Task<List<MedicineUsage>> GetUsagesByMedicineIdAsync(int medicineId)
         {
             return await _context.MedicineUsages
                 .Where(u => u.MedicineId == medicineId)
@@ -30,7 +57,7 @@ namespace MedicineStorage.Data.Implementations
                 .ToListAsync();
         }
 
-        public async Task<List<MedicineUsage>> GetUsagesByUserAsync(int userId)
+        public async Task<List<MedicineUsage>> GetUsagesByUserIdAsync(int userId)
         {
             return await _context.MedicineUsages
                 .Where(u => u.UsedByUserId == userId)
@@ -38,18 +65,18 @@ namespace MedicineStorage.Data.Implementations
                 .ToListAsync();
         }
 
-        public async Task<List<MedicineUsage>> GetUsagesByDateRangeAsync(DateTime startDate, DateTime endDate)
+
+        public async Task<List<MedicineUsage>> GetUsagesByRequestIdAsync(int requestId)
         {
             return await _context.MedicineUsages
-                .Where(u => u.UsageDate >= startDate && u.UsageDate <= endDate)
+                .Where(u => u.MedicineRequestId == requestId)
                 .Include(u => u.Medicine)
                 .Include(u => u.UsedByUser)
                 .ToListAsync();
         }
 
-        public async Task<MedicineUsage> AddUsageAsync(MedicineUsage usage)
+        public async Task<MedicineUsage> CreateUsageAsync(MedicineUsage usage)
         {
-            usage.UsageDate = DateTime.UtcNow;
             _context.MedicineUsages.Add(usage);
             await _context.SaveChangesAsync();
             return usage;
@@ -76,29 +103,6 @@ namespace MedicineStorage.Data.Implementations
             return false;
         }
 
-        public async Task<decimal> GetTotalUsageQuantityAsync(int medicineId, DateTime? startDate = null, DateTime? endDate = null)
-        {
-            var query = _context.MedicineUsages
-                .Where(u => u.MedicineId == medicineId);
-
-            if (startDate.HasValue)
-                query = query.Where(u => u.UsageDate >= startDate.Value);
-
-            if (endDate.HasValue)
-                query = query.Where(u => u.UsageDate <= endDate.Value);
-
-            return await query.SumAsync(u => u.Quantity);
-        }
-
-
-        public async Task<List<MedicineUsage>> GetUsagesByRequestIdAsync(int requestId)
-        {
-            return await _context.MedicineUsages
-                .Where(u => u.MedicineRequestId == requestId)
-                .Include(u => u.Medicine)
-                .Include(u => u.UsedByUser)
-                .ToListAsync();
-        }
 
 
     }

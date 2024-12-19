@@ -12,7 +12,8 @@ namespace MedicineStorage.Data.Implementations
         ITenderRepository _tenderRepository,
         ITenderItemRepository _tenderItemRepository,
         ITenderProposalRepository _tenderProposalRepository,
-        ITenderProposalItemRepository _tenderProposalItemRepository
+        ITenderProposalItemRepository _tenderProposalItemRepository,
+        IMedicineSupplyRepository _inventoryTransactionRepository
         ) : IUnitOfWork
     {
         public IAuditRepository AuditRepository => _auditRepository;
@@ -32,6 +33,16 @@ namespace MedicineStorage.Data.Implementations
         public ITenderItemRepository TenderItemRepository => _tenderItemRepository;
 
         public ITenderProposalItemRepository TenderProposalItemRepository => _tenderProposalItemRepository;
+
+
+
+
+
+        public IMedicineSupplyRepository InventoryTransactionRepository => _inventoryTransactionRepository;
+
+
+
+
 
 
         public void BeginTransaction()

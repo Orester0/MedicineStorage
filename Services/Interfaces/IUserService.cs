@@ -5,7 +5,7 @@ namespace MedicineStorage.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<ServiceResult<User?>> GetByIdAsync(int id);
+        Task<ServiceResult<User?>> GetUserByIdAsync(int id);
         Task<ServiceResult<User?>> GetByUserNameAsync(string username);
         Task<ServiceResult<List<User>>> GetAllAsync();
         Task<ServiceResult<List<User>>> GetUsersByRoleAsync(string roleName);

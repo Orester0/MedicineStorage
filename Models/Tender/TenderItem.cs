@@ -4,6 +4,12 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.TenderModels
 {
+    public enum TenderItemStatus
+    {
+        Pending,
+        Executed
+    }
+
     public class TenderItem
     {
         [Required]
@@ -18,6 +24,9 @@ namespace MedicineStorage.Models.TenderModels
 
         [Required]
         public decimal RequiredQuantity { get; set; }
+
+        [Required]
+        public TenderItemStatus Status { get; set; } = TenderItemStatus.Pending;
 
         public virtual Tender Tender { get; set; }
         public virtual Medicine Medicine { get; set; }

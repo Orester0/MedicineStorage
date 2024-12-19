@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using MedicineStorage.Data.Interfaces;
 using MedicineStorage.DTOs;
+using MedicineStorage.Helpers;
+using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Services.Interfaces;
@@ -11,16 +13,17 @@ namespace MedicineStorage.Services.Implementations
         IUnitOfWork _unitOfWork,
         IMapper _mapper) : IMedicineService
     {
-        public async Task<ServiceResult<IEnumerable<ReturnMedicineDTO>>> GetAllMedicinesAsync()
+        public async Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetMedicinesAsync(MedicineParams parameters)
         {
-            var result = new ServiceResult<IEnumerable<ReturnMedicineDTO>>();
+            var result = new ServiceResult<PagedList<ReturnMedicineDTO>>();
 
             try
             {
-                var medicines = await _unitOfWork.MedicineRepository.GetAllAsync();
-                result.Data = _mapper.Map<IEnumerable<ReturnMedicineDTO>>(medicines);
+                var (medicines, totalCount) = await _unitOfWork.MedicineRepository.GetAllAsync(parameters);
+                var dtos = _mapper.Map<IEnumerable<ReturnMedicineDTO>>(medicines);
+                result.Data = new PagedList<ReturnMedicineDTO>(dtos.ToList(), totalCount, parameters.PageNumber, parameters.PageSize);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to retrieve medicines");
             }
@@ -43,13 +46,17 @@ namespace MedicineStorage.Services.Implementations
 
                 result.Data = _mapper.Map<ReturnMedicineDTO>(medicine);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to retrieve medicine");
             }
 
             return result;
         }
+
+
+
+
 
         public async Task<ServiceResult<ReturnMedicineDTO>> CreateMedicineAsync(CreateMedicineDTO createMedicineDTO)
         {
@@ -58,7 +65,7 @@ namespace MedicineStorage.Services.Implementations
             try
             {
                 var medicine = _mapper.Map<Medicine>(createMedicineDTO);
-                var createdMedicine = await _unitOfWork.MedicineRepository.AddAsync(medicine);
+                var createdMedicine = await _unitOfWork.MedicineRepository.CreateMedicineAsync(medicine);
 
                 if (createdMedicine == null)
                 {
@@ -69,7 +76,7 @@ namespace MedicineStorage.Services.Implementations
                 await _unitOfWork.Complete();
                 result.Data = _mapper.Map<ReturnMedicineDTO>(createdMedicine);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to create medicine");
             }
@@ -92,14 +99,14 @@ namespace MedicineStorage.Services.Implementations
 
                 _mapper.Map(medicineDTO, existingMedicine);
 
-                _unitOfWork.MedicineRepository.Update(existingMedicine);
+                _unitOfWork.MedicineRepository.UpdateMedicineAsync(existingMedicine);
 
 
                 await _unitOfWork.Complete();
 
                 result.Data = true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to update medicine");
             }
@@ -119,12 +126,12 @@ namespace MedicineStorage.Services.Implementations
                     return result;
                 }
 
-                _unitOfWork.MedicineRepository.Delete(medicine);
+                _unitOfWork.MedicineRepository.DeleteMedicineAsync(medicine);
                 await _unitOfWork.Complete();
 
                 result.Data = true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 result.Errors.Add("Failed to delete medicine");
             }
@@ -132,39 +139,6 @@ namespace MedicineStorage.Services.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<IEnumerable<ReturnMedicineDTO>>> GetLowStockMedicinesAsync()
-        {
-            var result = new ServiceResult<IEnumerable<ReturnMedicineDTO>>();
-
-            try
-            {
-                var medicines = await _unitOfWork.MedicineRepository.GetLowStockMedicinesAsync();
-                result.Data = _mapper.Map<IEnumerable<ReturnMedicineDTO>>(medicines);
-            }
-            catch (Exception ex)
-            {
-                result.Errors.Add("Failed to retrieve low stock medicines");
-            }
-
-            return result;
-        }
-
-        public async Task<ServiceResult<IEnumerable<ReturnMedicineDTO>>> GetMedicinesRequiringAuditAsync()
-        {
-            var result = new ServiceResult<IEnumerable<ReturnMedicineDTO>>();
-
-            try
-            {
-                var medicines = await _unitOfWork.MedicineRepository.GetMedicinesRequiringAuditAsync();
-                result.Data = _mapper.Map<IEnumerable<ReturnMedicineDTO>>(medicines);
-            }
-            catch (Exception ex)
-            {
-                result.Errors.Add("Failed to retrieve medicines requiring audit");
-            }
-
-            return result;
-        }
     }
 }
 

@@ -2,7 +2,7 @@
 using MedicineStorage.DTOs;
 using MedicineStorage.Models;
 
-namespace MedicineStorage.Helpers
+namespace MedicineStorage.Helpers.Mappers
 {
     public class AutoMapperProfiles : Profile
     {

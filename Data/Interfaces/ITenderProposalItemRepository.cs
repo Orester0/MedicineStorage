@@ -9,12 +9,14 @@ namespace MedicineStorage.Data.Interfaces
 
         public Task<IEnumerable<TenderProposalItem>> GetAllAsync();
 
-        public Task<IEnumerable<TenderProposalItem>> GetByProposalIdAsync(int proposalId);
+        public Task<IEnumerable<TenderProposalItem>> GetItemsByProposalIdAsync(int proposalId);
 
-        public Task<TenderProposalItem> AddAsync(TenderProposalItem tenderProposalItem);
+        public Task<TenderProposalItem> CreateTenderProposalItemAsync(TenderProposalItem tenderProposalItem);
 
-        public Task UpdateAsync(TenderProposalItem tenderProposalItem);
+        public Task UpdateTenderProposalItemAsync(TenderProposalItem tenderProposalItem);
 
-        public Task DeleteAsync(TenderProposalItem tenderProposalItem);
+        public Task DeleteTenderProposalItemAsync(TenderProposalItem tenderProposalItem);
+
+
     }
 }

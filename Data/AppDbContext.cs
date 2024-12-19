@@ -1,6 +1,7 @@
 ﻿using MedicineStorage.Models;
 using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.Tender;
 using MedicineStorage.Models.TenderModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -22,11 +23,32 @@ namespace MedicineStorage.Data
         public DbSet<MedicineUsage> MedicineUsages { get; set; }
         public DbSet<Audit> Audits { get; set; }
         public DbSet<AuditItem> AuditItems { get; set; }
+        public DbSet<MedicineSupply> InventoryTransactions { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<MedicineSupply>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.TenderProposalItemId)
+                      .IsRequired();
+
+                entity.Property(e => e.Quantity)
+                      .IsRequired()
+                      .HasColumnType("decimal(10, 0)");
+
+                entity.Property(e => e.TransactionDate)
+                      .IsRequired();
+
+                entity.HasOne(e => e.TenderProposalItem)
+                      .WithMany() 
+                      .HasForeignKey(e => e.TenderProposalItemId)
+                      .OnDelete(DeleteBehavior.Cascade);
+            });
 
             modelBuilder.Entity<User>(entity =>
             {
