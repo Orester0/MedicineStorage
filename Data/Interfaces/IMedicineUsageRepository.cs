@@ -15,9 +15,9 @@ namespace MedicineStorage.Data.Interfaces
 
         public Task<MedicineUsage> CreateUsageAsync(MedicineUsage usage);
 
-        public Task<MedicineUsage> UpdateUsageAsync(MedicineUsage usage);
+        public void UpdateUsage(MedicineUsage usage);
 
-        public Task<bool> DeleteUsageAsync(int id);
+        public Task DeleteUsageAsync(int id);
 
         public Task<List<MedicineUsage>> GetUsagesByRequestIdAsync(int requestId);
 

@@ -17,7 +17,7 @@ namespace MedicineStorage.Data.Interfaces
         ITenderItemRepository TenderItemRepository { get; }
 
 
-        IMedicineSupplyRepository InventoryTransactionRepository { get; }
+        IMedicineSupplyRepository MedicineSupplyRepository { get; }
 
 
 

@@ -26,7 +26,7 @@ namespace MedicineStorage.Migrations
                 defaultValue: 0);
 
             migrationBuilder.CreateTable(
-                name: "InventoryTransactions",
+                name: "MedicineSupplies",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -48,7 +48,7 @@ namespace MedicineStorage.Migrations
 
             migrationBuilder.CreateIndex(
                 name: "IX_InventoryTransactions_TenderProposalItemId",
-                table: "InventoryTransactions",
+                table: "MedicineSupplies",
                 column: "TenderProposalItemId");
         }
 
@@ -56,7 +56,7 @@ namespace MedicineStorage.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "InventoryTransactions");
+                name: "MedicineSupplies");
 
             migrationBuilder.DropColumn(
                 name: "ClosingDate",

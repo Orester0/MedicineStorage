@@ -1,5 +1,6 @@
 ﻿using MedicineStorage.Data.Interfaces;
 using MedicineStorage.Helpers.Params;
+using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
 using Microsoft.EntityFrameworkCore;
 
@@ -92,29 +93,23 @@ namespace MedicineStorage.Data.Implementations
 
         public async Task<MedicineRequest> CreateRequestAsync(MedicineRequest request)
         {
-            _context.MedicineRequests.Add(request);
-            await _context.SaveChangesAsync();
+            await _context.MedicineRequests.AddAsync(request);
             return request;
         }
 
-        public async Task<MedicineRequest> UpdateRequestAsync(MedicineRequest request)
+        public void UpdateRequest(MedicineRequest request)
         {
             _context.MedicineRequests.Update(request);
-            await _context.SaveChangesAsync();
-
-            return await GetByIdAsync(request.Id) ?? request;
         }
 
-        public async Task<bool> DeleteRequestAsync(int id)
+        public async Task DeleteRequestAsync(int requestId)
         {
-            var request = await _context.MedicineRequests.FindAsync(id);
-            if (request != null)
+            var medicineRequest = await _context.MedicineRequests.FindAsync(requestId);
+            if (medicineRequest != null)
             {
-                _context.MedicineRequests.Remove(request);
-                await _context.SaveChangesAsync();
-                return true;
+                _context.MedicineRequests.Remove(medicineRequest);
+
             }
-            return false;
         }
 
     }

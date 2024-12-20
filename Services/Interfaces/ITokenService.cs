@@ -1,4 +1,4 @@
-﻿using MedicineStorage.Models;
+﻿using MedicineStorage.Models.UserModels;
 
 namespace MedicineStorage.Services.Interfaces
 {

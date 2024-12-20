@@ -274,7 +274,7 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("TenderProposalItemId");
 
-                    b.ToTable("InventoryTransactions");
+                    b.ToTable("MedicineSupplies");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.Tender", b =>
@@ -426,7 +426,7 @@ namespace MedicineStorage.Migrations
                     b.ToTable("TenderProposalItems");
                 });
 
-            modelBuilder.Entity("MedicineStorage.Models.User", b =>
+            modelBuilder.Entity("MedicineStorage.Models.UserModels", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -622,13 +622,13 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("MedicineStorage.Models.AuditModels.Audit", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.User", "ExecutedByUser")
+                    b.HasOne("MedicineStorage.Models.UserModels", "ExecutedByUser")
                         .WithMany()
                         .HasForeignKey("ExecutedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.User", "PlannedByUser")
+                    b.HasOne("MedicineStorage.Models.UserModels", "PlannedByUser")
                         .WithMany()
                         .HasForeignKey("PlannedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -660,7 +660,7 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineRequest", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.User", "ApprovedByUser")
+                    b.HasOne("MedicineStorage.Models.UserModels", "ApprovedByUser")
                         .WithMany()
                         .HasForeignKey("ApprovedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -671,7 +671,7 @@ namespace MedicineStorage.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.User", "RequestedByUser")
+                    b.HasOne("MedicineStorage.Models.UserModels", "RequestedByUser")
                         .WithMany()
                         .HasForeignKey("RequestedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -698,7 +698,7 @@ namespace MedicineStorage.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.User", "UsedByUser")
+                    b.HasOne("MedicineStorage.Models.UserModels", "UsedByUser")
                         .WithMany()
                         .HasForeignKey("UsedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -724,25 +724,25 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.Tender", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.User", "ClosedByUser")
+                    b.HasOne("MedicineStorage.Models.UserModels", "ClosedByUser")
                         .WithMany()
                         .HasForeignKey("ClosedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.User", "CreatedByUser")
+                    b.HasOne("MedicineStorage.Models.UserModels", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.User", "OpenedByUser")
+                    b.HasOne("MedicineStorage.Models.UserModels", "OpenedByUser")
                         .WithMany()
                         .HasForeignKey("OpenedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.User", "WinnerSelectedByUser")
+                    b.HasOne("MedicineStorage.Models.UserModels", "WinnerSelectedByUser")
                         .WithMany()
                         .HasForeignKey("WinnerSelectedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -778,7 +778,7 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.TenderProposal", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.User", "CreatedByUser")
+                    b.HasOne("MedicineStorage.Models.UserModels", "CreatedByUser")
                         .WithMany()
                         .HasForeignKey("CreatedByUserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -826,7 +826,7 @@ namespace MedicineStorage.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.User", "User")
+                    b.HasOne("MedicineStorage.Models.UserModels", "UserModels")
                         .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -834,7 +834,7 @@ namespace MedicineStorage.Migrations
 
                     b.Navigation("Role");
 
-                    b.Navigation("User");
+                    b.Navigation("UserModels");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<int>", b =>
@@ -848,7 +848,7 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<int>", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.User", null)
+                    b.HasOne("MedicineStorage.Models.UserModels", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -857,7 +857,7 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserLogin<int>", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.User", null)
+                    b.HasOne("MedicineStorage.Models.UserModels", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -866,7 +866,7 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserToken<int>", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.User", null)
+                    b.HasOne("MedicineStorage.Models.UserModels", null)
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -907,7 +907,7 @@ namespace MedicineStorage.Migrations
                     b.Navigation("Items");
                 });
 
-            modelBuilder.Entity("MedicineStorage.Models.User", b =>
+            modelBuilder.Entity("MedicineStorage.Models.UserModels", b =>
                 {
                     b.Navigation("UserRoles");
                 });

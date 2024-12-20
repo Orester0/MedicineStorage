@@ -2,6 +2,7 @@
 using MedicineStorage.Data;
 using MedicineStorage.DTOs;
 using MedicineStorage.Models;
+using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -36,12 +37,12 @@ namespace MedicineStorage.Services.Implementations
 
                 if (result.Data == null)
                 {
-                    result.Errors.Add("User not found.");
+                    result.Errors.Add("UserModels not found.");
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"An error occurred: {ex.Message}");
+                result.Errors.Add($"Couldnt get user");
             }
 
             return result;
@@ -59,12 +60,12 @@ namespace MedicineStorage.Services.Implementations
 
                 if (result.Data == null)
                 {
-                    result.Errors.Add("User not found.");
+                    result.Errors.Add("UserModels not found.");
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"An error occurred: {ex.Message}");
+                result.Errors.Add($"Couldnt get user");
             }
 
             return result;
@@ -80,9 +81,9 @@ namespace MedicineStorage.Services.Implementations
                     .ThenInclude(ur => ur.Role)
                     .ToListAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"An error occurred: {ex.Message}");
+                result.Errors.Add($"Couldnt get users");
             }
 
             return result;
@@ -106,9 +107,9 @@ namespace MedicineStorage.Services.Implementations
                     .Where(u => u.UserRoles.Any(ur => ur.Role.Name == roleName))
                     .ToListAsync();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"An error occurred: {ex.Message}");
+                result.Errors.Add($"Couldnt get users");
             }
 
             return result;
@@ -141,10 +142,10 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = user;
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 await transaction.RollbackAsync();
-                result.Errors.Add(ex.Message);
+                result.Errors.Add($"Couldnt create user");
                 return result;
             }
         }
@@ -156,7 +157,7 @@ namespace MedicineStorage.Services.Implementations
 
             if (existingUser == null)
             {
-                result.Errors.Add("User not found");
+                result.Errors.Add("UserModels not found");
                 return result;
             }
 
@@ -180,7 +181,7 @@ namespace MedicineStorage.Services.Implementations
 
             if (user == null)
             {
-                result.Errors.Add("User not found");
+                result.Errors.Add("UserModels not found");
                 return result;
             }
 
@@ -202,7 +203,7 @@ namespace MedicineStorage.Services.Implementations
 
             if (user == null)
             {
-                result.Errors.Add("User not found");
+                result.Errors.Add("UserModels not found");
                 return result;
             }
 
@@ -230,7 +231,7 @@ namespace MedicineStorage.Services.Implementations
 
             if (user == null)
             {
-                result.Errors.Add("User not found");
+                result.Errors.Add("UserModels not found");
                 return result;
             }
 
@@ -253,16 +254,16 @@ namespace MedicineStorage.Services.Implementations
                 var user = await _userManager.FindByIdAsync(userId.ToString());
                 if (user == null)
                 {
-                    result.Errors.Add("User not found.");
+                    result.Errors.Add("UserModels not found.");
                     return result;
                 }
 
                 var roles = await _userManager.GetRolesAsync(user);
                 result.Data = roles.ToList();
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"An error occurred: {ex.Message}");
+                result.Errors.Add($"Couldnt get user roles");
             }
 
             return result;
@@ -276,7 +277,7 @@ namespace MedicineStorage.Services.Implementations
 
             if (user == null)
             {
-                result.Errors.Add("User not found");
+                result.Errors.Add("UserModels not found");
                 return result;
             }
 

@@ -1,6 +1,6 @@
-﻿using MedicineStorage.Models;
-using MedicineStorage.Models.MedicineModels;
+﻿using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.TenderModels;
+using MedicineStorage.Models.UserModels;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 

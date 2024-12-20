@@ -81,4 +81,18 @@ namespace MedicineStorage.DTOs
         public string LastName { get; set; } = string.Empty;
         public List<string> Roles { get; set; } = new List<string>();
     }
+
+    public class ChangePasswordDTO
+    {
+        [Required]
+        public int UserId { get; set; }
+
+        [Required]
+        [MinLength(6)]
+        public string CurrentPassword { get; set; }
+
+        [Required]
+        [MinLength(6)]
+        public string NewPassword { get; set; }
+    }
 }

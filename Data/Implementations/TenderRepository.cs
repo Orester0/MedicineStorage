@@ -84,14 +84,12 @@ namespace MedicineStorage.Data.Implementations
         public async Task<Tender> CreateTenderAsync(Tender tender)
         {
             await _context.Tenders.AddAsync(tender);
-            await _context.SaveChangesAsync();
             return tender;
         }
 
-        public async Task UpdateTenderAsync(Tender tender)
+        public void UpdateTender(Tender tender)
         {
             _context.Tenders.Update(tender);
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteTenderAsync(int id)
@@ -100,7 +98,6 @@ namespace MedicineStorage.Data.Implementations
             if (tender != null)
             {
                 _context.Tenders.Remove(tender);
-                await _context.SaveChangesAsync();
             }
         }
 

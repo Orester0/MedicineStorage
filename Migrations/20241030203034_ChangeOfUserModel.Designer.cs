@@ -499,7 +499,7 @@ namespace MedicineStorage.Migrations
                     b.ToTable("TenderRequests");
                 });
 
-            modelBuilder.Entity("MedicineStorage.Models.User", b =>
+            modelBuilder.Entity("MedicineStorage.Models.UserModels", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -547,13 +547,13 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("MedicineStorage.Models.AuditModels.Audit", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.User", "Auditor")
+                    b.HasOne("MedicineStorage.Models.UserModels", "Auditor")
                         .WithMany("ConductedAudits")
                         .HasForeignKey("AuditorId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.User", "Doctor")
+                    b.HasOne("MedicineStorage.Models.UserModels", "Doctor")
                         .WithMany()
                         .HasForeignKey("DoctorId")
                         .OnDelete(DeleteBehavior.Restrict);
@@ -622,12 +622,12 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineRequest", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.User", "Approver")
+                    b.HasOne("MedicineStorage.Models.UserModels", "Approver")
                         .WithMany()
                         .HasForeignKey("ApproverId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("MedicineStorage.Models.User", "Requester")
+                    b.HasOne("MedicineStorage.Models.UserModels", "Requester")
                         .WithMany("Requests")
                         .HasForeignKey("RequesterId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -665,7 +665,7 @@ namespace MedicineStorage.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.User", "User")
+                    b.HasOne("MedicineStorage.Models.UserModels", "UserModels")
                         .WithMany("MedicineUsages")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -673,12 +673,12 @@ namespace MedicineStorage.Migrations
 
                     b.Navigation("Medicine");
 
-                    b.Navigation("User");
+                    b.Navigation("UserModels");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.MedicineModels.RequestApproval", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.User", "Approver")
+                    b.HasOne("MedicineStorage.Models.UserModels", "Approver")
                         .WithMany()
                         .HasForeignKey("ApproverId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -703,7 +703,7 @@ namespace MedicineStorage.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.User", "User")
+                    b.HasOne("MedicineStorage.Models.UserModels", "UserModels")
                         .WithMany()
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -711,7 +711,7 @@ namespace MedicineStorage.Migrations
 
                     b.Navigation("Medicine");
 
-                    b.Navigation("User");
+                    b.Navigation("UserModels");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.Tender", b =>
@@ -781,7 +781,7 @@ namespace MedicineStorage.Migrations
                     b.Navigation("Requests");
                 });
 
-            modelBuilder.Entity("MedicineStorage.Models.User", b =>
+            modelBuilder.Entity("MedicineStorage.Models.UserModels", b =>
                 {
                     b.Navigation("ConductedAudits");
 

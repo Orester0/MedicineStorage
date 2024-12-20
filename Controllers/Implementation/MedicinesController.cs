@@ -33,9 +33,7 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPost]
         public async Task<IActionResult> CreateMedicine([FromBody] CreateMedicineDTO createMedicineDTO)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
+           
             var result = await _medicineService.CreateMedicineAsync(createMedicineDTO);
             return result.Success
                 ? CreatedAtAction(nameof(GetMedicineById), new { id = result.Data.Id }, result.Data)
@@ -45,9 +43,7 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPut("{medicineId:int}")]
         public async Task<IActionResult> UpdateMedicine(int medicineId, [FromBody] CreateMedicineDTO medicineDTO)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
+            
 
             var result = await _medicineService.UpdateMedicineAsync(medicineId, medicineDTO);
             return result.Success

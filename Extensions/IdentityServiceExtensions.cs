@@ -1,5 +1,5 @@
 ﻿using MedicineStorage.Data;
-using MedicineStorage.Models;
+using MedicineStorage.Models.UserModels;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;

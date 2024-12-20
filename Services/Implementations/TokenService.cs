@@ -1,4 +1,4 @@
-﻿using MedicineStorage.Models;
+﻿using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;

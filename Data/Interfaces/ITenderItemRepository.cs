@@ -13,8 +13,8 @@ namespace MedicineStorage.Data.Interfaces
 
         public Task<TenderItem> CreateTenderItemAsync(TenderItem tenderItem);
 
-        public Task UpdateTenderItemAsync(TenderItem tenderItem);
+        public void UpdateTenderItem(TenderItem tenderItem);
 
-        public Task DeleteTenderItemAsync(TenderItem tenderItem);
+        public void DeleteTenderItem(TenderItem tenderItem);
     }
 }

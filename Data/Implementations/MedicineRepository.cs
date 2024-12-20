@@ -76,22 +76,20 @@ namespace MedicineStorage.Data.Implementations
         }
 
 
-        public async Task<Medicine?> CreateMedicineAsync(Medicine medicine)
+        public async Task<Medicine> CreateMedicineAsync(Medicine medicine)
         {
             await _context.Medicines.AddAsync(medicine);
             return medicine;
         }
 
-        public async Task UpdateMedicineAsync(Medicine medicine)
+        public void UpdateMedicine(Medicine medicine)
         {
             _context.Medicines.Update(medicine);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteMedicineAsync(Medicine medicine)
+        public void DeleteMedicine(Medicine medicine)
         {
             _context.Medicines.Remove(medicine);
-            await _context.SaveChangesAsync();
         }
 
     }

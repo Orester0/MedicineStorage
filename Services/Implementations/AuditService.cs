@@ -19,9 +19,9 @@ namespace MedicineStorage.Services.Implementations
                 var (audits, totalCount) = await _unitOfWork.AuditRepository.GetAllAuditsAsync(auditParams);
                 result.Data = new PagedList<Audit>(audits.ToList(), totalCount, auditParams.PageNumber, auditParams.PageSize);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error retrieving audits: {ex.Message}");
+                result.Errors.Add($"Error retrieving audits");
             }
             return result;
         }
@@ -43,9 +43,9 @@ namespace MedicineStorage.Services.Implementations
                     result.Data = audit;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error retrieving audits: {ex.Message}");
+                result.Errors.Add($"Error retrieving audits");
             }
 
             return result;
@@ -67,9 +67,9 @@ namespace MedicineStorage.Services.Implementations
                     result.Data = audits;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error retrieving audits: {ex.Message}");
+                result.Errors.Add($"Error retrieving audits");
             }
 
             return result;
@@ -92,9 +92,9 @@ namespace MedicineStorage.Services.Implementations
                     result.Data = audits;
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error retrieving audits: {ex.Message}");
+                result.Errors.Add($"Error retrieving audits");
             }
 
             return result;
@@ -153,7 +153,7 @@ namespace MedicineStorage.Services.Implementations
 
                 foreach (var item in auditItems)
                 {
-                    await _unitOfWork.AuditRepository.AddAuditItemAsync(item);
+                    await _unitOfWork.AuditRepository.CreateAuditItemAsync(item);
                 }
 
                 await _unitOfWork.Complete();
@@ -161,9 +161,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = audit;
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error creating audits: {ex.Message}");
+                result.Errors.Add($"Error creating audits");
                 return result;
             }
         }
@@ -207,15 +207,15 @@ namespace MedicineStorage.Services.Implementations
                 audit.Status = AuditStatus.InProgress;
                 audit.Notes = request.Notes;
 
-                await _unitOfWork.AuditRepository.UpdateAuditAsync(audit);
+                _unitOfWork.AuditRepository.UpdateAudit(audit);
                 await _unitOfWork.Complete();
 
                 result.Data = audit;
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error starting audits: {ex.Message}");
+                result.Errors.Add($"Error starting audit");
                 return result;
             }
         }
@@ -245,7 +245,7 @@ namespace MedicineStorage.Services.Implementations
                     if (request.ActualQuantities.TryGetValue(auditItem.MedicineId, out decimal actualQuantity))
                     {
                         auditItem.ActualQuantity = actualQuantity;
-                        await _unitOfWork.AuditRepository.UpdateAuditItemAsync(auditItem);
+                        _unitOfWork.AuditRepository.UpdateAuditItem(auditItem);
                     }
                 }
 
@@ -264,15 +264,15 @@ namespace MedicineStorage.Services.Implementations
 
                 audit.Notes = request.Notes;
 
-                await _unitOfWork.AuditRepository.UpdateAuditAsync(audit);
+                _unitOfWork.AuditRepository.UpdateAudit(audit);
                 await _unitOfWork.Complete();
 
                 result.Data = audit;
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error updating audits items: {ex.Message}");
+                result.Errors.Add($"Error updating audits items");
                 return result;
             }
         }
@@ -321,15 +321,15 @@ namespace MedicineStorage.Services.Implementations
 
                 audit.Notes = request.Notes;
 
-                await _unitOfWork.AuditRepository.UpdateAuditAsync(audit);
+                _unitOfWork.AuditRepository.UpdateAudit(audit);
                 await _unitOfWork.Complete();
 
                 result.Data = audit;
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error closing audits: {ex.Message}");
+                result.Errors.Add($"Error closing audit");
                 return result;
             }
         }
@@ -344,9 +344,9 @@ namespace MedicineStorage.Services.Implementations
                 await _unitOfWork.Complete();
                 result.Data = audit;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error creating audits: {ex.Message}");
+                result.Errors.Add($"Error creating audit");
             }
 
             return result;
@@ -365,13 +365,13 @@ namespace MedicineStorage.Services.Implementations
                     return result;
                 }
 
-                await _unitOfWork.AuditRepository.UpdateAuditAsync(audit);
+                _unitOfWork.AuditRepository.UpdateAudit(audit);
                 await _unitOfWork.Complete();
                 result.Data = audit;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error updating audits: {ex.Message}");
+                result.Errors.Add($"Error updating audit");
             }
 
             return result;
@@ -395,9 +395,9 @@ namespace MedicineStorage.Services.Implementations
                 await _unitOfWork.Complete(); // Commit changes
                 result.Data = true;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error deleting audits: {ex.Message}");
+                result.Errors.Add($"Error deleting audit");
                 result.Data = false;
             }
 

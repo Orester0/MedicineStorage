@@ -49,6 +49,7 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPost("users")]
         public async Task<IActionResult> CreateUser([FromBody] UserRegistrationDTO registerDto)
         {
+
             var result = await _userService.CreateUserAsync(registerDto);
 
             if (!result.Success)
@@ -61,6 +62,7 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPut("users/{userId:int}")]
         public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateDTO updateDto)
         {
+
             var userResult = await _userService.GetUserByIdAsync(userId);
             if (!userResult.Success)
                 return NotFound(userResult.Errors);
@@ -77,6 +79,7 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpDelete("users/{userId:int}")]
         public async Task<IActionResult> DeleteUser(int userId)
         {
+
             var result = await _userService.DeleteUserAsync(userId);
 
             if (!result.Success)

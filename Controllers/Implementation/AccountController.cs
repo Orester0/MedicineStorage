@@ -17,11 +17,16 @@ namespace MedicineStorage.Controllers.Implementation
 
 
         [HttpPost("register")]
-        public async Task<ActionResult<UserReturnDTO>> Register([FromBody] UserRegistrationDTO registerDto)
+        public async Task<ActionResult<UserReturnDTO>> Register([FromBody] UserRegistrationDTO request)
         {
-            _logger.LogInformation($"Incoming registration request: \n{registerDto.ToJson()}");
+            _logger.LogInformation($"Incoming registration request: \n{request.ToJson()}");
 
-            var result = await _userService.ValidateAndCreateUserAsync(registerDto);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _userService.ValidateAndCreateUserAsync(request);
 
             if (!result.Success)
             {
@@ -36,18 +41,24 @@ namespace MedicineStorage.Controllers.Implementation
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserReturnDTO>> Login(UserLoginDTO loginDto)
+        public async Task<ActionResult<UserReturnDTO>> Login(UserLoginDTO request)
         {
-            _logger.LogInformation($"Incoming login request: \n{loginDto.ToJson()}");
+            _logger.LogInformation($"Incoming login request: \n{request.ToJson()}");
 
-            var userResult = await _userService.GetByUserNameAsync(loginDto.UserName);
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var userResult = await _userService.GetByUserNameAsync(request.UserName);
 
             if (!userResult.Success || userResult.Data == null)
             {
                 return Unauthorized(new { Errors = new[] { "Invalid username" } });
             }
 
-            var verifyResult = await _userService.VerifyPasswordAsync(userResult.Data, loginDto.Password);
+            var verifyResult = await _userService.VerifyPasswordAsync(userResult.Data, request.Password);
 
             if (!verifyResult)
             {
@@ -59,6 +70,27 @@ namespace MedicineStorage.Controllers.Implementation
                 UserName = userResult.Data.UserName,
                 Token = await _tokenService.CreateToken(userResult.Data)
             });
+        }
+
+
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO request)
+        {
+
+            _logger.LogInformation($"Incoming change-password request: \n{request.ToJson()}");
+
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var result = await _userService.ChangePasswordAsync(request.UserId, request.CurrentPassword, request.NewPassword);
+            if (!result.Data)
+            {
+                return BadRequest(new { Errors = result.Errors });
+            }
+
+            return Ok(new { Message = "Password changed successfully." });
         }
     }
 }

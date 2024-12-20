@@ -1,8 +1,8 @@
-﻿using MedicineStorage.Models;
-using MedicineStorage.Models.AuditModels;
+﻿using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.Tender;
 using MedicineStorage.Models.TenderModels;
+using MedicineStorage.Models.UserModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
@@ -23,7 +23,7 @@ namespace MedicineStorage.Data
         public DbSet<MedicineUsage> MedicineUsages { get; set; }
         public DbSet<Audit> Audits { get; set; }
         public DbSet<AuditItem> AuditItems { get; set; }
-        public DbSet<MedicineSupply> InventoryTransactions { get; set; }
+        public DbSet<MedicineSupply> MedicineSupplies { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

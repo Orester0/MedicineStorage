@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using MedicineStorage.DTOs;
-using MedicineStorage.Models;
+using MedicineStorage.Models.UserModels;
 
 namespace MedicineStorage.Helpers.Mappers
 {

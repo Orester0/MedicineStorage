@@ -55,14 +55,12 @@ namespace MedicineStorage.Data.Implementations
         public async Task<TenderProposal> CreateTenderProposalAsync(TenderProposal tenderProposal)
         {
             await _context.TenderProposals.AddAsync(tenderProposal);
-            await _context.SaveChangesAsync();
             return tenderProposal;
         }
 
-        public async Task UpdateTenderProposalAsync(TenderProposal tenderProposal)
+        public void UpdateTenderProposal(TenderProposal tenderProposal)
         {
             _context.TenderProposals.Update(tenderProposal);
-            await _context.SaveChangesAsync();
         }
 
         public async Task DeleteTenderProposalAsync(int id)
@@ -71,7 +69,6 @@ namespace MedicineStorage.Data.Implementations
             if (tenderProposal != null)
             {
                 _context.TenderProposals.Remove(tenderProposal);
-                await _context.SaveChangesAsync();
             }
         }
 

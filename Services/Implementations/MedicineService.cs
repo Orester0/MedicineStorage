@@ -99,7 +99,7 @@ namespace MedicineStorage.Services.Implementations
 
                 _mapper.Map(medicineDTO, existingMedicine);
 
-                _unitOfWork.MedicineRepository.UpdateMedicineAsync(existingMedicine);
+                _unitOfWork.MedicineRepository.UpdateMedicine(existingMedicine);
 
 
                 await _unitOfWork.Complete();
@@ -126,7 +126,7 @@ namespace MedicineStorage.Services.Implementations
                     return result;
                 }
 
-                _unitOfWork.MedicineRepository.DeleteMedicineAsync(medicine);
+                _unitOfWork.MedicineRepository.DeleteMedicine(medicine);
                 await _unitOfWork.Complete();
 
                 result.Data = true;

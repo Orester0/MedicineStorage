@@ -20,15 +20,15 @@ namespace MedicineStorage.Data.Interfaces
 
 
 
-        public Task CreateAuditAsync(Audit audit);
+        public Task<Audit> CreateAuditAsync(Audit audit);
 
-        public Task UpdateAuditAsync(Audit audit);
+        public void UpdateAudit(Audit audit);
 
         public Task DeleteAuditAsync(int auditId);
 
-        public Task AddAuditItemAsync(AuditItem auditItem);
+        public Task<AuditItem> CreateAuditItemAsync(AuditItem auditItem);
 
-        public Task UpdateAuditItemAsync(AuditItem auditItem);
+        public void UpdateAuditItem(AuditItem auditItem);
 
         public Task DeleteAuditItemAsync(int auditItemId);
     }

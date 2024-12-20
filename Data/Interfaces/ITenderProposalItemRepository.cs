@@ -13,9 +13,9 @@ namespace MedicineStorage.Data.Interfaces
 
         public Task<TenderProposalItem> CreateTenderProposalItemAsync(TenderProposalItem tenderProposalItem);
 
-        public Task UpdateTenderProposalItemAsync(TenderProposalItem tenderProposalItem);
+        public void UpdateTenderProposalItem(TenderProposalItem tenderProposalItem);
 
-        public Task DeleteTenderProposalItemAsync(TenderProposalItem tenderProposalItem);
+        public void DeleteTenderProposalItem(TenderProposalItem tenderProposalItem);
 
 
     }

@@ -21,29 +21,25 @@ namespace MedicineStorage.Data.Implementations
                 .FirstOrDefaultAsync(it => it.Id == id);
         }
 
-        public async Task CreateMedicineSupplyAsync(MedicineSupply transaction)
+        public async Task<MedicineSupply> CreateMedicineSupplyAsync(MedicineSupply medicineSupply)
         {
-            if (transaction == null) throw new ArgumentNullException(nameof(transaction));
-
-            await _context.Set<MedicineSupply>().AddAsync(transaction);
-            await _context.SaveChangesAsync();
+            await _context.MedicineSupplies.AddAsync(medicineSupply);
+            return medicineSupply;
         }
 
-        public async Task UpdateMedicineSupplyAsync(MedicineSupply transaction)
+        public void UpdateMedicineSupply(MedicineSupply medicineSupply)
         {
-            if (transaction == null) throw new ArgumentNullException(nameof(transaction));
-
-            _context.Set<MedicineSupply>().Update(transaction);
-            await _context.SaveChangesAsync();
+            _context.MedicineSupplies.Update(medicineSupply);
         }
 
-        public async Task DeleteMedicineSupplyAsync(int id)
+        public async Task DeleteMedicineSupplyAsync(int supplyId)
         {
-            var transaction = await GetByIdAsync(id);
-            if (transaction == null) throw new KeyNotFoundException($"Transaction with ID {id} not found.");
+            var medicineSupply = await _context.MedicineSupplies.FindAsync(supplyId);
+            if (medicineSupply != null)
+            {
+                _context.MedicineSupplies.Remove(medicineSupply);
 
-            _context.Set<MedicineSupply>().Remove(transaction);
-            await _context.SaveChangesAsync();
+            }
         }
     }
 }

@@ -10,10 +10,10 @@ namespace MedicineStorage.Data.Interfaces
 
         public Task<(IEnumerable<Medicine>, int)> GetAllAsync(MedicineParams parameters);
 
-        public Task<Medicine?> CreateMedicineAsync(Medicine medicine);
+        public Task<Medicine> CreateMedicineAsync(Medicine medicine);
 
-        public Task UpdateMedicineAsync(Medicine medicine);
+        public void UpdateMedicine(Medicine medicine);
 
-        public Task DeleteMedicineAsync(Medicine medicine);
+        public void DeleteMedicine(Medicine medicine);
     }
 }

@@ -59,16 +59,16 @@ namespace MedicineStorage.Data.Implementations
             return await _context.Audits.Where(ai => ai.PlannedByUserId == userId).ToListAsync();
         }
 
-        public async Task CreateAuditAsync(Audit audit)
+        public async Task<Audit> CreateAuditAsync(Audit audit)
         {
-            _context.Audits.Add(audit);
-            await _context.SaveChangesAsync();
+            await _context.Audits.AddAsync(audit);
+            return audit;
         }
 
-        public async Task UpdateAuditAsync(Audit audit)
+        public void UpdateAudit(Audit audit)
         {
             _context.Audits.Update(audit);
-            await _context.SaveChangesAsync();
+             
         }
 
         public async Task DeleteAuditAsync(int auditId)
@@ -77,20 +77,19 @@ namespace MedicineStorage.Data.Implementations
             if (audit != null)
             {
                 _context.Audits.Remove(audit);
-                await _context.SaveChangesAsync();
             }
         }
 
-        public async Task AddAuditItemAsync(AuditItem auditItem)
+        public async Task<AuditItem> CreateAuditItemAsync(AuditItem auditItem)
         {
-            _context.AuditItems.Add(auditItem);
-            await _context.SaveChangesAsync();
+            await _context.AuditItems.AddAsync(auditItem);
+            return auditItem;
         }
 
-        public async Task UpdateAuditItemAsync(AuditItem auditItem)
+        public void UpdateAuditItem(AuditItem auditItem)
         {
             _context.AuditItems.Update(auditItem);
-            await _context.SaveChangesAsync();
+             
         }
 
         public async Task DeleteAuditItemAsync(int auditItemId)
@@ -99,7 +98,7 @@ namespace MedicineStorage.Data.Implementations
             if (auditItem != null)
             {
                 _context.AuditItems.Remove(auditItem);
-                await _context.SaveChangesAsync();
+                 
             }
         }
     }

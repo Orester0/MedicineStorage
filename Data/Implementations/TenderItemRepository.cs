@@ -29,21 +29,18 @@ namespace MedicineStorage.Data.Implementations
 
         public async Task<TenderItem> CreateTenderItemAsync(TenderItem tenderItem)
         {
-            _context.TenderItems.Add(tenderItem);
-            await _context.SaveChangesAsync();
+            await _context.TenderItems.AddAsync(tenderItem);
             return tenderItem;
         }
 
-        public async Task UpdateTenderItemAsync(TenderItem tenderItem)
+        public void UpdateTenderItem(TenderItem tenderItem)
         {
             _context.TenderItems.Update(tenderItem);
-            await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteTenderItemAsync(TenderItem tenderItem)
+        public void DeleteTenderItem(TenderItem tenderItem)
         {
             _context.TenderItems.Remove(tenderItem);
-            await _context.SaveChangesAsync();
         }
     }
 }

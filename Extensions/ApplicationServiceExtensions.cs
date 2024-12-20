@@ -1,8 +1,10 @@
 ﻿using MedicineStorage.Data;
 using MedicineStorage.Data.Implementations;
 using MedicineStorage.Data.Interfaces;
+using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.Implementations;
 using MedicineStorage.Services.Interfaces;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Extensions
@@ -58,9 +60,10 @@ namespace MedicineStorage.Extensions
             services.AddSignalR();
 
 
+
             return services;
         }
-
+       
 
     }
 }

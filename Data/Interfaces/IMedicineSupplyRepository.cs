@@ -10,9 +10,9 @@ namespace MedicineStorage.Data.Interfaces
 
         public Task<MedicineSupply> GetByIdAsync(int id);
 
-        public Task CreateMedicineSupplyAsync(MedicineSupply transaction);
+        public Task<MedicineSupply> CreateMedicineSupplyAsync(MedicineSupply medicineSupply);
 
-        public Task UpdateMedicineSupplyAsync(MedicineSupply transaction);
+        public void UpdateMedicineSupply(MedicineSupply medicineSupply);
 
         public Task DeleteMedicineSupplyAsync(int id);
     }

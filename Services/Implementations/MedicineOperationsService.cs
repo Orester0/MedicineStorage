@@ -232,7 +232,7 @@ namespace MedicineStorage.Services.Implementations
                 var createdUsage = await _unitOfWork.MedicineUsageRepository.CreateUsageAsync(usage);
 
                 medicine.Stock -= createUsageDTO.Quantity;
-                _unitOfWork.MedicineRepository.UpdateMedicineAsync(medicine);
+                _unitOfWork.MedicineRepository.UpdateMedicine(medicine);
 
                 await _unitOfWork.Complete();
                 result.Data = _mapper.Map<ReturnMedicineUsageDTO>(createdUsage);
@@ -329,9 +329,9 @@ namespace MedicineStorage.Services.Implementations
                 request.ApprovalDate = DateTime.UtcNow;
 
                 medicine.Stock -= request.Quantity;
-                _unitOfWork.MedicineRepository.UpdateMedicineAsync(medicine);
+                _unitOfWork.MedicineRepository.UpdateMedicine(medicine);
 
-                await _unitOfWork.MedicineRequestRepository.UpdateRequestAsync(request);
+                _unitOfWork.MedicineRequestRepository.UpdateRequest(request);
                 await _unitOfWork.Complete();
 
                 result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
@@ -382,7 +382,7 @@ namespace MedicineStorage.Services.Implementations
                 request.ApprovedByUserId = userId;
                 request.ApprovalDate = DateTime.UtcNow;
 
-                await _unitOfWork.MedicineRequestRepository.UpdateRequestAsync(request);
+                _unitOfWork.MedicineRequestRepository.UpdateRequest(request);
                 await _unitOfWork.Complete();
 
                 result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);

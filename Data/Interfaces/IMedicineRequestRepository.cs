@@ -16,7 +16,7 @@ namespace MedicineStorage.Data.Interfaces
 
 
         public Task<MedicineRequest> CreateRequestAsync(MedicineRequest request);
-        public Task<MedicineRequest> UpdateRequestAsync(MedicineRequest request);
-        public Task<bool> DeleteRequestAsync(int id);
+        public void UpdateRequest(MedicineRequest request);
+        public Task DeleteRequestAsync(int requestId);
     }
 }

@@ -20,9 +20,9 @@ namespace MedicineStorage.Services.Implementations
                 var (tenders, totalCount) = await _unitOfWork.TenderRepository.GetAllTendersAsync(tenderParams);
                 result.Data = new PagedList<Tender>(tenders.ToList(), totalCount, tenderParams.PageNumber, tenderParams.PageSize);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"Error retrieving tenders: {ex.Message}");
+                result.Errors.Add($"Error retrieving tenders");
             }
             return result;
         }
@@ -37,9 +37,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = _mapper.Map<ReturnTenderDTO>(tender);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add(ex.Message);
+                result.Errors.Add($"Error retrieving tender");
                 return result;
             }
         }
@@ -54,9 +54,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = _mapper.Map<IEnumerable<ReturnTenderDTO>>(tenders);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add(ex.Message);
+                result.Errors.Add($"Error retrieving tenders");
                 return result;
             }
         }
@@ -71,9 +71,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = _mapper.Map<IEnumerable<ReturnTenderDTO>>(tenders);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add(ex.Message);
+                result.Errors.Add($"Error retrieving tenders");
                 return result;
             }
         }
@@ -88,9 +88,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = _mapper.Map<IEnumerable<ReturnTenderItemDTO>>(tenderItems);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"An error occurred while retrieving tender items: {ex.Message}");
+                result.Errors.Add($"An error occurred while retrieving tender items");
                 return result;
             }
         }
@@ -106,9 +106,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = _mapper.Map<ReturnTenderProposalDTO>(proposal);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add(ex.Message);
+                result.Errors.Add($"Error retrieving proposal");
                 return result;
             }
         }
@@ -123,9 +123,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = _mapper.Map<IEnumerable<ReturnTenderProposalDTO>>(proposals);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add(ex.Message);
+                result.Errors.Add($"Error retrieving proposals");
                 return result;
             }
         }
@@ -141,9 +141,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = _mapper.Map<IEnumerable<ReturnTenderProposalDTO>>(proposals);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add(ex.Message);
+                result.Errors.Add($"Error retrieving proposal");
                 return result;
             }
         }
@@ -159,9 +159,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = _mapper.Map<IEnumerable<ReturnTenderProposalItemDTO>>(proposalItems);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"An error occurred while retrieving tender proposal items: {ex.Message}");
+                result.Errors.Add($"An error occurred while retrieving tender proposal items");
                 return result;
             }
         }
@@ -200,9 +200,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = _mapper.Map<ReturnTenderDTO>(addedTender);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add(ex.Message);
+                result.Errors.Add($"Couldnt create tender");
                 return result;
             }
         }
@@ -260,9 +260,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = _mapper.Map<ReturnTenderItemDTO>(addedTenderItem);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"An error occurred while adding tender item: {ex.Message}");
+                result.Errors.Add($"An error occurred while adding tender item");
                 return result;
             }
         }
@@ -310,15 +310,15 @@ namespace MedicineStorage.Services.Implementations
                 tender.PublishDate = DateTime.UtcNow;
                 tender.OpenedByUserId = userId;
 
-                await _unitOfWork.TenderRepository.UpdateTenderAsync(tender);
+                _unitOfWork.TenderRepository.UpdateTender(tender);
                 await _unitOfWork.Complete();
 
                 result.Data = _mapper.Map<ReturnTenderDTO>(tender);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add(ex.Message);
+                result.Errors.Add($"Couldnt publish tender");
                 return result;
             }
         }
@@ -422,9 +422,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = _mapper.Map<ReturnTenderProposalDTO>(addedProposal);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"An error occurred while submitting the proposal: {ex.Message}");
+                result.Errors.Add($"An error occurred while submitting the proposal");
                 return result;
             }
         }
@@ -448,7 +448,6 @@ namespace MedicineStorage.Services.Implementations
                     return result;
                 }
 
-                // Check if there are any proposals
                 var proposals = await _unitOfWork.TenderProposalRepository.GetProposalsByTenderAsync(tenderId);
                 if (!proposals.Any())
                 {
@@ -460,15 +459,15 @@ namespace MedicineStorage.Services.Implementations
                 tender.ClosingDate = DateTime.UtcNow;
                 tender.ClosedByUserId = userId;
 
-                await _unitOfWork.TenderRepository.UpdateTenderAsync(tender);
+                _unitOfWork.TenderRepository.UpdateTender(tender);
                 await _unitOfWork.Complete();
 
                 result.Data = _mapper.Map<ReturnTenderDTO>(tender);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add(ex.Message);
+                result.Errors.Add($"Couldnt close tender");
                 return result;
             }
         }
@@ -501,27 +500,27 @@ namespace MedicineStorage.Services.Implementations
 
 
                 proposal.Status = ProposalStatus.Accepted;
-                await _unitOfWork.TenderProposalRepository.UpdateTenderProposalAsync(proposal);
+                _unitOfWork.TenderProposalRepository.UpdateTenderProposal(proposal);
 
                 var otherProposals = await _unitOfWork.TenderProposalRepository.GetProposalsByTenderAsync(tender.Id);
                 foreach (var otherProposal in otherProposals.Where(p => p.Id != proposalId))
                 {
                     otherProposal.Status = ProposalStatus.Rejected;
-                    await _unitOfWork.TenderProposalRepository.UpdateTenderProposalAsync(otherProposal);
+                    _unitOfWork.TenderProposalRepository.UpdateTenderProposal(otherProposal);
                 }
 
                 tender.Status = TenderStatus.Awarded;
                 tender.WinnerSelectedByUserId = userId;
-                await _unitOfWork.TenderRepository.UpdateTenderAsync(tender);
+                _unitOfWork.TenderRepository.UpdateTender(tender);
 
                 await _unitOfWork.Complete();
 
                 result.Data = _mapper.Map<ReturnTenderProposalDTO>(proposal);
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add(ex.Message);
+                result.Errors.Add($"Couldnt award tender");
                 return result;
             }
         }
@@ -599,16 +598,16 @@ namespace MedicineStorage.Services.Implementations
                     Quantity = proposalItem.Quantity,
                     TransactionDate = DateTime.UtcNow
                 };
-                await _unitOfWork.InventoryTransactionRepository.CreateMedicineSupplyAsync(createdMedicineSupply);
+                await _unitOfWork.MedicineSupplyRepository.CreateMedicineSupplyAsync(createdMedicineSupply);
 
                 tenderItem.Status = TenderItemStatus.Executed;
-                await _unitOfWork.TenderItemRepository.UpdateTenderItemAsync(tenderItem);
+                _unitOfWork.TenderItemRepository.UpdateTenderItem(tenderItem);
 
                 var updatedMedicine = tenderItem.Medicine;
                 if (updatedMedicine != null)
                 {
                     updatedMedicine.Stock += createdMedicineSupply.Quantity;
-                    _unitOfWork.MedicineRepository.UpdateMedicineAsync(updatedMedicine);
+                    _unitOfWork.MedicineRepository.UpdateMedicine(updatedMedicine);
                 }
                 else
                 {
@@ -626,15 +625,15 @@ namespace MedicineStorage.Services.Implementations
                     tender.Status = TenderStatus.Executing;
                 }
 
-                await _unitOfWork.TenderRepository.UpdateTenderAsync(tender);
+                _unitOfWork.TenderRepository.UpdateTender(tender);
                 await _unitOfWork.Complete();
 
                 result.Data = true;
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"An error occurred while executing the tender item: {ex.Message}");
+                result.Errors.Add($"An error occurred while executing the tender item");
                 return result;
             }
         }
@@ -690,16 +689,16 @@ namespace MedicineStorage.Services.Implementations
                             TransactionDate = DateTime.UtcNow
                         };
 
-                        await _unitOfWork.InventoryTransactionRepository.CreateMedicineSupplyAsync(transaction);
+                        await _unitOfWork.MedicineSupplyRepository.CreateMedicineSupplyAsync(transaction);
                         tenderItem.Status = TenderItemStatus.Executed;
-                        await _unitOfWork.TenderItemRepository.UpdateTenderItemAsync(tenderItem);
+                        _unitOfWork.TenderItemRepository.UpdateTenderItem(tenderItem);
 
 
                         var updatedMedicine = tenderItem.Medicine;
                         if (updatedMedicine != null)
                         {
                             updatedMedicine.Stock += transaction.Quantity;
-                            _unitOfWork.MedicineRepository.UpdateMedicineAsync(updatedMedicine);
+                            _unitOfWork.MedicineRepository.UpdateMedicine(updatedMedicine);
                         }
                         else
                         {
@@ -715,7 +714,7 @@ namespace MedicineStorage.Services.Implementations
                 }
 
                 tender.Status = TenderStatus.Executed;
-                await _unitOfWork.TenderRepository.UpdateTenderAsync(tender);
+                _unitOfWork.TenderRepository.UpdateTender(tender);
 
 
                 await _unitOfWork.Complete();
@@ -723,9 +722,9 @@ namespace MedicineStorage.Services.Implementations
                 result.Data = true;
                 return result;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                result.Errors.Add($"An error occurred while executing the tender: {ex.Message}");
+                result.Errors.Add($"An error occurred while executing the tender");
                 return result;
             }
         }

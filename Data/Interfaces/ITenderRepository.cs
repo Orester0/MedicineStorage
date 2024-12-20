@@ -9,7 +9,7 @@ namespace MedicineStorage.Data.Interfaces
         Task<Tender> GetByIdAsync(int id);
         public Task<(IEnumerable<Tender>, int)> GetAllTendersAsync(TenderParams tenderParams);
         Task<Tender> CreateTenderAsync(Tender tender);
-        Task UpdateTenderAsync(Tender tender);
+        void UpdateTender(Tender tender);
         Task DeleteTenderAsync(int id);
         Task<IEnumerable<Tender>> GetTendersCreatedByUserIdAsync(int userId);
         Task<IEnumerable<Tender>> GetTendersAwardedByUserIdAsync(int userId);

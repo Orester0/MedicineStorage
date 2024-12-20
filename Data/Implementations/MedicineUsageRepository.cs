@@ -77,30 +77,22 @@ namespace MedicineStorage.Data.Implementations
 
         public async Task<MedicineUsage> CreateUsageAsync(MedicineUsage usage)
         {
-            _context.MedicineUsages.Add(usage);
-            await _context.SaveChangesAsync();
+            await _context.MedicineUsages.AddAsync(usage);
             return usage;
         }
 
-        public async Task<MedicineUsage> UpdateUsageAsync(MedicineUsage usage)
+        public void UpdateUsage(MedicineUsage usage)
         {
             _context.MedicineUsages.Update(usage);
-            await _context.SaveChangesAsync();
-
-            // Reload the entity to get the updated version with includes
-            return await GetByIdAsync(usage.Id) ?? usage;
         }
 
-        public async Task<bool> DeleteUsageAsync(int id)
+        public async Task DeleteUsageAsync(int usageId)
         {
-            var usage = await _context.MedicineUsages.FindAsync(id);
+            var usage = await _context.MedicineUsages.FindAsync(usageId);
             if (usage != null)
             {
                 _context.MedicineUsages.Remove(usage);
-                await _context.SaveChangesAsync();
-                return true;
             }
-            return false;
         }
 
 
