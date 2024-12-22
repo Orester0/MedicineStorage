@@ -7,6 +7,7 @@ using MedicineStorage.Models;
 using MedicineStorage.Models.Tender;
 using MedicineStorage.Models.TenderModels;
 using MedicineStorage.Services.Interfaces;
+using System.ComponentModel.DataAnnotations;
 
 namespace MedicineStorage.Services.Implementations
 {
@@ -231,6 +232,11 @@ namespace MedicineStorage.Services.Implementations
                 {
                     result.Errors.Add("Medicine not found.");
                     return result;
+                }
+
+                if (result.Errors.Count > 0)
+                {
+                    throw new ValidationException();
                 }
 
                 var tenderItems = await _unitOfWork.TenderItemRepository.GetItemsByTenderIdAsync(tenderItemDto.TenderId);

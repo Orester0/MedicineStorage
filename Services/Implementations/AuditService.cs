@@ -116,7 +116,7 @@ namespace MedicineStorage.Services.Implementations
                 var medicinesNeedingSpecialAudit = await CheckMedicinesRequireSpecialAuditAsync(request.MedicineIds, userRolesResult.Data ?? new List<string>());
                 if (medicinesNeedingSpecialAudit.Any())
                 {
-                    result.Errors.Add("Some medicines require Supreme Manager for audits planning");
+                    result.Errors.Add("Some medicines require Admin for audits planning");
                     return result;
                 }
 
@@ -167,7 +167,7 @@ namespace MedicineStorage.Services.Implementations
                 return result;
             }
         }
-        public async Task<ServiceResult<Audit>> StartAuditAsync(int userId, int auditId, StartAuditRequest request)
+        public async Task<ServiceResult<Audit>> StartAuditAsync(int userId, int auditId, AuditNotes request)
         {
             var result = new ServiceResult<Audit>();
             try
@@ -297,7 +297,7 @@ namespace MedicineStorage.Services.Implementations
             return specialAuditMedicines;
         }
 
-        public async Task<ServiceResult<Audit>> CloseAuditAsync(int userId, int auditId, CloseAuditRequest request)
+        public async Task<ServiceResult<Audit>> CloseAuditAsync(int userId, int auditId, AuditNotes request)
         {
             var result = new ServiceResult<Audit>();
             try

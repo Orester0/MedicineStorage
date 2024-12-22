@@ -21,7 +21,7 @@ namespace MedicineStorage.Controllers.Implementation
             if (!result.Success)
                 return BadRequest(new { result.Errors });
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("{requestId:int}")]
@@ -29,9 +29,9 @@ namespace MedicineStorage.Controllers.Implementation
         {
             var result = await _operationsService.GetRequestByIdAsync(requestId);
             if (!result.Success)
-                return NotFound(result.Errors);
+                return BadRequest(result.Errors);
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("requested-by/{userId:int}")]
@@ -41,7 +41,7 @@ namespace MedicineStorage.Controllers.Implementation
             if (!result.Success)
                 return BadRequest(new { result.Errors });
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("approved-by/{userId:int}")]
@@ -51,7 +51,7 @@ namespace MedicineStorage.Controllers.Implementation
             if (!result.Success)
                 return BadRequest(new { result.Errors });
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("requests-for/{medicineId:int}")]
@@ -61,7 +61,7 @@ namespace MedicineStorage.Controllers.Implementation
             if (!result.Success)
                 return BadRequest(new { result.Errors });
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("created-from/{usageId:int}")]
@@ -69,9 +69,9 @@ namespace MedicineStorage.Controllers.Implementation
         {
             var result = await _operationsService.GetRequestByUsageIdAsync(usageId);
             if (!result.Success)
-                return NotFound(result.Errors);
+                return BadRequest(result.Errors);
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
 
@@ -88,15 +88,13 @@ namespace MedicineStorage.Controllers.Implementation
                 if (!result.Success)
                     return BadRequest(new { result.Errors });
 
-                return CreatedAtAction(
-                    nameof(GetRequestById),
-                    new { id = result.Data.Id },
+                return Ok(
                     result.Data
                 );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -111,14 +109,14 @@ namespace MedicineStorage.Controllers.Implementation
                 var result = await _operationsService.ApproveRequestAsync(requestId, userId, isAdmin);
                 if (!result.Success)
                     return result.Errors.Contains("Not found")
-                        ? NotFound(result.Errors)
+                        ? BadRequest(result.Errors)
                         : BadRequest(result.Errors);
 
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -133,14 +131,14 @@ namespace MedicineStorage.Controllers.Implementation
                 var result = await _operationsService.RejectRequestAsync(requestId, userId, isAdmin);
                 if (!result.Success)
                     return result.Errors.Contains("Not found")
-                        ? NotFound(result.Errors)
+                        ? BadRequest(result.Errors)
                         : BadRequest(result.Errors);
 
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -150,7 +148,7 @@ namespace MedicineStorage.Controllers.Implementation
             var result = await _operationsService.DeleteRequestAsync(requestId);
             if (!result.Success)
                 return result.Errors.Contains("Not found")
-                    ? NotFound(result.Errors)
+                    ? BadRequest(result.Errors)
                     : BadRequest(result.Errors);
 
             return NoContent();

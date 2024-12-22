@@ -6,10 +6,10 @@ namespace MedicineStorage.Services.Interfaces
 {
     public interface IUserService
     {
-        Task<ServiceResult<User?>> GetUserByIdAsync(int id);
-        Task<ServiceResult<User?>> GetByUserNameAsync(string username);
-        Task<ServiceResult<List<User>>> GetAllAsync();
-        Task<ServiceResult<List<User>>> GetUsersByRoleAsync(string roleName);
+        Task<ServiceResult<User>> GetUserByIdAsync(int id);
+        Task<ServiceResult<User>> GetByUserNameAsync(string username);
+        Task<ServiceResult<List<UserDTO>>> GetAllAsync();
+        Task<ServiceResult<List<UserDTO>>> GetUsersByRoleAsync(string roleName);
         Task<ServiceResult<User>> CreateUserAsync(UserRegistrationDTO registerDto);
         Task<ServiceResult<bool>> UpdateUserAsync(User user);
         Task<ServiceResult<bool>> DeleteUserAsync(int id);
@@ -22,6 +22,6 @@ namespace MedicineStorage.Services.Interfaces
         Task<bool> RoleExistsAsync(string roleName);
         Task<bool> UserExists(string login);
         Task<bool> EmailTaken(string email);
-        Task<ServiceResult<User>> ValidateAndCreateUserAsync(UserRegistrationDTO registerDto);
+        Task<ServiceResult<User>> RegisterUser(UserRegistrationDTO registerDto);
     }
 }

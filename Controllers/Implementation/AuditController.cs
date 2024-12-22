@@ -21,7 +21,8 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 return BadRequest(new { result.Errors });
             }
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
+            
         }
 
         [HttpGet("{auditId:int}")]
@@ -31,10 +32,11 @@ namespace MedicineStorage.Controllers.Implementation
 
             if (!result.Success)
             {
-                return NotFound(result.Errors);
+                return BadRequest(new { result.Errors });
+                
             }
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -56,12 +58,12 @@ namespace MedicineStorage.Controllers.Implementation
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
         [HttpPut("start/{auditId:int}")]
-        public async Task<IActionResult> StartAudit(int auditId, [FromBody] StartAuditRequest request)
+        public async Task<IActionResult> StartAudit(int auditId, [FromBody] AuditNotes request)
         {
             try
             {
@@ -73,11 +75,11 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
 
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -94,16 +96,16 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
 
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
         [HttpPut("close/{auditId:int}")]
-        public async Task<IActionResult> CloseAudit(int auditId, [FromBody] CloseAuditRequest request)
+        public async Task<IActionResult> CloseAudit(int auditId, [FromBody] AuditNotes request)
         {
             try
             {
@@ -115,11 +117,11 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
 
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -138,7 +140,7 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         [HttpDelete("{auditId:int}")]

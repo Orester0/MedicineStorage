@@ -17,7 +17,7 @@ namespace MedicineStorage.Controllers.Implementation
 
 
         [HttpPost("register")]
-        public async Task<ActionResult<UserReturnDTO>> Register([FromBody] UserRegistrationDTO request)
+        public async Task<ActionResult<UserTokenReturnDTO>> Register([FromBody] UserRegistrationDTO request)
         {
             _logger.LogInformation($"Incoming registration request: \n{request.ToJson()}");
 
@@ -26,22 +26,21 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(ModelState);
             }
 
-            var result = await _userService.ValidateAndCreateUserAsync(request);
+            var result = await _userService.RegisterUser(request);
 
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });
             }
 
-            return Ok(new UserReturnDTO
+            return Ok(new UserTokenReturnDTO
             {
-                UserName = result.Data.UserName,
                 Token = await _tokenService.CreateToken(result.Data)
             });
         }
 
         [HttpPost("login")]
-        public async Task<ActionResult<UserReturnDTO>> Login(UserLoginDTO request)
+        public async Task<ActionResult<UserTokenReturnDTO>> Login(UserLoginDTO request)
         {
             _logger.LogInformation($"Incoming login request: \n{request.ToJson()}");
 
@@ -62,12 +61,11 @@ namespace MedicineStorage.Controllers.Implementation
 
             if (!verifyResult)
             {
-                return Unauthorized(new { Errors = new[] { "Invalid password" } });
+                return Unauthorized(new { Errors = new[] { "Invalid username" } });
             }
 
-            return Ok(new UserReturnDTO
+            return Ok(new UserTokenReturnDTO
             {
-                UserName = userResult.Data.UserName,
                 Token = await _tokenService.CreateToken(userResult.Data)
             });
         }
@@ -85,12 +83,12 @@ namespace MedicineStorage.Controllers.Implementation
             }
 
             var result = await _userService.ChangePasswordAsync(request.UserId, request.CurrentPassword, request.NewPassword);
-            if (!result.Data)
+            if (!result.Success)
             {
-                return BadRequest(new { Errors = result.Errors });
+                return BadRequest(new { result.Errors });
             }
 
-            return Ok(new { Message = "Password changed successfully." });
+            return Ok("Password changed successfully.");
         }
     }
 }

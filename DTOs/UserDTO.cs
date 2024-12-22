@@ -63,11 +63,8 @@ namespace MedicineStorage.DTOs
         public string Email { get; set; } = string.Empty;
     }
 
-    public class UserReturnDTO
+    public class UserTokenReturnDTO
     {
-        [Required]
-        public string UserName { get; set; }
-        [Required]
         public string Token { get; set; }
     }
 

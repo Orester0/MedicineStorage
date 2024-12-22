@@ -9,25 +9,11 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Services.Implementations
 {
-    public class UserService : IUserService
+    public class UserService(UserManager<User> _userManager, RoleManager<AppRole> _roleManager, AppDbContext _context, IMapper _mapper) : IUserService
     {
-        private readonly UserManager<User> _userManager;
-        private readonly RoleManager<AppRole> _roleManager;
-        private readonly AppDbContext _context;
-        private readonly IMapper _mapper;
-
-        public UserService(UserManager<User> userManager, RoleManager<AppRole> roleManager,
-            AppDbContext context, IMapper mapper)
+        public async Task<ServiceResult<User>> GetUserByIdAsync(int id)
         {
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _context = context;
-            _mapper = mapper;
-        }
-
-        public async Task<ServiceResult<User?>> GetUserByIdAsync(int id)
-        {
-            var result = new ServiceResult<User?>();
+            var result = new ServiceResult<User>();
             try
             {
                 result.Data = await _userManager.Users
@@ -35,6 +21,7 @@ namespace MedicineStorage.Services.Implementations
                     .ThenInclude(ur => ur.Role)
                     .FirstOrDefaultAsync(u => u.Id == id);
 
+
                 if (result.Data == null)
                 {
                     result.Errors.Add("UserModels not found.");
@@ -48,9 +35,9 @@ namespace MedicineStorage.Services.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<User?>> GetByUserNameAsync(string username)
+        public async Task<ServiceResult<User>> GetByUserNameAsync(string username)
         {
-            var result = new ServiceResult<User?>();
+            var result = new ServiceResult<User>();
             try
             {
                 result.Data = await _userManager.Users
@@ -58,6 +45,7 @@ namespace MedicineStorage.Services.Implementations
                     .ThenInclude(ur => ur.Role)
                     .FirstOrDefaultAsync(u => u.NormalizedUserName == username.ToUpper());
 
+
                 if (result.Data == null)
                 {
                     result.Errors.Add("UserModels not found.");
@@ -71,15 +59,17 @@ namespace MedicineStorage.Services.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<List<User>>> GetAllAsync()
+        public async Task<ServiceResult<List<UserDTO>>> GetAllAsync()
         {
-            var result = new ServiceResult<List<User>>();
+            var result = new ServiceResult<List<UserDTO>>();
             try
             {
-                result.Data = await _userManager.Users
+                var users = await _userManager.Users
                     .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
                     .ToListAsync();
+
+                _mapper.Map(users, result.Data);
             }
             catch (Exception)
             {
@@ -89,9 +79,9 @@ namespace MedicineStorage.Services.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<List<User>>> GetUsersByRoleAsync(string roleName)
+        public async Task<ServiceResult<List<UserDTO>>> GetUsersByRoleAsync(string roleName)
         {
-            var result = new ServiceResult<List<User>>();
+            var result = new ServiceResult<List<UserDTO>>();
             try
             {
                 var role = await _roleManager.FindByNameAsync(roleName);
@@ -101,11 +91,13 @@ namespace MedicineStorage.Services.Implementations
                     return result;
                 }
 
-                result.Data = await _userManager.Users
+                var users = await _userManager.Users
                     .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
                     .Where(u => u.UserRoles.Any(ur => ur.Role.Name == roleName))
                     .ToListAsync();
+
+                _mapper.Map(users, result.Data);
             }
             catch (Exception)
             {
@@ -277,7 +269,7 @@ namespace MedicineStorage.Services.Implementations
 
             if (user == null)
             {
-                result.Errors.Add("UserModels not found");
+                result.Errors.Add("User not found");
                 return result;
             }
 
@@ -320,7 +312,7 @@ namespace MedicineStorage.Services.Implementations
             return await _userManager.Users.AnyAsync(x => x.NormalizedEmail == email.ToUpper());
         }
 
-        public async Task<ServiceResult<User>> ValidateAndCreateUserAsync(UserRegistrationDTO registerDto)
+        public async Task<ServiceResult<User>> RegisterUser(UserRegistrationDTO registerDto)
         {
             var result = new ServiceResult<User>();
 

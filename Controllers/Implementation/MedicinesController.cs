@@ -4,6 +4,7 @@ using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models;
 using MedicineStorage.Services.Implementations;
 using MedicineStorage.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MedicineStorage.Controllers.Implementation
@@ -14,18 +15,24 @@ namespace MedicineStorage.Controllers.Implementation
         public async Task<IActionResult> GetMedicines([FromQuery] MedicineParams parameters)
         {
             var result = await _medicineService.GetMedicinesAsync(parameters);
-            return result.Success
-                ? Ok(result.Data)
-                : StatusCode(500, result.Errors);
+
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("{medicineId:int}")]
         public async Task<IActionResult> GetMedicineById(int medicineId)
         {
             var result = await _medicineService.GetMedicineByIdAsync(medicineId);
-            return result.Success
-                ? Ok(result.Data)
-                : StatusCode(404, result.Errors);
+
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(new { result.Data } );
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -36,7 +43,7 @@ namespace MedicineStorage.Controllers.Implementation
            
             var result = await _medicineService.CreateMedicineAsync(createMedicineDTO);
             return result.Success
-                ? CreatedAtAction(nameof(GetMedicineById), new { id = result.Data.Id }, result.Data)
+                ? Ok(result.Data)
                 : StatusCode(400, result.Errors);
         }
 

@@ -5,7 +5,10 @@ using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.Implementations;
 using MedicineStorage.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.OpenApi.Models;
+using System.Text.Json;
 
 namespace MedicineStorage.Extensions
 {
@@ -26,8 +29,14 @@ namespace MedicineStorage.Extensions
 
 
             services.AddControllers();
+            // (options =>
+            //{
+            //    options.Filters.Add(new ConsumesAttribute("application/*+json"));
+            //    options.Filters.Add(new ProducesAttribute("application/json"));
+            //});
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
+
             services.AddDbContext<AppDbContext>(
                     options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 

@@ -18,9 +18,11 @@ namespace MedicineStorage.Controllers.Implementation
         {
             var result = await _operationsService.GetAllUsagesAsync(parameters);
             if (!result.Success)
+            {
                 return BadRequest(new { result.Errors });
+            }
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("{usageId:int}")]
@@ -28,9 +30,11 @@ namespace MedicineStorage.Controllers.Implementation
         {
             var result = await _operationsService.GetUsageByIdAsync(usageId);
             if (!result.Success)
-                return NotFound(result.Errors);
+            {
+                return BadRequest(new { result.Errors });
+            }
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("from-request/{requestId:int}")]
@@ -40,7 +44,7 @@ namespace MedicineStorage.Controllers.Implementation
             if (!result.Success)
                 return BadRequest(new { result.Errors });
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,17 +58,16 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var result = await _operationsService.CreateUsageAsync(createUsageDto, userId);
                 if (!result.Success)
+                {
                     return BadRequest(new { result.Errors });
 
-                return CreatedAtAction(
-                    nameof(GetUsageById),
-                    new { id = result.Data.Id },
-                    result.Data
-                );
+                }
+
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
     }

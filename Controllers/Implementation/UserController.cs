@@ -22,11 +22,11 @@ namespace MedicineStorage.Controllers.Implementation
                 {
                     return BadRequest(new { result.Errors });
                 }
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -41,11 +41,11 @@ namespace MedicineStorage.Controllers.Implementation
                 {
                     return BadRequest(new { result.Errors });
                 }
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -60,11 +60,11 @@ namespace MedicineStorage.Controllers.Implementation
                 {
                     return BadRequest(new { result.Errors });
                 }
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -78,11 +78,11 @@ namespace MedicineStorage.Controllers.Implementation
                 if (!result.Success)
                     return BadRequest(new { result.Errors });
 
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -96,11 +96,11 @@ namespace MedicineStorage.Controllers.Implementation
                 if (!result.Success)
                     return BadRequest(new { result.Errors });
 
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -112,11 +112,11 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.GetTendersAwardedByUserId(userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -128,11 +128,11 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.GetProposalsCreatedByUserId(userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 

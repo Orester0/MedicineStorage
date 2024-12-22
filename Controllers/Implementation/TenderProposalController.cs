@@ -16,16 +16,16 @@ namespace MedicineStorage.Controllers.Implementation
         public async Task<IActionResult> GetProposalById(int proposalId)
         {
             var result = await _tenderService.GetProposalByIdAsync(proposalId);
-            if (!result.Success) return NotFound(result.Errors);
-            return Ok(result.Data);
+            if (!result.Success) return BadRequest(result.Errors);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("{proposalId:int}/proposal-items")]
         public async Task<IActionResult> GetProposalItemsByProposal(int proposalId)
         {
             var result = await _tenderService.GetItemsByProposalId(proposalId);
-            if (!result.Success) return NotFound(result.Errors);
-            return Ok(result.Data);
+            if (!result.Success) return BadRequest(result.Errors);
+            return Ok(new { result.Data } );
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -39,11 +39,11 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.SubmitProposalAsync(proposalDto, new List<CreateTenderProposalItemDTO>(), userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -55,11 +55,11 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.ExecuteTenderItemAsync(tenderItemId, proposalId, userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -71,11 +71,11 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.ExecuteTenderAsync(proposalId, userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
     }

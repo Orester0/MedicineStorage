@@ -19,9 +19,9 @@ namespace MedicineStorage.Services.Interfaces
 
 
         public Task<ServiceResult<Audit>> CreateAuditAsync(int userId, CreateAuditRequest request);
-        public Task<ServiceResult<Audit>> StartAuditAsync(int userId, int auditId, StartAuditRequest request);
+        public Task<ServiceResult<Audit>> StartAuditAsync(int userId, int auditId, AuditNotes request);
         public Task<ServiceResult<Audit>> UpdateAuditItemsAsync(int userId, int auditId, UpdateAuditItemsRequest request);
-        public Task<ServiceResult<Audit>> CloseAuditAsync(int userId, int auditId, CloseAuditRequest request);
+        public Task<ServiceResult<Audit>> CloseAuditAsync(int userId, int auditId, AuditNotes request);
         public Task<ServiceResult<Audit>> CreateAuditAsync(Audit audit);
         public Task<ServiceResult<Audit>> UpdateAuditAsync(Audit audit);
         public Task<ServiceResult<bool>> DeleteAuditAsync(int auditId);

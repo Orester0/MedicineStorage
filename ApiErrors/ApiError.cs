@@ -1,11 +1,11 @@
-﻿namespace MedicineStorage.Errors
+﻿namespace MedicineStorage.ApiErrors
 {
-    public class ApiException
+    public class ApiError
     {
         public int StatusCode { get; set; }
         public string Message { get; set; }
         public string? Details { get; set; }
-        public ApiException(int statusCode, string message, string? details)
+        public ApiError(int statusCode, string message, string? details)
         {
             StatusCode = statusCode;
             Message = message;

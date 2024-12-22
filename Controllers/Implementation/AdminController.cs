@@ -16,10 +16,11 @@ namespace MedicineStorage.Controllers.Implementation
         {
             var result = await _userService.GetAllAsync();
             if (!result.Success)
+            {
                 return BadRequest(new { result.Errors });
+            }
 
-            var userDtos = _mapper.Map<List<UserDTO>>(result.Data);
-            return Ok(userDtos);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("users/{id:int}")]
@@ -27,7 +28,9 @@ namespace MedicineStorage.Controllers.Implementation
         {
             var result = await _userService.GetUserByIdAsync(id);
             if (!result.Success)
-                return NotFound(result.Errors);
+            {
+                return BadRequest(new { result.Errors });
+            }
 
             var userDto = _mapper.Map<UserDTO>(result.Data);
             return Ok(userDto);
@@ -39,9 +42,11 @@ namespace MedicineStorage.Controllers.Implementation
             var result = await _userService.GetUserRolesAsync(userId);
 
             if (!result.Success)
+            {
                 return BadRequest(new { result.Errors });
+            }
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,7 +58,9 @@ namespace MedicineStorage.Controllers.Implementation
             var result = await _userService.CreateUserAsync(registerDto);
 
             if (!result.Success)
+            {
                 return BadRequest(new { result.Errors });
+            }
 
             var userDto = _mapper.Map<UserDTO>(result.Data);
             return CreatedAtAction(nameof(GetUserById), new { id = result.Data!.Id }, userDto);
@@ -65,13 +72,17 @@ namespace MedicineStorage.Controllers.Implementation
 
             var userResult = await _userService.GetUserByIdAsync(userId);
             if (!userResult.Success)
-                return NotFound(userResult.Errors);
+            {
+                return BadRequest(new { userResult.Errors });
+            }
 
             _mapper.Map(updateDto, userResult.Data);
             var result = await _userService.UpdateUserAsync(userResult.Data);
 
             if (!result.Success)
+            {
                 return BadRequest(new { result.Errors });
+            }
 
             return NoContent();
         }
@@ -83,7 +94,9 @@ namespace MedicineStorage.Controllers.Implementation
             var result = await _userService.DeleteUserAsync(userId);
 
             if (!result.Success)
+            {
                 return BadRequest(new { result.Errors });
+            }
 
             return NoContent();
         }
@@ -94,8 +107,9 @@ namespace MedicineStorage.Controllers.Implementation
             var result = await _userService.AssignRoleAsync(userId, roleName);
 
             if (!result.Success)
+            {
                 return BadRequest(new { result.Errors });
-
+            }
             return Ok();
         }
 
@@ -105,8 +119,9 @@ namespace MedicineStorage.Controllers.Implementation
             var result = await _userService.RemoveRoleAsync(userId, roleName);
 
             if (!result.Success)
+            {
                 return BadRequest(new { result.Errors });
-
+            }
             return Ok();
         }
 

@@ -1,4 +1,5 @@
-﻿using MedicineStorage.Errors;
+﻿using MedicineStorage.ApiErrors;
+using System.ComponentModel.DataAnnotations;
 using System.Net;
 using System.Text.Json;
 
@@ -30,8 +31,8 @@ namespace MedicineStorage.Middleware
                 context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
 
                 var response = env.IsDevelopment()
-                    ? new ApiException(context.Response.StatusCode, ex.Message, ex.StackTrace)
-                    : new ApiException(context.Response.StatusCode, ex.Message, "Internal server error");
+                    ? new ApiError(context.Response.StatusCode, ex.Message, ex.StackTrace)
+                    : new ApiError(context.Response.StatusCode, ex.Message, "Internal server error");
 
                 var options = new JsonSerializerOptions
                 {
@@ -42,6 +43,7 @@ namespace MedicineStorage.Middleware
 
                 await context.Response.WriteAsync(json);
             }
+            
         }
     }
 }

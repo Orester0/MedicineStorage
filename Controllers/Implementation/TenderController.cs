@@ -20,7 +20,7 @@ namespace MedicineStorage.Controllers.Implementation
             if (!result.Success)
                 return BadRequest(new { result.Errors });
 
-            return Ok(result.Data);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("created-by/{userId:int}")]
@@ -30,11 +30,11 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 var result = await _tenderService.GetTendersCreatedByUserId(userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -45,11 +45,11 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 var result = await _tenderService.GetTendersAwardedByUserId(userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -57,24 +57,24 @@ namespace MedicineStorage.Controllers.Implementation
         public async Task<IActionResult> GetTenderById(int tenderId)
         {
             var result = await _tenderService.GetTenderByIdAsync(tenderId);
-            if (!result.Success) return NotFound(result.Errors);
-            return Ok(result.Data);
+            if (!result.Success) return BadRequest(result.Errors);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("{tenderId:int}/tender-items")]
         public async Task<IActionResult> GetTenderItemsByTender(int tenderId)
         {
             var result = await _tenderService.GetItemsByTenderId(tenderId);
-            if (!result.Success) return NotFound(result.Errors);
-            return Ok(result.Data);
+            if (!result.Success) return BadRequest(result.Errors);
+            return Ok(new { result.Data } );
         }
 
         [HttpGet("{tenderId:int}/proposals")]
         public async Task<IActionResult> GetProposalsByTenderId(int tenderId)
         {
             var result = await _tenderService.GetProposalsByTenderId(tenderId);
-            if (!result.Success) return NotFound(result.Errors);
-            return Ok(result.Data);
+            if (!result.Success) return BadRequest(result.Errors);
+            return Ok(new { result.Data } );
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -89,11 +89,11 @@ namespace MedicineStorage.Controllers.Implementation
 
 
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -105,11 +105,11 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.PublishTenderAsync(tenderId, userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -121,11 +121,11 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.CloseTenderAsync(tenderId, userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
@@ -137,11 +137,11 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.SelectWinningProposalAsync(proposalId, userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(result.Data);
+                return Ok(new { result.Data } );
             }
             catch (UnauthorizedAccessException ex)
             {
-                return Unauthorized(ex.Message);
+                return Unauthorized(new { Errors = new [] { ex.Message } });
             }
         }
 
