@@ -1,7 +1,7 @@
 ﻿using MedicineStorage.Controllers.Interface;
 using MedicineStorage.DTOs;
 using MedicineStorage.Extensions;
-using MedicineStorage.Services.Interfaces;
+using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;
@@ -22,7 +22,7 @@ namespace MedicineStorage.Controllers.Implementation
                 {
                     return BadRequest(new { result.Errors });
                 }
-                return Ok(new { result.Data } );
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -41,7 +41,7 @@ namespace MedicineStorage.Controllers.Implementation
                 {
                     return BadRequest(new { result.Errors });
                 }
-                return Ok(new { result.Data } );
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -60,7 +60,7 @@ namespace MedicineStorage.Controllers.Implementation
                 {
                     return BadRequest(new { result.Errors });
                 }
-                return Ok(new { result.Data } );
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -78,7 +78,7 @@ namespace MedicineStorage.Controllers.Implementation
                 if (!result.Success)
                     return BadRequest(new { result.Errors });
 
-                return Ok(new { result.Data } );
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -96,7 +96,7 @@ namespace MedicineStorage.Controllers.Implementation
                 if (!result.Success)
                     return BadRequest(new { result.Errors });
 
-                return Ok(new { result.Data } );
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -112,7 +112,7 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.GetTendersAwardedByUserId(userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(new { result.Data } );
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -128,7 +128,7 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.GetProposalsCreatedByUserId(userId);
                 if (!result.Success) return BadRequest(new { result.Errors });
-                return Ok(new { result.Data } );
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {

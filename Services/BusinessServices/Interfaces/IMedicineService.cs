@@ -4,7 +4,7 @@ using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
 
-namespace MedicineStorage.Services.Interfaces
+namespace MedicineStorage.Services.BusinessServices.Interfaces
 {
     public interface IMedicineService
     {

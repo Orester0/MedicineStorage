@@ -16,7 +16,6 @@ namespace MedicineStorage.Models.TenderModels
         [Key]
         public int Id { get; set; }
         [Required]
-        [ForeignKey("Tender")]
         public int TenderId { get; set; }
         [Required]
         [ForeignKey("Medicine")]
@@ -27,8 +26,6 @@ namespace MedicineStorage.Models.TenderModels
 
         [Required]
         public TenderItemStatus Status { get; set; } = TenderItemStatus.Pending;
-
-        public virtual Tender Tender { get; set; }
         public virtual Medicine Medicine { get; set; }
     }
 }

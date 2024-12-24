@@ -154,14 +154,7 @@ namespace MedicineStorage.Data
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.MinimumStock).HasPrecision(12, 0);
                 entity.Property(e => e.Stock).HasPrecision(12, 0);
-                entity.HasMany(m => m.Requests)
-                    .WithOne(r => r.Medicine)
-                    .HasForeignKey(r => r.MedicineId)
-                    .OnDelete(DeleteBehavior.Restrict);
-                entity.HasMany(m => m.UsageRecords)
-                    .WithOne(u => u.Medicine)
-                    .HasForeignKey(u => u.MedicineId)
-                    .OnDelete(DeleteBehavior.Restrict);
+
             });
             modelBuilder.Entity<MedicineRequest>(entity =>
             {
@@ -176,11 +169,7 @@ namespace MedicineStorage.Data
                     .WithMany()
                     .HasForeignKey(mr => mr.ApprovedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(mr => mr.Medicine)
-                    .WithMany(m => m.Requests)
-                    .HasForeignKey(mr => mr.MedicineId)
-                    .OnDelete(DeleteBehavior.Restrict);
-
+               
                 entity.HasMany(mr => mr.MedicineUsages)
                     .WithOne(mu => mu.MedicineRequest)
                     .HasForeignKey(mu => mu.MedicineRequestId)
@@ -197,10 +186,6 @@ namespace MedicineStorage.Data
                     .HasForeignKey(mu => mu.MedicineRequestId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(mu => mu.Medicine)
-                    .WithMany(m => m.UsageRecords)
-                    .HasForeignKey(mu => mu.MedicineId)
-                    .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(mu => mu.UsedByUser)
                     .WithMany()
                     .HasForeignKey(mu => mu.UsedByUserId)
@@ -228,24 +213,12 @@ namespace MedicineStorage.Data
                     .WithMany()
                     .HasForeignKey(t => t.WinnerSelectedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
-                entity.HasMany(t => t.Items)
-                    .WithOne(ti => ti.Tender)
-                    .HasForeignKey(ti => ti.TenderId)
-                    .OnDelete(DeleteBehavior.Cascade);
-                entity.HasMany(t => t.Proposals)
-                    .WithOne(tp => tp.Tender)
-                    .HasForeignKey(tp => tp.TenderId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<TenderItem>(entity =>
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.RequiredQuantity).HasPrecision(18, 2);
-                entity.HasOne(ti => ti.Tender)
-                    .WithMany(t => t.Items)
-                    .HasForeignKey(ti => ti.TenderId)
-                    .OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(ti => ti.Medicine)
                     .WithMany()
                     .HasForeignKey(ti => ti.MedicineId)
@@ -257,18 +230,10 @@ namespace MedicineStorage.Data
             {
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.TotalPrice).HasPrecision(12, 0);
-                entity.HasOne(tp => tp.Tender)
-                    .WithMany(t => t.Proposals)
-                    .HasForeignKey(tp => tp.TenderId)
-                    .OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(tp => tp.CreatedByUser)
                     .WithMany()
                     .HasForeignKey(tp => tp.CreatedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
-                entity.HasMany(tp => tp.Items)
-                    .WithOne(tpi => tpi.Proposal)
-                    .HasForeignKey(tpi => tpi.TenderProposalId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
             modelBuilder.Entity<TenderProposalItem>(entity =>
@@ -280,10 +245,6 @@ namespace MedicineStorage.Data
                     .WithMany()
                     .HasForeignKey(tpi => tpi.MedicineId)
                     .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(tpi => tpi.Proposal)
-                    .WithMany(tp => tp.Items)
-                    .HasForeignKey(tpi => tpi.TenderProposalId)
-                    .OnDelete(DeleteBehavior.Cascade);
             });
 
         }

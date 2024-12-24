@@ -1,6 +1,7 @@
 ﻿using MedicineStorage.Controllers.Interface;
 using MedicineStorage.DTOs;
-using MedicineStorage.Services.Interfaces;
+using MedicineStorage.Services.ApplicationServices.Interfaces;
+using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NuGet.Protocol;

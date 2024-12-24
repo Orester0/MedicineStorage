@@ -3,11 +3,11 @@ using MedicineStorage.Data;
 using MedicineStorage.DTOs;
 using MedicineStorage.Models;
 using MedicineStorage.Models.UserModels;
-using MedicineStorage.Services.Interfaces;
+using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
-namespace MedicineStorage.Services.Implementations
+namespace MedicineStorage.Services.BusinessServices.Implementations
 {
     public class UserService(UserManager<User> _userManager, RoleManager<AppRole> _roleManager, AppDbContext _context, IMapper _mapper) : IUserService
     {
@@ -348,6 +348,6 @@ namespace MedicineStorage.Services.Implementations
         }
 
     }
-    
+
 }
 

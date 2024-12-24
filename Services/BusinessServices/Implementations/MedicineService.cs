@@ -5,9 +5,9 @@ using MedicineStorage.Helpers;
 using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
-using MedicineStorage.Services.Interfaces;
+using MedicineStorage.Services.BusinessServices.Interfaces;
 
-namespace MedicineStorage.Services.Implementations
+namespace MedicineStorage.Services.BusinessServices.Implementations
 {
     public class MedicineService(
         IUnitOfWork _unitOfWork,

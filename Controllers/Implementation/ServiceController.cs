@@ -1,5 +1,5 @@
 ﻿using MedicineStorage.Controllers.Interface;
-using MedicineStorage.Services.SignalR;
+using MedicineStorage.Services.ApplicationServices.SignalR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SignalR;

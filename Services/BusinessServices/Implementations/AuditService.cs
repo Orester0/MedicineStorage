@@ -4,9 +4,9 @@ using MedicineStorage.Helpers.Params;
 using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.AuditModels;
-using MedicineStorage.Services.Interfaces;
+using MedicineStorage.Services.BusinessServices.Interfaces;
 
-namespace MedicineStorage.Services.Implementations
+namespace MedicineStorage.Services.BusinessServices.Implementations
 {
     public class AuditService(IUnitOfWork _unitOfWork, IUserService _userService) : IAuditService
     {
@@ -251,7 +251,7 @@ namespace MedicineStorage.Services.Implementations
 
                 bool hasSignificantDiscrepancies = auditItems.Any(item =>
                     Math.Abs(item.ExpectedQuantity - item.ActualQuantity) >
-                    (item.ExpectedQuantity * 0.05m));                                  // MOVE TO CONFIG
+                    item.ExpectedQuantity * 0.05m);                                  // MOVE TO CONFIG
 
                 audit.Status = hasSignificantDiscrepancies
                     ? AuditStatus.RequiresFollowUp

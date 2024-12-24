@@ -9,7 +9,6 @@ namespace MedicineStorage.Data.Implementations
         public async Task<TenderItem?> GetByIdAsync(int id)
         {
             return await _context.TenderItems
-                .Include(ti => ti.Tender)
                 .Include(ti => ti.Medicine)
                 .FirstOrDefaultAsync(ti => ti.Id == id);
                 
@@ -24,6 +23,7 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.TenderItems
                 .Where(ti => ti.TenderId == tenderId)
+                .Include(ti => ti.Medicine)
                 .ToListAsync();
         }
 

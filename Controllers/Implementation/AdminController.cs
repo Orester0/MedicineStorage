@@ -1,14 +1,13 @@
 ﻿using AutoMapper;
 using MedicineStorage.Controllers.Interface;
 using MedicineStorage.DTOs;
-using MedicineStorage.Services.Interfaces;
+using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using NuGet.Protocol;
 
 namespace MedicineStorage.Controllers.Implementation
 {
-    [Authorize]
     public class AdminController(IUserService _userService, IMapper _mapper) : BaseApiController
     {
         [HttpGet("users")]
@@ -20,7 +19,7 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            return Ok(new { result.Data } );
+            return Ok(result.Data);
         }
 
         [HttpGet("users/{id:int}")]
@@ -46,7 +45,7 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            return Ok(new { result.Data } );
+            return Ok(result.Data);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -54,6 +53,10 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPost("users")]
         public async Task<IActionResult> CreateUser([FromBody] UserRegistrationDTO registerDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
 
             var result = await _userService.CreateUserAsync(registerDto);
 
@@ -69,7 +72,10 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPut("users/{userId:int}")]
         public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateDTO updateDto)
         {
-
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             var userResult = await _userService.GetUserByIdAsync(userId);
             if (!userResult.Success)
             {

@@ -20,7 +20,7 @@ namespace MedicineStorage.Data.Implementations
             if (auditParams.Status.HasValue)
                 query = query.Where(x => x.Status == auditParams.Status);
 
-            query = auditParams.OrderBy switch
+            query = auditParams.SortyBy switch
             {
                 "date" => query.OrderBy(x => x.PlannedDate),
                 "dateDesc" => query.OrderByDescending(x => x.PlannedDate),

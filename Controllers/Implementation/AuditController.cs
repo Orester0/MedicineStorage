@@ -3,7 +3,7 @@ using MedicineStorage.DTOs;
 using MedicineStorage.Extensions;
 using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models.AuditModels;
-using MedicineStorage.Services.Interfaces;
+using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -21,7 +21,7 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 return BadRequest(new { result.Errors });
             }
-            return Ok(new { result.Data } );
+            return Ok(result.Data);
             
         }
 
@@ -36,7 +36,7 @@ namespace MedicineStorage.Controllers.Implementation
                 
             }
 
-            return Ok(new { result.Data } );
+            return Ok(result.Data);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -44,6 +44,10 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPost("create")]
         public async Task<IActionResult> CreateAudit([FromBody] CreateAuditRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 var userId = User.GetUserIdFromClaims();
@@ -75,7 +79,7 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
 
-                return Ok(new { result.Data } );
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -86,6 +90,10 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPut("update-items/{auditId:int}")]
         public async Task<IActionResult> UpdateAuditItems(int auditId, [FromBody] UpdateAuditItemsRequest request)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 var userId = User.GetUserIdFromClaims();
@@ -96,7 +104,7 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
 
-                return Ok(new { result.Data } );
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -117,7 +125,7 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
 
-                return Ok(new { result.Data } );
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -128,6 +136,10 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPut("update/{auditId:int}")]
         public async Task<IActionResult> UpdateAudit(int auditId, [FromBody] Audit audit)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             if (auditId != audit.Id)
             {
                 return BadRequest("Audit ID mismatch");
@@ -140,7 +152,7 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            return Ok(new { result.Data } );
+            return Ok(result.Data);
         }
 
         [HttpDelete("{auditId:int}")]

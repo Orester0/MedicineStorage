@@ -1,9 +1,12 @@
 ﻿using MedicineStorage.Data;
 using MedicineStorage.Data.Implementations;
 using MedicineStorage.Data.Interfaces;
+using MedicineStorage.Helpers;
 using MedicineStorage.Models.UserModels;
-using MedicineStorage.Services.Implementations;
-using MedicineStorage.Services.Interfaces;
+using MedicineStorage.Services.ApplicationServices.Implementations;
+using MedicineStorage.Services.ApplicationServices.Interfaces;
+using MedicineStorage.Services.BusinessServices.Implementations;
+using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -16,7 +19,7 @@ namespace MedicineStorage.Extensions
     {
         public static IServiceCollection AddApplicationServices(this IServiceCollection services, IConfiguration config)
         {
-
+            // CORS
             services.AddCors(options =>
             {
                 options.AddPolicy("AllowLocalhost", policy =>
@@ -26,23 +29,39 @@ namespace MedicineStorage.Extensions
                           .AllowAnyMethod();
                 });
             });
-
-
             services.AddControllers();
-            // (options =>
-            //{
-            //    options.Filters.Add(new ConsumesAttribute("application/*+json"));
-            //    options.Filters.Add(new ProducesAttribute("application/json"));
-            //});
+            
+
+
+            // SWAGGER
             services.AddEndpointsApiExplorer();
             services.AddSwaggerGen();
 
+
+            // SQL SERVER 
             services.AddDbContext<AppDbContext>(
                     options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 
+
+            // REPOSITORIES
+            services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IMedicineService, MedicineService>();
+            services.AddScoped<IMedicineOperationsService, MedicineOperationsService>();
+            services.AddScoped<IAuditService, AuditService>();
+            services.AddScoped<ITenderService, TenderService>();
+
+
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+
+            // APPLICATION SERVICES
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IPhotoService, PhotoService>();
+            services.AddSignalR();
 
 
+            // BUSINESS SERVICES
             services.AddScoped<IAuditRepository, AuditRepository>();
             services.AddScoped<IMedicineRepository, MedicineRepository>();
             services.AddScoped<IMedicineRequestRepository, MedicineRequestRepository>();
@@ -55,20 +74,9 @@ namespace MedicineStorage.Extensions
 
 
 
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
-
-            services.AddScoped<IUserService, UserService>();
-            services.AddScoped<IMedicineService, MedicineService>();
-            services.AddScoped<IMedicineOperationsService, MedicineOperationsService>();
-            services.AddScoped<IAuditService, AuditService>();
-            services.AddScoped<ITenderService, TenderService>();
-            services.AddScoped<IEmailService, EmailService>();
-
+            services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-            services.AddSignalR();
-
-
 
             return services;
         }

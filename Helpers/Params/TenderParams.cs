@@ -8,7 +8,7 @@ namespace MedicineStorage.Helpers.Params
         public DateTime? PublishDateFrom { get; set; }
         public DateTime? PublishDateTo { get; set; }
         public TenderStatus? Status { get; set; }
-        public string? OrderBy { get; set; }
+        public string? SortBy { get; set; }
     }
 
 }

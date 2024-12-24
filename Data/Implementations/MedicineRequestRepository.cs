@@ -11,7 +11,6 @@ namespace MedicineStorage.Data.Implementations
         public async Task<MedicineRequest?> GetByIdAsync(int id)
         {
             return await _context.MedicineRequests
-                .Include(r => r.Medicine)
                 .Include(r => r.RequestedByUser)
                 .Include(r => r.ApprovedByUser)
                 .FirstOrDefaultAsync(r => r.Id == id);
@@ -20,7 +19,6 @@ namespace MedicineStorage.Data.Implementations
         public async Task<(IEnumerable<MedicineRequest>, int)> GetAllAsync(MedicineRequestParams parameters)
         {
             var query = _context.MedicineRequests
-                .Include(r => r.Medicine)
                 .Include(r => r.RequestedByUser)
                 .AsQueryable();
 
@@ -58,7 +56,6 @@ namespace MedicineStorage.Data.Implementations
         public async Task<List<MedicineRequest>> GetRequestsRequestedByUserIdAsync(int userId)
         {
             return await _context.MedicineRequests
-                .Include(r => r.Medicine)
                 .Where(r => r.RequestedByUserId == userId)
                 .ToListAsync();
         }
@@ -66,7 +63,6 @@ namespace MedicineStorage.Data.Implementations
         public async Task<List<MedicineRequest>> GetRequestsApprovedByUserIdAsync(int userId)
         {
             return await _context.MedicineRequests
-                .Include(r => r.Medicine)
                 .Where(r => r.ApprovedByUserId == userId)
                 .ToListAsync();
         }
@@ -74,7 +70,6 @@ namespace MedicineStorage.Data.Implementations
         public async Task<List<MedicineRequest>> GetRequestsForMedicineIdAsync(int medicineId)
         {
             return await _context.MedicineRequests
-                .Include(r => r.Medicine)
                 .Where(r => r.MedicineId == medicineId)
                 .ToListAsync();
         }

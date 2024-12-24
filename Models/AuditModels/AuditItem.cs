@@ -17,13 +17,18 @@ namespace MedicineStorage.Models.AuditModels
         [Required]
         [ForeignKey("Medicine")]
         public int MedicineId { get; set; }
+
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        [Range(0, double.MaxValue)]
         public decimal ExpectedQuantity { get; set; }
+
         [Required]
+        [Column(TypeName = "decimal(18,2)")]
+        [Range(0, double.MaxValue)]
         public decimal ActualQuantity { get; set; }
 
         public virtual Audit Audit { get; set; }
-
         public virtual Medicine Medicine { get; set; }
     }
 }

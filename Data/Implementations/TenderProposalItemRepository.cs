@@ -9,7 +9,6 @@ namespace MedicineStorage.Data.Implementations
         public async Task<TenderProposalItem?> GetByIdAsync(int id)
         {
             return await _context.TenderProposalItems
-                .Include(tpi => tpi.Proposal)
                 .Include(tpi => tpi.Medicine)
                 .FirstOrDefaultAsync(tpi => tpi.Id == id);
         }

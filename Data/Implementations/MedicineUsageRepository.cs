@@ -10,14 +10,12 @@ namespace MedicineStorage.Data.Implementations
         public async Task<MedicineUsage?> GetByIdAsync(int id)
         {
             return await _context.MedicineUsages
-                .Include(u => u.Medicine)
                 .Include(u => u.UsedByUser)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
         public async Task<(IEnumerable<MedicineUsage>, int)> GetAllAsync(MedicineUsageParams parameters)
         {
             var query = _context.MedicineUsages
-                .Include(u => u.Medicine)
                 .Include(u => u.UsedByUser)
                 .AsQueryable();
 
@@ -61,7 +59,6 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.MedicineUsages
                 .Where(u => u.UsedByUserId == userId)
-                .Include(u => u.Medicine)
                 .ToListAsync();
         }
 
@@ -70,7 +67,6 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.MedicineUsages
                 .Where(u => u.MedicineRequestId == requestId)
-                .Include(u => u.Medicine)
                 .Include(u => u.UsedByUser)
                 .ToListAsync();
         }

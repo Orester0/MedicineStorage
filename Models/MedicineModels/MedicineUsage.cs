@@ -9,27 +9,32 @@ namespace MedicineStorage.Models.MedicineModels
         [Required]
         [Key]
         public int Id { get; set; }
+
         [Required]
         [ForeignKey("Medicine")]
         public int MedicineId { get; set; }
+
         [Required]
         [ForeignKey("UsedByUser")]
         public int UsedByUserId { get; set; }
+
         [Required]
         [ForeignKey("MedicineRequest")]
         public int MedicineRequestId { get; set; }
 
-
-
         [Required]
+        [Range(0.1, double.MaxValue)]
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Quantity { get; set; }
+
         [Required]
+        [DataType(DataType.Date)]
         public DateTime UsageDate { get; set; }
+
+        [StringLength(1000)]
         public string? Notes { get; set; }
-        
 
         public virtual MedicineRequest MedicineRequest { get; set; }
-        public virtual Medicine Medicine { get; set; }
         public virtual User UsedByUser { get; set; }
     }
 }

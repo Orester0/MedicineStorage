@@ -1,6 +1,6 @@
 ﻿using MedicineStorage.Models.UserModels;
 
-namespace MedicineStorage.Services.Interfaces
+namespace MedicineStorage.Services.ApplicationServices.Interfaces
 {
     public interface ITokenService
     {

@@ -3,9 +3,8 @@ using MedicineStorage.Helpers.Params;
 using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.AuditModels;
-using MedicineStorage.Services.Implementations;
 
-namespace MedicineStorage.Services.Interfaces
+namespace MedicineStorage.Services.BusinessServices.Interfaces
 {
     public interface IAuditService
     {

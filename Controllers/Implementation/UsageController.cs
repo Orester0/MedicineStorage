@@ -3,11 +3,9 @@ using MedicineStorage.DTOs;
 using MedicineStorage.Extensions;
 using MedicineStorage.Helpers.Params;
 using MedicineStorage.Helpers;
-using MedicineStorage.Models.MedicineModels;
-using MedicineStorage.Services.Implementations;
-using MedicineStorage.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
+using MedicineStorage.Services.BusinessServices.Interfaces;
 
 namespace MedicineStorage.Controllers.Implementation
 {
@@ -22,7 +20,7 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            return Ok(new { result.Data } );
+            return Ok(result.Data);
         }
 
         [HttpGet("{usageId:int}")]
@@ -34,7 +32,7 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            return Ok(new { result.Data } );
+            return Ok(result.Data);
         }
 
         [HttpGet("from-request/{requestId:int}")]
@@ -44,7 +42,7 @@ namespace MedicineStorage.Controllers.Implementation
             if (!result.Success)
                 return BadRequest(new { result.Errors });
 
-            return Ok(new { result.Data } );
+            return Ok(result.Data);
         }
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -53,6 +51,10 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPost]
         public async Task<IActionResult> CreateUsage([FromBody] CreateMedicineUsageDTO createUsageDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 var userId = User.GetUserIdFromClaims();
@@ -60,10 +62,8 @@ namespace MedicineStorage.Controllers.Implementation
                 if (!result.Success)
                 {
                     return BadRequest(new { result.Errors });
-
                 }
-
-                return Ok(new { result.Data } );
+                return Ok(result.Data);
             }
             catch (UnauthorizedAccessException ex)
             {

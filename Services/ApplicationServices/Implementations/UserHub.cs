@@ -1,6 +1,6 @@
 ﻿using MedicineStorage.Extensions;
 using MedicineStorage.Models.UserModels;
-using MedicineStorage.Services.Interfaces;
+using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.SignalR;
@@ -8,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using System.Collections.Concurrent;
 using System.Linq.Expressions;
 
-namespace MedicineStorage.Services.SignalR
+namespace MedicineStorage.Services.ApplicationServices.SignalR
 {
     public class UserHub(IUserService _userService, ILogger<UserHub> _logger) : Hub
     {
@@ -38,7 +38,7 @@ namespace MedicineStorage.Services.SignalR
                     }
                 }
             }
-            catch(UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException ex)
             {
                 _logger.LogError(ex.Message);
                 return;

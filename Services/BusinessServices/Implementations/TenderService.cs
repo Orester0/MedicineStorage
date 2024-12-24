@@ -6,10 +6,10 @@ using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.Tender;
 using MedicineStorage.Models.TenderModels;
-using MedicineStorage.Services.Interfaces;
 using System.ComponentModel.DataAnnotations;
+using MedicineStorage.Services.BusinessServices.Interfaces;
 
-namespace MedicineStorage.Services.Implementations
+namespace MedicineStorage.Services.BusinessServices.Implementations
 {
     public class TenderService(IUnitOfWork _unitOfWork, IMapper _mapper) : ITenderService
     {
@@ -193,6 +193,9 @@ namespace MedicineStorage.Services.Implementations
 
                 var tender = _mapper.Map<Tender>(tenderDto);
                 tender.Status = TenderStatus.Created;
+
+                Console.WriteLine(userId);
+
                 tender.CreatedByUserId = userId;
 
                 var addedTender = await _unitOfWork.TenderRepository.CreateTenderAsync(tender);
@@ -208,13 +211,13 @@ namespace MedicineStorage.Services.Implementations
             }
         }
 
-        public async Task<ServiceResult<ReturnTenderItemDTO>> AddTenderItemAsync(CreateTenderItemDTO tenderItemDto)
+        public async Task<ServiceResult<ReturnTenderItemDTO>> AddTenderItemAsync(int tenderId, CreateTenderItemDTO tenderItemDto)
         {
             var result = new ServiceResult<ReturnTenderItemDTO>();
 
             try
             {
-                var tender = await _unitOfWork.TenderRepository.GetByIdAsync(tenderItemDto.TenderId);
+                var tender = await _unitOfWork.TenderRepository.GetByIdAsync(tenderId);
                 if (tender == null)
                 {
                     result.Errors.Add("Tender not found.");
@@ -234,12 +237,8 @@ namespace MedicineStorage.Services.Implementations
                     return result;
                 }
 
-                if (result.Errors.Count > 0)
-                {
-                    throw new ValidationException();
-                }
 
-                var tenderItems = await _unitOfWork.TenderItemRepository.GetItemsByTenderIdAsync(tenderItemDto.TenderId);
+                var tenderItems = await _unitOfWork.TenderItemRepository.GetItemsByTenderIdAsync(tenderId);
 
                 if (tenderItems != null)
                 {
@@ -260,6 +259,7 @@ namespace MedicineStorage.Services.Implementations
                 }
 
                 var tenderItem = _mapper.Map<TenderItem>(tenderItemDto);
+                tenderItem.TenderId = tenderId;
                 var addedTenderItem = await _unitOfWork.TenderItemRepository.CreateTenderItemAsync(tenderItem);
                 await _unitOfWork.Complete();
 
@@ -329,14 +329,13 @@ namespace MedicineStorage.Services.Implementations
             }
         }
 
-        public async Task<ServiceResult<ReturnTenderProposalDTO>> SubmitProposalAsync(CreateTenderProposalDTO proposalDto,
-        List<CreateTenderProposalItemDTO> proposalItemsDto, int userId)
+        public async Task<ServiceResult<ReturnTenderProposalDTO>> SubmitProposalAsync(int tenderId, CreateTenderProposalDTO proposalDto, int userId)
         {
             var result = new ServiceResult<ReturnTenderProposalDTO>();
 
             try
             {
-                var tender = await _unitOfWork.TenderRepository.GetByIdAsync(proposalDto.TenderId);
+                var tender = await _unitOfWork.TenderRepository.GetByIdAsync(tenderId);
                 if (tender == null)
                 {
                     result.Errors.Add("Tender not found.");
@@ -359,7 +358,7 @@ namespace MedicineStorage.Services.Implementations
                 var proposals = await _unitOfWork.TenderProposalRepository.GetProposalsCreatedByUserIdAsync(userId);
                 if (proposals != null)
                 {
-                    var existingProposal = proposals.Any(x => x.TenderId == proposalDto.TenderId);
+                    var existingProposal = proposals.Any(x => x.TenderId == tenderId);
                     if (existingProposal)
                     {
                         result.Errors.Add("You have already submitted a proposal for this tender.");
@@ -367,12 +366,12 @@ namespace MedicineStorage.Services.Implementations
                     }
                 }
 
-                var tenderItems = await _unitOfWork.TenderItemRepository.GetItemsByTenderIdAsync(proposalDto.TenderId);
+                var tenderItems = await _unitOfWork.TenderItemRepository.GetItemsByTenderIdAsync(tenderId);
                 decimal calculatedTotalPrice = 0;
 
                 foreach (var tenderItem in tenderItems)
                 {
-                    var matchingProposalItem = proposalItemsDto.FirstOrDefault(pi => pi.MedicineId == tenderItem.MedicineId);
+                    var matchingProposalItem = proposalDto.ProposalItemsDTOs.FirstOrDefault(pi => pi.MedicineId == tenderItem.MedicineId);
                     if (matchingProposalItem == null)
                     {
                         result.Errors.Add($"Missing proposal item for medicine ID {tenderItem.MedicineId}.");
@@ -402,7 +401,7 @@ namespace MedicineStorage.Services.Implementations
 
                 var proposal = new TenderProposal
                 {
-                    TenderId = proposalDto.TenderId,
+                    TenderId = tenderId,
                     CreatedByUserId = userId,
                     TotalPrice = proposalDto.TotalPrice,
                     SubmissionDate = DateTime.UtcNow,
@@ -411,7 +410,11 @@ namespace MedicineStorage.Services.Implementations
 
                 var addedProposal = await _unitOfWork.TenderProposalRepository.CreateTenderProposalAsync(proposal);
 
-                foreach (var itemDto in proposalItemsDto)
+
+                await _unitOfWork.Complete();
+
+
+                foreach (var itemDto in proposalDto.ProposalItemsDTOs)
                 {
                     var proposalItem = new TenderProposalItem
                     {
@@ -517,6 +520,7 @@ namespace MedicineStorage.Services.Implementations
 
                 tender.Status = TenderStatus.Awarded;
                 tender.WinnerSelectedByUserId = userId;
+
                 _unitOfWork.TenderRepository.UpdateTender(tender);
 
                 await _unitOfWork.Complete();
@@ -718,7 +722,6 @@ namespace MedicineStorage.Services.Implementations
                         return result;
                     }
                 }
-
                 tender.Status = TenderStatus.Executed;
                 _unitOfWork.TenderRepository.UpdateTender(tender);
 

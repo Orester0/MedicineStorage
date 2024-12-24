@@ -1,8 +1,8 @@
 ﻿using MailKit.Security;
-using MedicineStorage.Services.Interfaces;
+using MedicineStorage.Services.ApplicationServices.Interfaces;
 using MimeKit;
 
-namespace MedicineStorage.Services.Implementations
+namespace MedicineStorage.Services.ApplicationServices.Implementations
 {
     public class EmailService(IConfiguration _configuration, ILogger<EmailService> _logger) : IEmailService
     {

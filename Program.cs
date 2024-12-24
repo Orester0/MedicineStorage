@@ -4,7 +4,7 @@ using MedicineStorage.Helpers;
 using MedicineStorage.Middleware;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.UserModels;
-using MedicineStorage.Services.SignalR;
+using MedicineStorage.Services.ApplicationServices.SignalR;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 

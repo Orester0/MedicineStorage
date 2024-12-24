@@ -10,12 +10,10 @@ namespace MedicineStorage.Models.TenderModels
         [Required]
         public int Id { get; set; }
         [Required]
-        [ForeignKey("Tender")]
         public int TenderId { get; set; }
         [Required]
         [ForeignKey("CreatedByUser")]
         public int CreatedByUserId { get; set; }
-
         [Required]
         public decimal TotalPrice { get; set; }
         [Required]
@@ -23,7 +21,7 @@ namespace MedicineStorage.Models.TenderModels
         [Required]
         public ProposalStatus Status { get; set; }
 
-        public virtual Tender Tender { get; set; }
+
         public virtual User CreatedByUser { get; set; }
         public virtual ICollection<TenderProposalItem> Items { get; set; }
     }

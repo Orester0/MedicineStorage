@@ -47,8 +47,6 @@ namespace MedicineStorage.DTOs
 
     public class CreateTenderItemDTO
     {
-        [Required]
-        public int TenderId { get; set; }
 
         [Required]
         public int MedicineId { get; set; }
@@ -69,7 +67,7 @@ namespace MedicineStorage.DTOs
     public class CreateTenderProposalDTO
     {
         [Required]
-        public int TenderId { get; set; }
+        public List<CreateTenderProposalItemDTO> ProposalItemsDTOs { get; set; }
         [Required]
         public decimal TotalPrice { get; set; }
     }

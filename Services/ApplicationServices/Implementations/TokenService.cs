@@ -1,12 +1,12 @@
 ﻿using MedicineStorage.Models.UserModels;
-using MedicineStorage.Services.Interfaces;
+using MedicineStorage.Services.ApplicationServices.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 
-namespace MedicineStorage.Services.Implementations
+namespace MedicineStorage.Services.ApplicationServices.Implementations
 {
     public class TokenService(IConfiguration _config, UserManager<User> _userManager) : ITokenService
     {

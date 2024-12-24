@@ -32,7 +32,7 @@ namespace MedicineStorage.Data.Implementations
 
             if (tenderParams.Status.HasValue)
                 query = query.Where(t => t.Status == tenderParams.Status);
-            query = tenderParams.OrderBy switch
+            query = tenderParams.SortBy switch
             {
                 "title" => query.OrderBy(t => t.Title),
                 "titleDesc" => query.OrderByDescending(t => t.Title),
@@ -42,7 +42,6 @@ namespace MedicineStorage.Data.Implementations
                 _ => query.OrderByDescending(t => t.PublishDate) 
             };
 
-            //query = query.OrderBy(t => t.Id).ThenByDescending(t => t.PublishDate);
 
 
             var totalCount = await query.CountAsync();

@@ -1,7 +1,7 @@
 ﻿using MailKit.Security;
 using MimeKit;
 
-namespace MedicineStorage.Services.Interfaces
+namespace MedicineStorage.Services.ApplicationServices.Interfaces
 {
     public interface IEmailService
     {
