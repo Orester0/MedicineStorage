@@ -1,4 +1,5 @@
-﻿using MedicineStorage.Models.UserModels;
+﻿using MedicineStorage.Helpers;
+using MedicineStorage.Models.UserModels;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -15,7 +16,9 @@ namespace MedicineStorage.Models.TenderModels
         [ForeignKey("CreatedByUser")]
         public int CreatedByUserId { get; set; }
         [Required]
+        [Range(0.01, double.MaxValue)]
         public decimal TotalPrice { get; set; }
+
         [Required]
         public DateTime SubmissionDate { get; set; }
         [Required]

@@ -88,8 +88,7 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
+            
                 var userId = User.GetUserIdFromClaims();
                 var result = await _operationsService.CreateRequestAsync(createRequestDto, userId);
                 if (!result.Success)
@@ -97,18 +96,13 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
                 return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Errors = new [] { ex.Message } });
-            }
+            
         }
 
         [HttpPut("approve/{requestId:int}")]
         public async Task<IActionResult> ApproveRequest(int requestId)
         {
-            try
-            {
+            
                 var userId = User.GetUserIdFromClaims();
                 var userRoles = User.GetUserRolesFromClaims();
                 bool isAdmin = userRoles.Contains("Admin");
@@ -118,18 +112,13 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
                 return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Errors = new [] { ex.Message } });
-            }
+            
         }
 
         [HttpPut("reject/{requestId:int}")]
         public async Task<IActionResult> RejectRequest(int requestId)
         {
-            try
-            {
+            
                 var userId = User.GetUserIdFromClaims();
                 var userRoles = User.GetUserRolesFromClaims();
                 bool isAdmin = userRoles.Contains("Admin");
@@ -139,11 +128,7 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
                 return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Errors = new [] { ex.Message } });
-            }
+            
         }
 
         [HttpDelete("{requestId:int}")]

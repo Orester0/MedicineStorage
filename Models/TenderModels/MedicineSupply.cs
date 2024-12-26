@@ -1,6 +1,7 @@
 ﻿using MedicineStorage.Models.TenderModels;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using MedicineStorage.Helpers;
 
 namespace MedicineStorage.Models.Tender
 {
@@ -8,12 +9,17 @@ namespace MedicineStorage.Models.Tender
     {
         [Key]
         public int Id { get; set; }
+
         [Required]
         [ForeignKey("TenderProposalItem")]
         public int TenderProposalItemId { get; set; }
+
         [Required]
+        [Range(0.01, double.MaxValue)]
         public decimal Quantity { get; set; }
+
         [Required]
+        [FormerDate]
         public DateTime TransactionDate { get; set; }
 
         public virtual TenderProposalItem TenderProposalItem { get; set; }

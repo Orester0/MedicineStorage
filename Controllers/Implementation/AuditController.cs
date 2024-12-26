@@ -48,8 +48,7 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
+
                 var userId = User.GetUserIdFromClaims();
                 var result = await _auditService.CreateAuditAsync(userId, request);
 
@@ -59,18 +58,13 @@ namespace MedicineStorage.Controllers.Implementation
                 }
 
                 return CreatedAtAction(nameof(GetAuditById), new { auditId = result.Data.Id }, result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Errors = new [] { ex.Message } });
-            }
+
         }
 
         [HttpPut("start/{auditId:int}")]
         public async Task<IActionResult> StartAudit(int auditId, [FromBody] AuditNotes request)
         {
-            try
-            {
+            
                 var userId = User.GetUserIdFromClaims();
                 var result = await _auditService.StartAuditAsync(userId, auditId, request);
 
@@ -80,11 +74,7 @@ namespace MedicineStorage.Controllers.Implementation
                 }
 
                 return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Errors = new [] { ex.Message } });
-            }
+            
         }
 
         [HttpPut("update-items/{auditId:int}")]
@@ -94,8 +84,7 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
+            
                 var userId = User.GetUserIdFromClaims();
                 var result = await _auditService.UpdateAuditItemsAsync(userId, auditId, request);
 
@@ -105,18 +94,13 @@ namespace MedicineStorage.Controllers.Implementation
                 }
 
                 return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Errors = new [] { ex.Message } });
-            }
+            
         }
 
         [HttpPut("close/{auditId:int}")]
         public async Task<IActionResult> CloseAudit(int auditId, [FromBody] AuditNotes request)
         {
-            try
-            {
+            
                 var userId = User.GetUserIdFromClaims();
                 var result = await _auditService.CloseAuditAsync(userId, auditId, request);
 
@@ -126,11 +110,7 @@ namespace MedicineStorage.Controllers.Implementation
                 }
 
                 return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Errors = new [] { ex.Message } });
-            }
+            
         }
 
         [HttpPut("update/{auditId:int}")]

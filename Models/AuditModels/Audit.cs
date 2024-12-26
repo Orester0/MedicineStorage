@@ -14,9 +14,8 @@ namespace MedicineStorage.Models.AuditModels
         [ForeignKey("PlannedByUser")]
         public int PlannedByUserId { get; set; }
 
-        [Required]
         [ForeignKey("ExecutedByUser")]
-        public int ExecutedByUserId { get; set; }
+        public int? ExecutedByUserId { get; set; }
 
         [Required]
         [DataType(DataType.Date)]
@@ -36,7 +35,7 @@ namespace MedicineStorage.Models.AuditModels
         public AuditStatus Status { get; set; }
 
         public virtual User PlannedByUser { get; set; }
-        public virtual User ExecutedByUser { get; set; }
+        public virtual User? ExecutedByUser { get; set; }
         public virtual ICollection<AuditItem> AuditItems { get; set; }
     }
 

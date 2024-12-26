@@ -113,12 +113,12 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                     return result;
                 }
 
-                var medicinesNeedingSpecialAudit = await CheckMedicinesRequireSpecialAuditAsync(request.MedicineIds, userRolesResult.Data ?? new List<string>());
-                if (medicinesNeedingSpecialAudit.Any())
-                {
-                    result.Errors.Add("Some medicines require Admin for audits planning");
-                    return result;
-                }
+                //var medicinesNeedingSpecialAudit = await CheckMedicinesRequireSpecialAuditAsync(request.MedicineIds, userRolesResult.Data ?? new List<string>());
+                //if (medicinesNeedingSpecialAudit.Any())
+                //{
+                //    result.Errors.Add("Some medicines require Admin for audits planning");
+                //    return result;
+                //}
 
                 var audit = new Audit
                 {

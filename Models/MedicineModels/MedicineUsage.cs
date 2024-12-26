@@ -11,7 +11,6 @@ namespace MedicineStorage.Models.MedicineModels
         public int Id { get; set; }
 
         [Required]
-        [ForeignKey("Medicine")]
         public int MedicineId { get; set; }
 
         [Required]

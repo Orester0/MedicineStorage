@@ -30,223 +30,147 @@ namespace MedicineStorage.Data
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<MedicineSupply>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-
-                entity.Property(e => e.TenderProposalItemId)
-                      .IsRequired();
-
-                entity.Property(e => e.Quantity)
-                      .IsRequired()
-                      .HasColumnType("decimal(10, 0)");
-
-                entity.Property(e => e.TransactionDate)
-                      .IsRequired();
-
-                entity.HasOne(e => e.TenderProposalItem)
-                      .WithMany() 
-                      .HasForeignKey(e => e.TenderProposalItemId)
-                      .OnDelete(DeleteBehavior.Cascade);
-            });
-
             modelBuilder.Entity<User>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.FirstName).HasMaxLength(100).IsRequired();
-                entity.Property(e => e.LastName).HasMaxLength(100).IsRequired();
-                entity.HasIndex(e => e.UserName).IsUnique();
-                entity.Property(e => e.UserName).HasMaxLength(100);
-                entity.HasIndex(e => e.Email).IsUnique();
-                entity.Property(e => e.Email).HasMaxLength(255);
-            });
-
-            modelBuilder.Entity<UserRole>(entity =>
-            {
-                entity.HasKey(ur => new { ur.UserId, ur.RoleId });
-                entity.HasOne(ur => ur.User)
-                    .WithMany(u => u.UserRoles)
+                entity.HasMany(u => u.UserRoles)
+                    .WithOne(ur => ur.User)
                     .HasForeignKey(ur => ur.UserId)
                     .IsRequired();
-                entity.HasOne(ur => ur.Role)
-                    .WithMany()
+            });
+
+            modelBuilder.Entity<AppRole>(entity =>
+            {
+                entity.HasMany(r => r.UserRoles)
+                    .WithOne(ur => ur.Role)
                     .HasForeignKey(ur => ur.RoleId)
                     .IsRequired();
             });
 
-            modelBuilder.Entity<AuditItem>(entity =>
-            {
-                entity.Property(e => e.ActualQuantity)
-                    .HasPrecision(10, 0);
-                entity.Property(e => e.ExpectedQuantity)
-                    .HasPrecision(10, 0);
-            });
+            modelBuilder.Entity<MedicineSupply>()
+        .Property(m => m.Quantity)
+        .HasColumnType("decimal(18,2)");
 
-            modelBuilder.Entity<Medicine>(entity =>
-            {
-                entity.Property(e => e.MinimumStock)
-                    .HasPrecision(12, 0);
-                entity.Property(e => e.Stock)
-                    .HasPrecision(12, 0);
-            });
+            modelBuilder.Entity<TenderItem>()
+                .Property(t => t.RequiredQuantity)
+                .HasColumnType("decimal(18,2)");
 
-            modelBuilder.Entity<MedicineRequest>(entity =>
-            {
-                entity.Property(e => e.Quantity)
-                    .HasPrecision(10, 0);
-            });
-
-            modelBuilder.Entity<MedicineUsage>(entity =>
-            {
-                entity.Property(e => e.Quantity)
-                    .HasPrecision(10, 0);
-            });
-
-
-            modelBuilder.Entity<TenderProposal>(entity =>
-            {
-                entity.Property(e => e.TotalPrice)
-                    .HasPrecision(12, 0);
-            });
+            modelBuilder.Entity<TenderProposal>()
+                .Property(t => t.TotalPrice)
+                .HasColumnType("decimal(18,2)");
 
             modelBuilder.Entity<TenderProposalItem>(entity =>
             {
-                entity.Property(e => e.Quantity)
-                    .HasPrecision(10, 0);
-            });
+                entity.Property(t => t.Quantity)
+                    .HasColumnType("decimal(18,2)");
 
-            modelBuilder.Entity<TenderProposalItem>(entity =>
-            {
-                entity.Property(e => e.UnitPrice)
-                    .HasPrecision(12, 2);
-            });
-
-            modelBuilder.Entity<Audit>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.HasOne(a => a.PlannedByUser)
-                    .WithMany()
-                    .HasForeignKey(a => a.PlannedByUserId)
-                    .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(a => a.ExecutedByUser)
-                    .WithMany()
-                    .HasForeignKey(a => a.ExecutedByUserId)
-                    .OnDelete(DeleteBehavior.Restrict);
-                entity.HasMany(a => a.AuditItems)
-                    .WithOne(ai => ai.Audit)
-                    .HasForeignKey(ai => ai.AuditId)
-                    .OnDelete(DeleteBehavior.Cascade);
-            });
-
-            modelBuilder.Entity<AuditItem>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.ActualQuantity).HasPrecision(10, 0);
-                entity.Property(e => e.ExpectedQuantity).HasPrecision(10, 0);
-                entity.HasOne(ai => ai.Medicine)
-                    .WithMany()
-                    .HasForeignKey(ai => ai.MedicineId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
-
-            modelBuilder.Entity<Medicine>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.MinimumStock).HasPrecision(12, 0);
-                entity.Property(e => e.Stock).HasPrecision(12, 0);
-
-            });
-            modelBuilder.Entity<MedicineRequest>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Quantity).HasPrecision(10, 0);
-
-                entity.HasOne(mr => mr.RequestedByUser)
-                    .WithMany()
-                    .HasForeignKey(mr => mr.RequestedByUserId)
-                    .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne(mr => mr.ApprovedByUser)
-                    .WithMany()
-                    .HasForeignKey(mr => mr.ApprovedByUserId)
-                    .OnDelete(DeleteBehavior.Restrict);
-               
-                entity.HasMany(mr => mr.MedicineUsages)
-                    .WithOne(mu => mu.MedicineRequest)
-                    .HasForeignKey(mu => mu.MedicineRequestId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
-
-            modelBuilder.Entity<MedicineUsage>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Quantity).HasPrecision(10, 0);
-
-                entity.HasOne(mu => mu.MedicineRequest)
-                    .WithMany(mr => mr.MedicineUsages) 
-                    .HasForeignKey(mu => mu.MedicineRequestId)
-                    .OnDelete(DeleteBehavior.Restrict);
-
-                entity.HasOne(mu => mu.UsedByUser)
-                    .WithMany()
-                    .HasForeignKey(mu => mu.UsedByUserId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(t => t.UnitPrice)
+                    .HasColumnType("decimal(18,2)");
             });
 
             modelBuilder.Entity<Tender>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Title).IsRequired().HasMaxLength(255);
-                entity.Property(e => e.Description).IsRequired().HasMaxLength(2000);
                 entity.HasOne(t => t.CreatedByUser)
                     .WithMany()
                     .HasForeignKey(t => t.CreatedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
+
                 entity.HasOne(t => t.OpenedByUser)
                     .WithMany()
                     .HasForeignKey(t => t.OpenedByUserId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
+
                 entity.HasOne(t => t.ClosedByUser)
                     .WithMany()
                     .HasForeignKey(t => t.ClosedByUserId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
+
                 entity.HasOne(t => t.WinnerSelectedByUser)
                     .WithMany()
                     .HasForeignKey(t => t.WinnerSelectedByUserId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
 
-            modelBuilder.Entity<TenderItem>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.RequiredQuantity).HasPrecision(18, 2);
-                entity.HasOne(ti => ti.Medicine)
-                    .WithMany()
-                    .HasForeignKey(ti => ti.MedicineId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
+                entity.HasMany(t => t.Items)
+                    .WithOne()
+                    .HasForeignKey(ti => ti.TenderId);
 
+                entity.HasMany(t => t.Proposals)
+                    .WithOne()
+                    .HasForeignKey(tp => tp.TenderId);
+            });
 
             modelBuilder.Entity<TenderProposal>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.TotalPrice).HasPrecision(12, 0);
                 entity.HasOne(tp => tp.CreatedByUser)
                     .WithMany()
                     .HasForeignKey(tp => tp.CreatedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(tp => tp.Items)
+                    .WithOne()
+                    .HasForeignKey(tpi => tpi.TenderProposalId);
             });
 
-            modelBuilder.Entity<TenderProposalItem>(entity =>
+            modelBuilder.Entity<Medicine>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.UnitPrice).HasPrecision(12, 2);
-                entity.Property(e => e.Quantity).HasPrecision(10, 0);
-                entity.HasOne(tpi => tpi.Medicine)
+                entity.HasMany(m => m.Requests)
+                    .WithOne()
+                    .HasForeignKey(mr => mr.MedicineId);
+
+                entity.HasMany(m => m.UsageRecords)
+                    .WithOne()
+                    .HasForeignKey(mu => mu.MedicineId);
+            });
+
+            modelBuilder.Entity<MedicineRequest>(entity =>
+            {
+                entity.HasOne(mr => mr.RequestedByUser)
                     .WithMany()
-                    .HasForeignKey(tpi => tpi.MedicineId)
+                    .HasForeignKey(mr => mr.RequestedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(mr => mr.ApprovedByUser)
+                    .WithMany()
+                    .HasForeignKey(mr => mr.ApprovedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(mr => mr.MedicineUsages)
+                    .WithOne()
+                    .HasForeignKey(mu => mu.MedicineRequestId);
+            });
+
+            modelBuilder.Entity<MedicineUsage>(entity =>
+            {
+                entity.HasOne(mu => mu.UsedByUser)
+                    .WithMany()
+                    .HasForeignKey(mu => mu.UsedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(mu => mu.MedicineRequest)
+                    .WithMany(mr => mr.MedicineUsages)
+                    .HasForeignKey(mu => mu.MedicineRequestId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
+            modelBuilder.Entity<Audit>(entity =>
+            {
+                entity.HasOne(a => a.PlannedByUser)
+                    .WithMany()
+                    .HasForeignKey(a => a.PlannedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(a => a.ExecutedByUser)
+                    .WithMany()
+                    .HasForeignKey(a => a.ExecutedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict)
+                    .IsRequired(false);
+
+                entity.HasMany(a => a.AuditItems)
+                    .WithOne()
+                    .HasForeignKey(ai => ai.AuditId);
+            });
         }
     }
 }

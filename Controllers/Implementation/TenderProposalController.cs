@@ -43,8 +43,7 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
+            
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.SubmitProposalAsync(proposalId, proposalDto, userId);
                 if (!result.Success)
@@ -52,18 +51,13 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
                 return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Errors = new [] { ex.Message } });
-            }
+            
         }
 
         [HttpPut("execute/{proposalId:int}/{tenderItemId:int}")]
         public async Task<IActionResult> ExecuteTenderItem(int tenderItemId, int proposalId)
         {
-            try
-            {
+            
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.ExecuteTenderItemAsync(tenderItemId, proposalId, userId);
                 if (!result.Success)
@@ -71,18 +65,13 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
                 return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Errors = new [] { ex.Message } });
-            }
+            
         }
 
         [HttpPut("execute/{proposalId:int}")]
         public async Task<IActionResult> ExecuteTender(int proposalId)
         {
-            try
-            {
+            
                 var userId = User.GetUserIdFromClaims();
                 var result = await _tenderService.ExecuteTenderAsync(proposalId, userId);
                 if (!result.Success)
@@ -90,11 +79,7 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
                 return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Errors = new [] { ex.Message } });
-            }
+            
         }
     }
 }

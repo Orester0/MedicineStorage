@@ -22,6 +22,7 @@ namespace MedicineStorage.Models.TenderModels
         public int MedicineId { get; set; }
 
         [Required]
+        [Range(0.01, double.MaxValue)]
         public decimal RequiredQuantity { get; set; }
 
         [Required]

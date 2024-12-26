@@ -55,8 +55,7 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 return BadRequest(ModelState);
             }
-            try
-            {
+            
                 var userId = User.GetUserIdFromClaims();
                 var result = await _operationsService.CreateUsageAsync(createUsageDto, userId);
                 if (!result.Success)
@@ -64,11 +63,7 @@ namespace MedicineStorage.Controllers.Implementation
                     return BadRequest(new { result.Errors });
                 }
                 return Ok(result.Data);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                return Unauthorized(new { Errors = new [] { ex.Message } });
-            }
+            
         }
     }
 }

@@ -24,9 +24,11 @@ namespace MedicineStorage.Models.TenderModels
         public int? WinnerSelectedByUserId { get; set; }
 
         [Required]
+        [StringLength(200, MinimumLength = 5)]
         public string Title { get; set; }
 
         [Required]
+        [StringLength(2000, MinimumLength = 5)]
         public string Description { get; set; }
 
         [Required]
@@ -41,9 +43,9 @@ namespace MedicineStorage.Models.TenderModels
         public TenderStatus Status { get; set; }
 
         public virtual User CreatedByUser { get; set; }
-        public virtual User OpenedByUser { get; set; }
-        public virtual User ClosedByUser { get; set; }
-        public virtual User WinnerSelectedByUser { get; set; }
+        public virtual User? OpenedByUser { get; set; }
+        public virtual User? ClosedByUser { get; set; }
+        public virtual User? WinnerSelectedByUser { get; set; }
 
         public virtual ICollection<TenderItem> Items { get; set; }
         public virtual ICollection<TenderProposal> Proposals { get; set; }

@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.DTOs
 {
-    class ReturnMedicineRequestDTO
+    public class ReturnMedicineRequestDTO
     {
         [Required]
         public int Id { get; set; }

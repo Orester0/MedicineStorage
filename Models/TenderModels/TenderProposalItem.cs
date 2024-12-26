@@ -15,8 +15,11 @@ namespace MedicineStorage.Models.TenderModels
         [ForeignKey("Medicine")]
         public int MedicineId { get; set; }
         [Required]
+        [Range(0.01, double.MaxValue)]
         public decimal UnitPrice { get; set; }
+
         [Required]
+        [Range(0.01, double.MaxValue)]
         public decimal Quantity { get; set; }
         public virtual Medicine Medicine { get; set; }
     }

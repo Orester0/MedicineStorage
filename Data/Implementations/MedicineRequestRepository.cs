@@ -78,7 +78,6 @@ namespace MedicineStorage.Data.Implementations
         {
             var usage = await _context.MedicineUsages
                 .Where(u => u.Id == usageId)
-                .Include(u => u.MedicineRequest)
                 .FirstOrDefaultAsync();
 
             return usage?.MedicineRequest;

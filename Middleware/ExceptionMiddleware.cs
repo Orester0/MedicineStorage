@@ -24,6 +24,25 @@ namespace MedicineStorage.Middleware
             {
                 await next(context);
             }
+            catch (UnauthorizedAccessException ex)
+            {
+                logger.LogWarning(ex, ex.Message);
+                context.Response.ContentType = "application/json";
+                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
+
+                var response = env.IsDevelopment()
+                    ? new ApiError(context.Response.StatusCode, ex.Message, ex.StackTrace)
+                    : new ApiError(context.Response.StatusCode, ex.Message, "Unauthorized access");
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                };
+
+                var json = JsonSerializer.Serialize(response, options);
+
+                await context.Response.WriteAsync(json);
+            }
             catch (Exception ex)
             {
                 logger.LogError(ex, ex.Message);

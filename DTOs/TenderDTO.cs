@@ -1,4 +1,5 @@
-﻿using MedicineStorage.Models.MedicineModels;
+﻿using MedicineStorage.Helpers;
+using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.TenderModels;
 using MedicineStorage.Models.UserModels;
 using System.ComponentModel.DataAnnotations;
@@ -28,11 +29,15 @@ namespace MedicineStorage.DTOs
     public class CreateTenderDTO
     {
         [Required]
-        [StringLength(200)]
+        [StringLength(200, MinimumLength = 5)]
         public string Title { get; set; }
+
         [Required]
+        [StringLength(2000, MinimumLength = 5)]
         public string Description { get; set; }
+
         [Required]
+        [FutureDate]
         public DateTime DeadlineDate { get; set; }
     }
 
@@ -47,11 +52,11 @@ namespace MedicineStorage.DTOs
 
     public class CreateTenderItemDTO
     {
-
         [Required]
         public int MedicineId { get; set; }
 
         [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
         public decimal RequiredQuantity { get; set; }
     }
 
@@ -68,7 +73,9 @@ namespace MedicineStorage.DTOs
     {
         [Required]
         public List<CreateTenderProposalItemDTO> ProposalItemsDTOs { get; set; }
+
         [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Total price must be greater than 0")]
         public decimal TotalPrice { get; set; }
     }
 
@@ -87,11 +94,16 @@ namespace MedicineStorage.DTOs
     {
         [Required]
         public int TenderProposalId { get; set; }
+
         [Required]
         public int MedicineId { get; set; }
+
         [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Unit price must be greater than 0")]
         public decimal UnitPrice { get; set; }
+
         [Required]
+        [Range(0.01, double.MaxValue, ErrorMessage = "Quantity must be greater than 0")]
         public decimal Quantity { get; set; }
     }
 

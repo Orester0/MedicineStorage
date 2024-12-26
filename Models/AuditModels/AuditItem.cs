@@ -11,7 +11,6 @@ namespace MedicineStorage.Models.AuditModels
         public int Id { get; set; }
 
         [Required]
-        [ForeignKey("Audit")]
         public int AuditId { get; set; }
 
         [Required]
@@ -28,7 +27,6 @@ namespace MedicineStorage.Models.AuditModels
         [Range(0, double.MaxValue)]
         public decimal ActualQuantity { get; set; }
 
-        public virtual Audit Audit { get; set; }
         public virtual Medicine Medicine { get; set; }
     }
 }

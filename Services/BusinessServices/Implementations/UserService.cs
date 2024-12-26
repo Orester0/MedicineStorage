@@ -261,7 +261,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-
         public async Task<ServiceResult<bool>> ChangePasswordAsync(int userId, string currentPassword, string newPassword)
         {
             var result = new ServiceResult<bool>();
