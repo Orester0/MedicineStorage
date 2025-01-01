@@ -18,6 +18,7 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.TenderProposals
                 .Include(tp => tp.CreatedByUser)
+                .Include(tp => tp.Items)
                 .ToListAsync();
         }
 
@@ -26,6 +27,7 @@ namespace MedicineStorage.Data.Implementations
             return await _context.TenderProposals
                 .Where(tp => tp.TenderId == tenderId)
                 .Include(tp => tp.CreatedByUser)
+                .Include(tp => tp.Items)
                 .ToListAsync();
         }
 
@@ -34,6 +36,7 @@ namespace MedicineStorage.Data.Implementations
             return await _context.TenderProposals
                 .Where(tp => tp.CreatedByUserId == userId)
                 .Include(tp => tp.CreatedByUser)
+                .Include(tp => tp.Items)
                 .ToListAsync();
         }
 
@@ -42,6 +45,7 @@ namespace MedicineStorage.Data.Implementations
             return await _context.TenderProposals
                 .Where(tp => tp.Status == status)
                 .Include(tp => tp.CreatedByUser)
+                .Include(tp => tp.Items)
                 .ToListAsync();
         }
 

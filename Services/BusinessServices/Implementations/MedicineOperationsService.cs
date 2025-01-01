@@ -212,7 +212,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(createUsageDTO.MedicineId);
                 if (medicine == null)
                 {
-                    result.Errors.Add("Medicine not found");
+                    result.Errors.Add("ReturnMedicineDTO not found");
                     return result;
                 }
 
@@ -257,7 +257,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(createRequestDTO.MedicineId);
                 if (medicine == null)
                 {
-                    result.Errors.Add("Medicine not found");
+                    result.Errors.Add("ReturnMedicineDTO not found");
                     return result;
                 }
 
@@ -301,7 +301,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(request.MedicineId);
                 if (medicine == null)
                 {
-                    result.Errors.Add("Medicine not found");
+                    result.Errors.Add("ReturnMedicineDTO not found");
                     return result;
                 }
 
@@ -362,7 +362,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(request.MedicineId);
                 if (medicine == null)
                 {
-                    result.Errors.Add("Medicine not found");
+                    result.Errors.Add("ReturnMedicineDTO not found");
                     return result;
                 }
                 if (medicine.RequiresSpecialApproval && !isSpecialApproval)

@@ -2,13 +2,22 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using MedicineStorage.Helpers;
+using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.DTOs;
 
 namespace MedicineStorage.Models.Tender
 {
+
     public class MedicineSupply
     {
         [Key]
         public int Id { get; set; }
+
+
+        [Required]
+        [ForeignKey("ReturnMedicineDTO")]
+        public int MedicineId { get; set; }
+
 
         [Required]
         [ForeignKey("TenderProposalItem")]
@@ -21,6 +30,9 @@ namespace MedicineStorage.Models.Tender
         [Required]
         [FormerDate]
         public DateTime TransactionDate { get; set; }
+
+
+        public Medicine Medicine { get; set; }
 
         public virtual TenderProposalItem TenderProposalItem { get; set; }
     }

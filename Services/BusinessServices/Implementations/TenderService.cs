@@ -226,14 +226,14 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
                 if (tender.Status != TenderStatus.Created)
                 {
-                    result.Errors.Add("Items can only be added to draft tenders.");
+                    result.Errors.Add("TenderItems can only be added to draft tenders.");
                     return result;
                 }
 
                 var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(tenderItemDto.MedicineId);
                 if (medicine == null)
                 {
-                    result.Errors.Add("Medicine not found.");
+                    result.Errors.Add("ReturnMedicineDTO not found.");
                     return result;
                 }
 
@@ -344,7 +344,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
                 if (tender.Status != TenderStatus.Published)
                 {
-                    result.Errors.Add("Proposals can only be submitted to published tenders.");
+                    result.Errors.Add("TenderProposals can only be submitted to published tenders.");
                     return result;
                 }
 
@@ -621,7 +621,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 }
                 else
                 {
-                    result.Errors.Add($"Medicine not found for tender item with ID {tenderItem.Id}");
+                    result.Errors.Add($"ReturnMedicineDTO not found for tender item with ID {tenderItem.Id}");
                     return result;
                 }
 
@@ -712,7 +712,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                         }
                         else
                         {
-                            result.Errors.Add($"Medicine not found for tender item with ID {tenderItem.Id}");
+                            result.Errors.Add($"ReturnMedicineDTO not found for tender item with ID {tenderItem.Id}");
                             return result;
                         }
                     }

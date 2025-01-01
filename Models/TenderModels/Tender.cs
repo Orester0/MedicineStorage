@@ -34,7 +34,7 @@ namespace MedicineStorage.Models.TenderModels
         [Required]
         public DateTime PublishDate { get; set; }
 
-        public DateTime ClosingDate { get; set; }
+        public DateTime? ClosingDate { get; set; }
 
         [Required]
         public DateTime DeadlineDate { get; set; }
@@ -47,8 +47,8 @@ namespace MedicineStorage.Models.TenderModels
         public virtual User? ClosedByUser { get; set; }
         public virtual User? WinnerSelectedByUser { get; set; }
 
-        public virtual ICollection<TenderItem> Items { get; set; }
-        public virtual ICollection<TenderProposal> Proposals { get; set; }
+        public virtual ICollection<TenderItem> TenderItems { get; set; }
+        public virtual ICollection<TenderProposal> TenderProposals { get; set; }
     }
 
     public enum TenderStatus

@@ -1,4 +1,5 @@
 ﻿using MedicineStorage.Data.Interfaces;
+using MedicineStorage.DTOs;
 using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models.MedicineModels;
 using Microsoft.EntityFrameworkCore;
@@ -11,8 +12,6 @@ namespace MedicineStorage.Data.Implementations
         public async Task<Medicine?> GetByIdAsync(int id)
         {
             return await _context.Medicines
-                .Include(m => m.Requests)
-                .Include(m => m.UsageRecords)
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
@@ -20,13 +19,13 @@ namespace MedicineStorage.Data.Implementations
         {
             var query = _context.Medicines.AsQueryable();
 
-            if (!string.IsNullOrEmpty(parameters.Name))
+            if (!string.IsNullOrWhiteSpace(parameters.Name))
                 query = query.Where(m => m.Name.Contains(parameters.Name));
 
-            if (!string.IsNullOrEmpty(parameters.Description))
+            if (!string.IsNullOrWhiteSpace(parameters.Description))
                 query = query.Where(m => m.Description.Contains(parameters.Description));
 
-            if (!string.IsNullOrEmpty(parameters.Category))
+            if (!string.IsNullOrWhiteSpace(parameters.Category))
                 query = query.Where(m => m.Category == parameters.Category);
 
             if (parameters.RequiresSpecialApproval.HasValue)
@@ -53,18 +52,15 @@ namespace MedicineStorage.Data.Implementations
             if (parameters.MaxAuditFrequencyDays.HasValue)
                 query = query.Where(m => m.AuditFrequencyDays <= parameters.MaxAuditFrequencyDays);
 
-            if (!string.IsNullOrEmpty(parameters.SortBy))
+            query = parameters.SortBy?.ToLower() switch
             {
-                query = parameters.SortBy.ToLower() switch
-                {
-                    "name" => parameters.IsDescending ? query.OrderByDescending(m => m.Name) : query.OrderBy(m => m.Name),
-                    "category" => parameters.IsDescending ? query.OrderByDescending(m => m.Category) : query.OrderBy(m => m.Category),
-                    "stock" => parameters.IsDescending ? query.OrderByDescending(m => m.Stock) : query.OrderBy(m => m.Stock),
-                    "minimumstock" => parameters.IsDescending ? query.OrderByDescending(m => m.MinimumStock) : query.OrderBy(m => m.MinimumStock),
-                    "auditfrequencydays" => parameters.IsDescending ? query.OrderByDescending(m => m.AuditFrequencyDays) : query.OrderBy(m => m.AuditFrequencyDays),
-                    _ => query.OrderBy(m => m.Id)
-                };
-            }
+                "name" => parameters.IsDescending ? query.OrderByDescending(m => m.Name) : query.OrderBy(m => m.Name),
+                "category" => parameters.IsDescending ? query.OrderByDescending(m => m.Category) : query.OrderBy(m => m.Category),
+                "stock" => parameters.IsDescending ? query.OrderByDescending(m => m.Stock) : query.OrderBy(m => m.Stock),
+                "minimumstock" => parameters.IsDescending ? query.OrderByDescending(m => m.MinimumStock) : query.OrderBy(m => m.MinimumStock),
+                "auditfrequencydays" => parameters.IsDescending ? query.OrderByDescending(m => m.AuditFrequencyDays) : query.OrderBy(m => m.AuditFrequencyDays),
+                _ => query.OrderBy(m => m.Id)
+            };
 
             var totalCount = await query.CountAsync();
             var items = await query
@@ -74,6 +70,7 @@ namespace MedicineStorage.Data.Implementations
 
             return (items, totalCount);
         }
+
 
 
         public async Task<Medicine> CreateMedicineAsync(Medicine medicine)

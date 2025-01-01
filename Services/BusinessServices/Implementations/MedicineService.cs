@@ -13,15 +13,15 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         IUnitOfWork _unitOfWork,
         IMapper _mapper) : IMedicineService
     {
-        public async Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetMedicinesAsync(MedicineParams parameters)
+        public async Task<ServiceResult<PagedList<DTOs.ReturnMedicineDTO>>> GetMedicinesAsync(MedicineParams parameters)
         {
-            var result = new ServiceResult<PagedList<ReturnMedicineDTO>>();
+            var result = new ServiceResult<PagedList<DTOs.ReturnMedicineDTO>>();
 
             try
             {
                 var (medicines, totalCount) = await _unitOfWork.MedicineRepository.GetAllAsync(parameters);
-                var dtos = _mapper.Map<IEnumerable<ReturnMedicineDTO>>(medicines);
-                result.Data = new PagedList<ReturnMedicineDTO>(dtos.ToList(), totalCount, parameters.PageNumber, parameters.PageSize);
+                var dtos = _mapper.Map<IEnumerable<DTOs.ReturnMedicineDTO>>(medicines);
+                result.Data = new PagedList<DTOs.ReturnMedicineDTO>(dtos.ToList(), totalCount, parameters.PageNumber, parameters.PageSize);
             }
             catch (Exception)
             {
@@ -31,20 +31,20 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<ReturnMedicineDTO>> GetMedicineByIdAsync(int id)
+        public async Task<ServiceResult<DTOs.ReturnMedicineDTO>> GetMedicineByIdAsync(int id)
         {
-            var result = new ServiceResult<ReturnMedicineDTO>();
+            var result = new ServiceResult<DTOs.ReturnMedicineDTO>();
 
             try
             {
                 var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(id);
                 if (medicine == null)
                 {
-                    result.Errors.Add($"Medicine with ID {id} not found");
+                    result.Errors.Add($"ReturnMedicineDTO with ID {id} not found");
                     return result;
                 }
 
-                result.Data = _mapper.Map<ReturnMedicineDTO>(medicine);
+                result.Data = _mapper.Map<DTOs.ReturnMedicineDTO>(medicine);
             }
             catch (Exception)
             {
@@ -58,9 +58,9 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
 
 
-        public async Task<ServiceResult<ReturnMedicineDTO>> CreateMedicineAsync(CreateMedicineDTO createMedicineDTO)
+        public async Task<ServiceResult<DTOs.ReturnMedicineDTO>> CreateMedicineAsync(CreateMedicineDTO createMedicineDTO)
         {
-            var result = new ServiceResult<ReturnMedicineDTO>();
+            var result = new ServiceResult<DTOs.ReturnMedicineDTO>();
 
             try
             {
@@ -74,7 +74,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 }
 
                 await _unitOfWork.Complete();
-                result.Data = _mapper.Map<ReturnMedicineDTO>(createdMedicine);
+                result.Data = _mapper.Map<DTOs.ReturnMedicineDTO>(createdMedicine);
             }
             catch (Exception)
             {
@@ -93,7 +93,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 var existingMedicine = await _unitOfWork.MedicineRepository.GetByIdAsync(id);
                 if (existingMedicine == null)
                 {
-                    result.Errors.Add($"Medicine with ID {id} not found");
+                    result.Errors.Add($"ReturnMedicineDTO with ID {id} not found");
                     return result;
                 }
 
@@ -122,7 +122,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(id);
                 if (medicine == null)
                 {
-                    result.Errors.Add($"Medicine with ID {id} not found");
+                    result.Errors.Add($"ReturnMedicineDTO with ID {id} not found");
                     return result;
                 }
 

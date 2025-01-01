@@ -1,4 +1,5 @@
-﻿using MedicineStorage.Models.MedicineModels;
+﻿using MedicineStorage.DTOs;
+using MedicineStorage.Models.MedicineModels;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -18,7 +19,7 @@ namespace MedicineStorage.Models.TenderModels
         [Required]
         public int TenderId { get; set; }
         [Required]
-        [ForeignKey("Medicine")]
+        [ForeignKey("ReturnMedicineDTO")]
         public int MedicineId { get; set; }
 
         [Required]

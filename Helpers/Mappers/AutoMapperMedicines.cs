@@ -9,10 +9,8 @@ namespace MedicineStorage.Helpers.Mappers
         public AutoMapperMedicines()
         {
             CreateMap<Medicine, ReturnMedicineDTO>();
-            CreateMap<ReturnMedicineDTO, Medicine>();
 
             CreateMap<CreateMedicineDTO, Medicine>();
-            CreateMap<Medicine, CreateMedicineDTO>();
         }
     }
 }

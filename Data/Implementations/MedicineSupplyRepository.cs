@@ -11,13 +11,15 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.Set<MedicineSupply>()
                 .Include(it => it.TenderProposalItem)
+                .Include(it => it.Medicine)
                 .ToListAsync();
         }
 
         public async Task<MedicineSupply> GetByIdAsync(int id)
         {
-            return await _context.Set<MedicineSupply>()
-                .Include(it => it.TenderProposalItem) 
+            return await _context.MedicineSupplies
+                .Include(it => it.TenderProposalItem)
+                .Include(it => it.Medicine)
                 .FirstOrDefaultAsync(it => it.Id == id);
         }
 

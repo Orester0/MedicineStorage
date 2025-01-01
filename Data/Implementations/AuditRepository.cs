@@ -9,8 +9,13 @@ namespace MedicineStorage.Data.Implementations
     {
         public async Task<(IEnumerable<Audit>, int)> GetAllAuditsAsync(AuditParams auditParams)
         {
-            var query = _context.Audits.AsQueryable();
+            var query = _context.Audits
+                .Include(a => a.PlannedByUser)
+                .Include(a => a.ExecutedByUser)
+                .Include(a => a.AuditItems)
+                .AsQueryable();
 
+            // Фільтрація
             if (auditParams.FromDate.HasValue)
                 query = query.Where(x => x.PlannedDate >= auditParams.FromDate);
 
@@ -20,14 +25,36 @@ namespace MedicineStorage.Data.Implementations
             if (auditParams.Status.HasValue)
                 query = query.Where(x => x.Status == auditParams.Status);
 
-            query = auditParams.SortyBy switch
+            if (auditParams.PlannedByUserId.HasValue)
+                query = query.Where(x => x.PlannedByUserId == auditParams.PlannedByUserId);
+
+            if (auditParams.ExecutedByUserId.HasValue)
+                query = query.Where(x => x.ExecutedByUserId == auditParams.ExecutedByUserId);
+
+            if (!string.IsNullOrWhiteSpace(auditParams.Notes))
+                query = query.Where(x => x.Notes != null && x.Notes.Contains(auditParams.Notes));
+
+            // Сортування
+            query = auditParams.SortBy?.ToLower() switch
             {
-                "date" => query.OrderBy(x => x.PlannedDate),
-                "dateDesc" => query.OrderByDescending(x => x.PlannedDate),
-                "status" => query.OrderBy(x => x.Status),
-                _ => query.OrderByDescending(x => x.PlannedDate)
+                "date" => auditParams.IsDescending
+                    ? query.OrderByDescending(x => x.PlannedDate)
+                    : query.OrderBy(x => x.PlannedDate),
+                "startdate" => auditParams.IsDescending
+                    ? query.OrderByDescending(x => x.StartDate)
+                    : query.OrderBy(x => x.StartDate),
+                "enddate" => auditParams.IsDescending
+                    ? query.OrderByDescending(x => x.EndDate)
+                    : query.OrderBy(x => x.EndDate),
+                "status" => auditParams.IsDescending
+                    ? query.OrderByDescending(x => x.Status)
+                    : query.OrderBy(x => x.Status),
+                _ => auditParams.IsDescending
+                    ? query.OrderByDescending(x => x.PlannedDate)
+                    : query.OrderBy(x => x.PlannedDate)
             };
 
+            // Пагінація
             var totalCount = await query.CountAsync();
             var items = await query
                 .Skip((auditParams.PageNumber - 1) * auditParams.PageSize)
@@ -37,26 +64,44 @@ namespace MedicineStorage.Data.Implementations
             return (items, totalCount);
         }
 
-        public async Task<Audit?> GetAuditByIdAsync(int auditId)
+
+        public async Task<Audit?> GetAuditByIdAsync(int id)
         {
-            return await _context.Audits.FindAsync(auditId);
+            return await _context.Audits
+                .Include(a => a.PlannedByUser)
+                .Include(a => a.ExecutedByUser)
+                .Include(a => a.AuditItems)
+                .FirstOrDefaultAsync(a => a.Id == id);
         }
 
         public async Task<IEnumerable<AuditItem>> GetAuditItemsByAuditIdAsync(int auditId)
         {
-            return await _context.AuditItems.Where(ai => ai.AuditId == auditId).ToListAsync();
+            return await _context.AuditItems
+                .Where(ai => ai.AuditId == auditId)
+                .Include(ai => ai.Medicine)
+                .ToListAsync();
         }
 
 
         public async Task<IEnumerable<Audit>> GetAuditsByPlannedUserIdAsync(int userId)
         {
-            return await _context.Audits.Where(ai => ai.ExecutedByUserId == userId).ToListAsync();
+            return await _context.Audits
+                .Where(ai => ai.ExecutedByUserId == userId)
+                .Include(a => a.PlannedByUser)
+                .Include(a => a.ExecutedByUser)
+                .Include(a => a.AuditItems)
+                .ToListAsync();
         }
 
 
         public async Task<IEnumerable<Audit>> GetAuditsByExecutedUserIdAsync(int userId)
         {
-            return await _context.Audits.Where(ai => ai.PlannedByUserId == userId).ToListAsync();
+            return await _context.Audits
+                .Where(ai => ai.PlannedByUserId == userId)
+                .Include(a => a.PlannedByUser)
+                .Include(a => a.ExecutedByUser)
+                .Include(a => a.AuditItems)
+                .ToListAsync();
         }
 
         public async Task<Audit> CreateAuditAsync(Audit audit)

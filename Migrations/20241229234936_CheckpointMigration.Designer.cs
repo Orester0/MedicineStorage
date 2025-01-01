@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MedicineStorage.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20241223154957_MakeUserFieldsNullable")]
-    partial class MakeUserFieldsNullable
+    [Migration("20241229234936_CheckpointMigration")]
+    partial class CheckpointMigration
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -36,11 +36,12 @@ namespace MedicineStorage.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("datetime2");
 
-                    b.Property<int>("ExecutedByUserId")
+                    b.Property<int?>("ExecutedByUserId")
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("PlannedByUserId")
                         .HasColumnType("int");
@@ -72,15 +73,13 @@ namespace MedicineStorage.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<decimal>("ActualQuantity")
-                        .HasPrecision(10)
-                        .HasColumnType("decimal(10,0)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("AuditId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("ExpectedQuantity")
-                        .HasPrecision(10)
-                        .HasColumnType("decimal(10,0)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("MedicineId")
                         .HasColumnType("int");
@@ -107,7 +106,8 @@ namespace MedicineStorage.Migrations
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -115,8 +115,7 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("nvarchar(500)");
 
                     b.Property<decimal>("MinimumStock")
-                        .HasPrecision(12)
-                        .HasColumnType("decimal(12,0)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -130,8 +129,7 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("bit");
 
                     b.Property<decimal>("Stock")
-                        .HasPrecision(12)
-                        .HasColumnType("decimal(12,0)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -153,14 +151,14 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Justification")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<int>("MedicineId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Quantity")
-                        .HasPrecision(10)
-                        .HasColumnType("decimal(10,0)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("RequestDate")
                         .HasColumnType("datetime2");
@@ -200,11 +198,11 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<decimal>("Quantity")
-                        .HasPrecision(10)
-                        .HasColumnType("decimal(10,0)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<DateTime>("UsageDate")
                         .HasColumnType("datetime2");
@@ -231,8 +229,11 @@ namespace MedicineStorage.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("MedicineId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(10, 0)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TenderProposalItemId")
                         .HasColumnType("int");
@@ -241,6 +242,8 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MedicineId");
 
                     b.HasIndex("TenderProposalItemId");
 
@@ -258,7 +261,7 @@ namespace MedicineStorage.Migrations
                     b.Property<int?>("ClosedByUserId")
                         .HasColumnType("int");
 
-                    b.Property<DateTime>("ClosingDate")
+                    b.Property<DateTime?>("ClosingDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("CreatedByUserId")
@@ -283,8 +286,8 @@ namespace MedicineStorage.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int?>("WinnerSelectedByUserId")
                         .HasColumnType("int");
@@ -314,7 +317,6 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("RequiredQuantity")
-                        .HasPrecision(18, 2)
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Status")
@@ -353,8 +355,7 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("TotalPrice")
-                        .HasPrecision(12)
-                        .HasColumnType("decimal(12,0)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -377,15 +378,13 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("Quantity")
-                        .HasPrecision(10)
-                        .HasColumnType("decimal(10,0)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("TenderProposalId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("UnitPrice")
-                        .HasPrecision(12, 2)
-                        .HasColumnType("decimal(12,2)");
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -442,8 +441,8 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Email")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
@@ -488,14 +487,10 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("UserName")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(256)
+                        .HasColumnType("nvarchar(256)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("Email")
-                        .IsUnique()
-                        .HasFilter("[Email] IS NOT NULL");
 
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
@@ -504,10 +499,6 @@ namespace MedicineStorage.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
-
-                    b.HasIndex("UserName")
-                        .IsUnique()
-                        .HasFilter("[UserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -520,12 +511,7 @@ namespace MedicineStorage.Migrations
                     b.Property<int>("RoleId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("AppRoleId")
-                        .HasColumnType("int");
-
                     b.HasKey("UserId", "RoleId");
-
-                    b.HasIndex("AppRoleId");
 
                     b.HasIndex("RoleId");
 
@@ -625,8 +611,7 @@ namespace MedicineStorage.Migrations
                     b.HasOne("MedicineStorage.Models.UserModels.User", "ExecutedByUser")
                         .WithMany()
                         .HasForeignKey("ExecutedByUserId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("MedicineStorage.Models.UserModels.User", "PlannedByUser")
                         .WithMany()
@@ -641,7 +626,7 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("MedicineStorage.Models.AuditModels.AuditItem", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.AuditModels.Audit", "Audit")
+                    b.HasOne("MedicineStorage.Models.AuditModels.Audit", null)
                         .WithMany("AuditItems")
                         .HasForeignKey("AuditId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -652,8 +637,6 @@ namespace MedicineStorage.Migrations
                         .HasForeignKey("MedicineId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Audit");
 
                     b.Navigation("Medicine");
                 });
@@ -666,7 +649,7 @@ namespace MedicineStorage.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("MedicineStorage.Models.MedicineModels.Medicine", "Medicine")
-                        .WithMany("Requests")
+                        .WithMany()
                         .HasForeignKey("MedicineId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -687,13 +670,13 @@ namespace MedicineStorage.Migrations
             modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineUsage", b =>
                 {
                     b.HasOne("MedicineStorage.Models.MedicineModels.Medicine", "Medicine")
-                        .WithMany("UsageRecords")
+                        .WithMany()
                         .HasForeignKey("MedicineId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("MedicineStorage.Models.MedicineModels.MedicineRequest", "MedicineRequest")
-                        .WithMany("MedicineUsages")
+                        .WithMany()
                         .HasForeignKey("MedicineRequestId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
@@ -713,11 +696,19 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("MedicineStorage.Models.Tender.MedicineSupply", b =>
                 {
+                    b.HasOne("MedicineStorage.Models.MedicineModels.Medicine", "Medicine")
+                        .WithMany()
+                        .HasForeignKey("MedicineId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
                     b.HasOne("MedicineStorage.Models.TenderModels.TenderProposalItem", "TenderProposalItem")
                         .WithMany()
                         .HasForeignKey("TenderProposalItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
+
+                    b.Navigation("Medicine");
 
                     b.Navigation("TenderProposalItem");
                 });
@@ -759,18 +750,16 @@ namespace MedicineStorage.Migrations
                     b.HasOne("MedicineStorage.Models.MedicineModels.Medicine", "Medicine")
                         .WithMany()
                         .HasForeignKey("MedicineId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.TenderModels.Tender", "Tender")
-                        .WithMany("Items")
+                    b.HasOne("MedicineStorage.Models.TenderModels.Tender", null)
+                        .WithMany("TenderItems")
                         .HasForeignKey("TenderId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Medicine");
-
-                    b.Navigation("Tender");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.TenderProposal", b =>
@@ -781,15 +770,13 @@ namespace MedicineStorage.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.TenderModels.Tender", "Tender")
-                        .WithMany("Proposals")
+                    b.HasOne("MedicineStorage.Models.TenderModels.Tender", null)
+                        .WithMany("TenderProposals")
                         .HasForeignKey("TenderId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("CreatedByUser");
-
-                    b.Navigation("Tender");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.TenderProposalItem", b =>
@@ -797,28 +784,22 @@ namespace MedicineStorage.Migrations
                     b.HasOne("MedicineStorage.Models.MedicineModels.Medicine", "Medicine")
                         .WithMany()
                         .HasForeignKey("MedicineId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.TenderModels.TenderProposal", "Proposal")
+                    b.HasOne("MedicineStorage.Models.TenderModels.TenderProposal", null)
                         .WithMany("Items")
                         .HasForeignKey("TenderProposalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Medicine");
-
-                    b.Navigation("Proposal");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.UserModels.UserRole", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.UserModels.AppRole", null)
-                        .WithMany("UserRoles")
-                        .HasForeignKey("AppRoleId");
-
                     b.HasOne("MedicineStorage.Models.UserModels.AppRole", "Role")
-                        .WithMany()
+                        .WithMany("UserRoles")
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -875,23 +856,11 @@ namespace MedicineStorage.Migrations
                     b.Navigation("AuditItems");
                 });
 
-            modelBuilder.Entity("MedicineStorage.Models.MedicineModels.Medicine", b =>
-                {
-                    b.Navigation("Requests");
-
-                    b.Navigation("UsageRecords");
-                });
-
-            modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineRequest", b =>
-                {
-                    b.Navigation("MedicineUsages");
-                });
-
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.Tender", b =>
                 {
-                    b.Navigation("Items");
+                    b.Navigation("TenderItems");
 
-                    b.Navigation("Proposals");
+                    b.Navigation("TenderProposals");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.TenderProposal", b =>

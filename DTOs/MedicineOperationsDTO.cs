@@ -8,51 +8,32 @@ namespace MedicineStorage.DTOs
 {
     public class ReturnMedicineRequestDTO
     {
-        [Required]
         public int Id { get; set; }
-
-        [Required]
-        [ForeignKey("RequestedByUser")]
-        public int RequestedByUserId { get; set; }
-
-        [ForeignKey("ApprovedByUser")]
-        public int? ApprovedByUserId { get; set; }
-
-        [Required]
-        [ForeignKey("Medicine")]
-        public int MedicineId { get; set; }
-
-        [Required]
-        [Range(0.1, double.MaxValue)]
-        [Column(TypeName = "decimal(18,2)")]
         public decimal Quantity { get; set; }
-
-        [Required]
-        [EnumDataType(typeof(RequestStatus))]
         public RequestStatus Status { get; set; }
-
-        [Required]
-        [DataType(DataType.Date)]
         public DateTime RequestDate { get; set; }
-
-        [Required]
-        [DataType(DataType.Date)]
-        [FutureDate]
         public DateTime RequiredByDate { get; set; }
-
-        [StringLength(1000)]
         public string? Justification { get; set; }
-
-        [DataType(DataType.Date)]
         public DateTime? ApprovalDate { get; set; }
-
-        public virtual ICollection<MedicineUsage> MedicineUsages { get; set; } = new List<MedicineUsage>();
+        public ReturnMedicineDTO Medicine { get; set; }
+        public virtual UserDTO RequestedByUser { get; set; }
+        public virtual UserDTO? ApprovedByUser { get; set; }
+    }
+    public class ReturnMedicineUsageDTO
+    {
+        public int Id { get; set; }
+        public decimal Quantity { get; set; }
+        public DateTime UsageDate { get; set; }
+        public string? Notes { get; set; }
+        public ReturnMedicineDTO Medicine { get; set; }
+        public virtual ReturnMedicineRequestDTO MedicineRequest { get; set; }
+        public virtual UserDTO UsedByUser { get; set; }
     }
 
     public class CreateMedicineRequestDTO
     {
         [Required]
-        [ForeignKey("Medicine")]
+        [ForeignKey("ReturnMedicineDTO")]
         public int MedicineId { get; set; }
 
         [Required]
@@ -69,40 +50,12 @@ namespace MedicineStorage.DTOs
         public string? Justification { get; set; }
     }
 
-    public class ReturnMedicineUsageDTO
-    {
-        [Required]
-        public int Id { get; set; }
-
-        [Required]
-        [ForeignKey("Medicine")]
-        public int MedicineId { get; set; }
-
-        [Required]
-        [ForeignKey("UsedByUser")]
-        public int UsedByUserId { get; set; }
-
-        [Required]
-        [ForeignKey("MedicineRequest")]
-        public int MedicineRequestId { get; set; }
-
-        [Required]
-        [Range(0.1, double.MaxValue)]
-        [Column(TypeName = "decimal(18,2)")]
-        public decimal Quantity { get; set; }
-
-        [Required]
-        [DataType(DataType.Date)]
-        public DateTime UsageDate { get; set; }
-
-        [StringLength(1000)]
-        public string? Notes { get; set; }
-    }
+    
 
     public class CreateMedicineUsageDTO
     {
         [Required]
-        [ForeignKey("Medicine")]
+        [ForeignKey("ReturnMedicineDTO")]
         public int MedicineId { get; set; }
 
         [Required]

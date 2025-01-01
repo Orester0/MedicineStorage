@@ -1,5 +1,6 @@
 ﻿using MedicineStorage.Helpers;
 using MedicineStorage.Models.AuditModels;
+using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.UserModels;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -8,39 +9,45 @@ namespace MedicineStorage.DTOs
 {
     public class ReturnAuditDTO
     {
-        [Key]
-        [Required]
         public int Id { get; set; }
 
-        [Required]
-        [ForeignKey("PlannedByUser")]
-        public int PlannedByUserId { get; set; }
-
-        [Required]
-        [ForeignKey("ExecutedByUser")]
-        public int ExecutedByUserId { get; set; }
-
-        [Required]
-        [DataType(DataType.Date)]
         public DateTime PlannedDate { get; set; }
 
-        [DataType(DataType.Date)]
         public DateTime? StartDate { get; set; }
-
-        [DataType(DataType.Date)]
+         
         public DateTime? EndDate { get; set; }
 
-        [StringLength(500)]
         public string? Notes { get; set; }
 
-        [Required]
-        [EnumDataType(typeof(AuditStatus))]
         public AuditStatus Status { get; set; }
 
-        public virtual User PlannedByUser { get; set; }
-        public virtual User ExecutedByUser { get; set; }
-        public virtual ICollection<AuditItem> AuditItems { get; set; }
+        public virtual UserDTO PlannedByUser { get; set; }
+
+        public virtual UserDTO? ExecutedByUser { get; set; }
+
+        public virtual ICollection<ReturnAuditItemDTO> AuditItems { get; set; }
     }
+
+    public class ReturnAuditItemDTO
+    {
+        public int Id { get; set; }
+
+        public int AuditId { get; set; }
+        
+        public decimal ExpectedQuantity { get; set; }
+
+        public decimal ActualQuantity { get; set; }
+
+        public virtual ReturnMedicineDTO Medicine { get; set; }
+    }
+
+
+
+
+
+
+
+
 
     public class CreateAuditRequest
     {

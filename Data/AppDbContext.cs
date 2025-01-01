@@ -1,4 +1,5 @@
-﻿using MedicineStorage.Models.AuditModels;
+﻿using MedicineStorage.DTOs;
+using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.Tender;
 using MedicineStorage.Models.TenderModels;
@@ -46,9 +47,33 @@ namespace MedicineStorage.Data
                     .IsRequired();
             });
 
+            modelBuilder.Entity<Medicine>()
+                .Property(m => m.Stock)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<Medicine>()
+                .Property(m => m.MinimumStock)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<MedicineRequest>()
+                .Property(m => m.Quantity)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<MedicineUsage>()
+                .Property(m => m.Quantity)
+                .HasColumnType("decimal(18,2)");
+
             modelBuilder.Entity<MedicineSupply>()
-        .Property(m => m.Quantity)
-        .HasColumnType("decimal(18,2)");
+                .Property(m => m.Quantity)
+                .HasColumnType("decimal(18,2)");
+
+            modelBuilder.Entity<AuditItem>(entity =>
+            {
+                entity.Property(a => a.ExpectedQuantity)
+                    .HasColumnType("decimal(18,2)");
+                entity.Property(a => a.ActualQuantity)
+                    .HasColumnType("decimal(18,2)");
+            });
 
             modelBuilder.Entity<TenderItem>()
                 .Property(t => t.RequiredQuantity)
@@ -62,7 +87,6 @@ namespace MedicineStorage.Data
             {
                 entity.Property(t => t.Quantity)
                     .HasColumnType("decimal(18,2)");
-
                 entity.Property(t => t.UnitPrice)
                     .HasColumnType("decimal(18,2)");
             });
@@ -92,11 +116,11 @@ namespace MedicineStorage.Data
                     .OnDelete(DeleteBehavior.Restrict)
                     .IsRequired(false);
 
-                entity.HasMany(t => t.Items)
+                entity.HasMany(t => t.TenderItems)
                     .WithOne()
                     .HasForeignKey(ti => ti.TenderId);
 
-                entity.HasMany(t => t.Proposals)
+                entity.HasMany(t => t.TenderProposals)
                     .WithOne()
                     .HasForeignKey(tp => tp.TenderId);
             });
@@ -113,17 +137,6 @@ namespace MedicineStorage.Data
                     .HasForeignKey(tpi => tpi.TenderProposalId);
             });
 
-            modelBuilder.Entity<Medicine>(entity =>
-            {
-                entity.HasMany(m => m.Requests)
-                    .WithOne()
-                    .HasForeignKey(mr => mr.MedicineId);
-
-                entity.HasMany(m => m.UsageRecords)
-                    .WithOne()
-                    .HasForeignKey(mu => mu.MedicineId);
-            });
-
             modelBuilder.Entity<MedicineRequest>(entity =>
             {
                 entity.HasOne(mr => mr.RequestedByUser)
@@ -136,9 +149,10 @@ namespace MedicineStorage.Data
                     .HasForeignKey(mr => mr.ApprovedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasMany(mr => mr.MedicineUsages)
-                    .WithOne()
-                    .HasForeignKey(mu => mu.MedicineRequestId);
+                entity.HasOne(mr => mr.Medicine)
+                    .WithMany()
+                    .HasForeignKey(mr => mr.MedicineId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<MedicineUsage>(entity =>
@@ -148,8 +162,13 @@ namespace MedicineStorage.Data
                     .HasForeignKey(mu => mu.UsedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
 
+                entity.HasOne(mu => mu.Medicine)
+                    .WithMany()
+                    .HasForeignKey(mu => mu.MedicineId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
                 entity.HasOne(mu => mu.MedicineRequest)
-                    .WithMany(mr => mr.MedicineUsages)
+                    .WithMany()
                     .HasForeignKey(mu => mu.MedicineRequestId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
@@ -170,6 +189,27 @@ namespace MedicineStorage.Data
                 entity.HasMany(a => a.AuditItems)
                     .WithOne()
                     .HasForeignKey(ai => ai.AuditId);
+            });
+
+            modelBuilder.Entity<AuditItem>(entity =>
+            {
+                entity.HasOne(ai => ai.Medicine)
+                    .WithMany()
+                    .HasForeignKey(ai => ai.MedicineId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            modelBuilder.Entity<MedicineSupply>(entity =>
+            {
+                entity.HasOne(ms => ms.Medicine)
+                    .WithMany()
+                    .HasForeignKey(ms => ms.MedicineId)
+                    .OnDelete(DeleteBehavior.NoAction); 
+
+                entity.HasOne(ms => ms.TenderProposalItem)
+                    .WithMany()
+                    .HasForeignKey(ms => ms.TenderProposalItemId)
+                    .OnDelete(DeleteBehavior.NoAction); 
             });
         }
     }

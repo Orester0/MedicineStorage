@@ -22,6 +22,7 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.TenderProposalItems
                 .Where(tpi => tpi.TenderProposalId == proposalId)
+                .Include(tpi => tpi.Medicine)
                 .ToListAsync();
         }
 

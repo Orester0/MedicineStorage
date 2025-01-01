@@ -137,7 +137,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                     var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(medicineId);
                     if (medicine == null)
                     {
-                        result.Errors.Add($"Medicine with ID {medicineId} not found");
+                        result.Errors.Add($"ReturnMedicineDTO with ID {medicineId} not found");
                         continue;
                     }
 

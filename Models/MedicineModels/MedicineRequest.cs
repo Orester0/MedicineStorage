@@ -1,4 +1,5 @@
-﻿using MedicineStorage.Helpers;
+﻿using MedicineStorage.DTOs;
+using MedicineStorage.Helpers;
 using MedicineStorage.Models.UserModels;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -19,7 +20,7 @@ namespace MedicineStorage.Models.MedicineModels
         public int? ApprovedByUserId { get; set; }
 
         [Required]
-        [ForeignKey("Medicine")]
+        [ForeignKey("ReturnMedicineDTO")]
         public int MedicineId { get; set; }
 
         [Required]
@@ -46,9 +47,9 @@ namespace MedicineStorage.Models.MedicineModels
         [DataType(DataType.Date)]
         public DateTime? ApprovalDate { get; set; }
 
+        public Medicine Medicine { get; set; }
         public virtual User RequestedByUser { get; set; }
         public virtual User? ApprovedByUser { get; set; }
-        public virtual ICollection<MedicineUsage> MedicineUsages { get; set; } = new List<MedicineUsage>();
     }
 
 

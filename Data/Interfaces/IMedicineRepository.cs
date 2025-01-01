@@ -1,4 +1,5 @@
-﻿using MedicineStorage.Helpers.Params;
+﻿using MedicineStorage.DTOs;
+using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models.MedicineModels;
 
 namespace MedicineStorage.Data.Interfaces

@@ -13,6 +13,7 @@ namespace MedicineStorage.Data.Implementations
             return await _context.MedicineRequests
                 .Include(r => r.RequestedByUser)
                 .Include(r => r.ApprovedByUser)
+                .Include(r => r.Medicine)
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
@@ -20,8 +21,11 @@ namespace MedicineStorage.Data.Implementations
         {
             var query = _context.MedicineRequests
                 .Include(r => r.RequestedByUser)
+                .Include(r => r.ApprovedByUser)
+                .Include(r => r.Medicine)
                 .AsQueryable();
 
+            // Фільтрація
             if (parameters.FromDate.HasValue)
                 query = query.Where(r => r.RequestDate >= parameters.FromDate);
 
@@ -31,32 +35,62 @@ namespace MedicineStorage.Data.Implementations
             if (parameters.Status.HasValue)
                 query = query.Where(r => r.Status == parameters.Status);
 
-            var totalCount = await query.CountAsync();
+            if (parameters.RequestedByUserId.HasValue)
+                query = query.Where(r => r.RequestedByUserId == parameters.RequestedByUserId);
 
-            if (!string.IsNullOrEmpty(parameters.SortBy))
+            if (parameters.ApprovedByUserId.HasValue)
+                query = query.Where(r => r.ApprovedByUserId == parameters.ApprovedByUserId);
+
+            if (parameters.MedicineId.HasValue)
+                query = query.Where(r => r.MedicineId == parameters.MedicineId);
+
+            if (parameters.MinQuantity.HasValue)
+                query = query.Where(r => r.Quantity >= parameters.MinQuantity);
+
+            if (parameters.MaxQuantity.HasValue)
+                query = query.Where(r => r.Quantity <= parameters.MaxQuantity);
+
+            if (!string.IsNullOrWhiteSpace(parameters.Justification))
+                query = query.Where(r => r.Justification != null && r.Justification.Contains(parameters.Justification));
+
+            // Сортування
+            query = parameters.SortBy?.ToLower() switch
             {
-                query = parameters.SortBy.ToLower() switch
-                {
-                    "date" => parameters.IsDescending ?
-                        query.OrderByDescending(r => r.RequestDate) :
-                        query.OrderBy(r => r.RequestDate),
-                    "status" => parameters.IsDescending ?
-                        query.OrderByDescending(r => r.Status) :
-                        query.OrderBy(r => r.Status),
-                    _ => query.OrderByDescending(r => r.RequestDate)
-                };
-            }
+                "requestdate" => parameters.IsDescending
+                    ? query.OrderByDescending(r => r.RequestDate)
+                    : query.OrderBy(r => r.RequestDate),
+                "requireddate" => parameters.IsDescending
+                    ? query.OrderByDescending(r => r.RequiredByDate)
+                    : query.OrderBy(r => r.RequiredByDate),
+                "quantity" => parameters.IsDescending
+                    ? query.OrderByDescending(r => r.Quantity)
+                    : query.OrderBy(r => r.Quantity),
+                "status" => parameters.IsDescending
+                    ? query.OrderByDescending(r => r.Status)
+                    : query.OrderBy(r => r.Status),
+                _ => parameters.IsDescending
+                    ? query.OrderByDescending(r => r.RequestDate)
+                    : query.OrderBy(r => r.RequestDate)
+            };
 
-            query = query.Skip((parameters.PageNumber - 1) * parameters.PageSize)
-                         .Take(parameters.PageSize);
+            // Пагінація
+            var totalCount = await query.CountAsync();
+            var items = await query
+                .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                .Take(parameters.PageSize)
+                .ToListAsync();
 
-            return (await query.ToListAsync(), totalCount);
+            return (items, totalCount);
         }
+
 
         public async Task<List<MedicineRequest>> GetRequestsRequestedByUserIdAsync(int userId)
         {
             return await _context.MedicineRequests
                 .Where(r => r.RequestedByUserId == userId)
+                .Include(r => r.RequestedByUser)
+                .Include(r => r.ApprovedByUser)
+                .Include(r => r.Medicine)
                 .ToListAsync();
         }
 
@@ -64,6 +98,9 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.MedicineRequests
                 .Where(r => r.ApprovedByUserId == userId)
+                .Include(r => r.RequestedByUser)
+                .Include(r => r.ApprovedByUser)
+                .Include(r => r.Medicine)
                 .ToListAsync();
         }
 
@@ -71,6 +108,9 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _context.MedicineRequests
                 .Where(r => r.MedicineId == medicineId)
+                .Include(r => r.RequestedByUser)
+                .Include(r => r.ApprovedByUser)
+                .Include(r => r.Medicine)
                 .ToListAsync();
         }
 
@@ -78,6 +118,7 @@ namespace MedicineStorage.Data.Implementations
         {
             var usage = await _context.MedicineUsages
                 .Where(u => u.Id == usageId)
+
                 .FirstOrDefaultAsync();
 
             return usage?.MedicineRequest;

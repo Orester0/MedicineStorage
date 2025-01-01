@@ -10,22 +10,53 @@ namespace MedicineStorage.DTOs
     public class ReturnTenderDTO
     {
         public int Id { get; set; }
-        public int CreatedByUserId { get; set; }
-        public int OpenedByUserId { get; set; }
-        public int ClosedByUserId { get; set; }
-        public int WinnerSelectedByUserId { get; set; }
-
-
         public string Title { get; set; }
         public string Description { get; set; }
         public DateTime PublishDate { get; set; }
+        public DateTime? ClosingDate { get; set; }
         public DateTime DeadlineDate { get; set; }
         public TenderStatus Status { get; set; }
+        public virtual UserDTO CreatedByUser { get; set; }
+        public virtual UserDTO? OpenedByUser { get; set; }
+        public virtual UserDTO? ClosedByUser { get; set; }
+        public virtual UserDTO? WinnerSelectedByUser { get; set; }
 
-
-        public virtual ICollection<TenderItem> Items { get; set; }
-        public virtual ICollection<TenderProposal> Proposals { get; set; }
+        public virtual ICollection<ReturnTenderItemDTO> Items { get; set; }
+        public virtual ICollection<ReturnTenderProposalDTO> Proposals { get; set; }
     }
+
+    public class ReturnTenderProposalItemDTO
+    {
+        public int Id { get; set; }
+        public int TenderProposalId { get; set; }
+        public decimal UnitPrice { get; set; }
+        public decimal Quantity { get; set; }
+        public decimal TotalItemPrice => UnitPrice * Quantity;
+
+        public virtual ReturnMedicineDTO Medicine { get; set; }
+    }
+
+    public class ReturnTenderProposalDTO
+    {
+        public int Id { get; set; }
+        public int TenderId { get; set; }
+        public decimal TotalPrice { get; set; }
+        public DateTime SubmissionDate { get; set; }
+        public ProposalStatus Status { get; set; }
+        public virtual UserDTO CreatedByUser { get; set; }
+        public virtual ICollection<ReturnTenderProposalItemDTO> Items { get; set; }
+    }
+
+    public class ReturnTenderItemDTO
+    {
+        public int Id { get; set; }
+        public int TenderId { get; set; }
+        public decimal RequiredQuantity { get; set; }
+        public TenderItemStatus Status { get; set; }
+        public virtual ReturnMedicineDTO Medicine { get; set; }
+
+    }
+
     public class CreateTenderDTO
     {
         [Required]
@@ -41,14 +72,7 @@ namespace MedicineStorage.DTOs
         public DateTime DeadlineDate { get; set; }
     }
 
-    public class ReturnTenderItemDTO
-    {
-        public int Id { get; set; }
-        public int TenderId { get; set; }
-        public int MedicineId { get; set; }
-        public decimal RequiredQuantity { get; set; }
-
-    }
+    
 
     public class CreateTenderItemDTO
     {
@@ -60,15 +84,7 @@ namespace MedicineStorage.DTOs
         public decimal RequiredQuantity { get; set; }
     }
 
-    public class ReturnTenderProposalDTO
-    {
-        public int Id { get; set; }
-        public int TenderId { get; set; }
-        public int CreatedByUserId { get; set; }
-        public decimal TotalPrice { get; set; }
-        public DateTime SubmissionDate { get; set; }
-        public ProposalStatus Status { get; set; }
-    }
+    
     public class CreateTenderProposalDTO
     {
         [Required]
@@ -77,16 +93,6 @@ namespace MedicineStorage.DTOs
         [Required]
         [Range(0.01, double.MaxValue, ErrorMessage = "Total price must be greater than 0")]
         public decimal TotalPrice { get; set; }
-    }
-
-    public class ReturnTenderProposalItemDTO
-    {
-        public int Id { get; set; }
-        public int TenderProposalId { get; set; }
-        public int MedicineId { get; set; }
-        public decimal UnitPrice { get; set; }
-        public decimal Quantity { get; set; }
-        public decimal TotalItemPrice => UnitPrice * Quantity;
     }
 
 

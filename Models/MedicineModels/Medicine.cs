@@ -41,8 +41,6 @@ namespace MedicineStorage.Models.MedicineModels
         [Range(1, 365)]
         public int AuditFrequencyDays { get; set; }
 
-        public virtual ICollection<MedicineRequest> Requests { get; set; }
-        public virtual ICollection<MedicineUsage> UsageRecords { get; set; }
     }
 
 }
