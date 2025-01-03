@@ -105,7 +105,7 @@ namespace MedicineStorage.Controllers.Implementation
             
                 var userId = User.GetUserIdFromClaims();
                 var userRoles = User.GetUserRolesFromClaims();
-                bool isAdmin = userRoles.Contains("Admin");
+                bool isAdmin = userRoles.Contains("Admin") || userRoles.Contains("SupremeAdmin");
                 var result = await _operationsService.ApproveRequestAsync(requestId, userId, isAdmin);
                 if (!result.Success)
                 {

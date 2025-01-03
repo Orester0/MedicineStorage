@@ -11,6 +11,18 @@ namespace MedicineStorage.Controllers.Implementation
     public class UserController(IUserService _userService, IAuditService _auditService, ITenderService _tenderService, IMedicineOperationsService _operationsService) : BaseApiController
     {
 
+        [HttpGet]
+        public async Task<IActionResult> GetAllUsers()
+        {
+            var result = await _userService.GetAllAsync();
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+
+            return Ok(result.Data);
+        }
+
         [HttpGet("info")]
         public async Task<IActionResult> GetInformationAboutCurrentUser()
         {

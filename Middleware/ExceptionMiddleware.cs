@@ -5,64 +5,51 @@ using System.Text.Json;
 
 namespace MedicineStorage.Middleware
 {
-    public class ExceptionMiddleware
+    public class ExceptionMiddleware(RequestDelegate _next, ILogger<ExceptionMiddleware> _logger, IHostEnvironment _env)
     {
-        RequestDelegate next;
-        ILogger<ExceptionMiddleware> logger;
-        IHostEnvironment env;
-
-        public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger, IHostEnvironment env)
-        {
-            this.next = next;
-            this.logger = logger;
-            this.env = env;
-        }
-
         public async Task InvokeAsync(HttpContext context)
         {
             try
             {
-                await next(context);
+                await _next(context);
+            }
+            catch (KeyNotFoundException ex)
+            {
+                await HandleExceptionAsync(context, ex, HttpStatusCode.NotFound, ex.Message);
+            }
+            catch (BadHttpRequestException ex)
+            {
+                await HandleExceptionAsync(context, ex, HttpStatusCode.BadRequest, ex.Message);
             }
             catch (UnauthorizedAccessException ex)
             {
-                logger.LogWarning(ex, ex.Message);
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = (int)HttpStatusCode.Unauthorized;
-
-                var response = env.IsDevelopment()
-                    ? new ApiError(context.Response.StatusCode, ex.Message, ex.StackTrace)
-                    : new ApiError(context.Response.StatusCode, ex.Message, "Unauthorized access");
-
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                };
-
-                var json = JsonSerializer.Serialize(response, options);
-
-                await context.Response.WriteAsync(json);
+                await HandleExceptionAsync(context, ex, HttpStatusCode.Unauthorized, "Unauthorized access");
             }
             catch (Exception ex)
             {
-                logger.LogError(ex, ex.Message);
-                context.Response.ContentType = "application/json";
-                context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-                var response = env.IsDevelopment()
-                    ? new ApiError(context.Response.StatusCode, ex.Message, ex.StackTrace)
-                    : new ApiError(context.Response.StatusCode, ex.Message, "Internal server error");
-
-                var options = new JsonSerializerOptions
-                {
-                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-                };
-
-                var json = JsonSerializer.Serialize(response, options);
-
-                await context.Response.WriteAsync(json);
+                await HandleExceptionAsync(context, ex, HttpStatusCode.InternalServerError, "Internal server error");
             }
-            
+        }
+
+        private async Task HandleExceptionAsync(HttpContext context, Exception ex, HttpStatusCode statusCode, string message)
+        {
+            _logger.LogError(ex, ex.Message);
+
+            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = (int)statusCode;
+
+            var response = _env.IsDevelopment()
+                ? new ApiError(context.Response.StatusCode, message, ex.StackTrace)
+                : new ApiError(context.Response.StatusCode, message, null);
+
+            var options = new JsonSerializerOptions
+            {
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+            };
+
+            var json = JsonSerializer.Serialize(response, options);
+
+            await context.Response.WriteAsync(json);
         }
     }
 }

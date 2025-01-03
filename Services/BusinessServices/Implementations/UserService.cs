@@ -2,10 +2,12 @@
 using MedicineStorage.Data;
 using MedicineStorage.DTOs;
 using MedicineStorage.Models;
+using MedicineStorage.Models.TenderModels;
 using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using MimeKit;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
@@ -14,23 +16,15 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<User>> GetUserByIdAsync(int id)
         {
             var result = new ServiceResult<User>();
-            try
-            {
-                result.Data = await _userManager.Users
+            var user = await _userManager.Users
                     .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
-                    .FirstOrDefaultAsync(u => u.Id == id);
-
-
-                if (result.Data == null)
-                {
-                    result.Errors.Add("UserModels not found.");
-                }
-            }
-            catch (Exception)
+            .FirstOrDefaultAsync(u => u.Id == id);
+            if (user == null)
             {
-                result.Errors.Add($"Couldnt get user");
+                throw new KeyNotFoundException("User not found");
             }
+            result.Data = user;
 
             return result;
         }
@@ -38,23 +32,18 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<User>> GetByUserNameAsync(string username)
         {
             var result = new ServiceResult<User>();
-            try
-            {
-                result.Data = await _userManager.Users
-                    .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                    .FirstOrDefaultAsync(u => u.NormalizedUserName == username.ToUpper());
+            var user = await _userManager.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .FirstOrDefaultAsync(u => u.NormalizedUserName == username.ToUpper());
 
 
-                if (result.Data == null)
-                {
-                    result.Errors.Add("UserModels not found.");
-                }
-            }
-            catch (Exception)
+            if (user == null)
             {
-                result.Errors.Add($"Couldnt get user");
+                result.Errors.Add("UserModels not found.");
             }
+
+            result.Data = user;
 
             return result;
         }
@@ -62,19 +51,12 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<List<UserDTO>>> GetAllAsync()
         {
             var result = new ServiceResult<List<UserDTO>>();
-            try
-            {
-                var users = await _userManager.Users
+            var users = await _userManager.Users
                     .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
                     .ToListAsync();
 
-                _mapper.Map(users, result.Data);
-            }
-            catch (Exception)
-            {
-                result.Errors.Add($"Couldnt get users");
-            }
+            _mapper.Map(users, result.Data);
 
             return result;
         }
@@ -82,27 +64,19 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<List<UserDTO>>> GetUsersByRoleAsync(string roleName)
         {
             var result = new ServiceResult<List<UserDTO>>();
-            try
+            var role = await _roleManager.FindByNameAsync(roleName);
+            if (role == null)
             {
-                var role = await _roleManager.FindByNameAsync(roleName);
-                if (role == null)
-                {
-                    result.Errors.Add("Role not found.");
-                    return result;
-                }
-
-                var users = await _userManager.Users
-                    .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                    .Where(u => u.UserRoles.Any(ur => ur.Role.Name == roleName))
-                    .ToListAsync();
-
-                _mapper.Map(users, result.Data);
+                throw new KeyNotFoundException($"Role {roleName} not found");
             }
-            catch (Exception)
-            {
-                result.Errors.Add($"Couldnt get users");
-            }
+
+            var users = await _userManager.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .Where(u => u.UserRoles.Any(ur => ur.Role.Name == roleName))
+                .ToListAsync();
+
+            _mapper.Map(users, result.Data);
 
             return result;
         }
@@ -173,8 +147,8 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             if (user == null)
             {
-                result.Errors.Add("UserModels not found");
-                return result;
+
+                throw new KeyNotFoundException("User not found");
             }
 
             var deleteResult = await _userManager.DeleteAsync(user);
@@ -195,14 +169,12 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             if (user == null)
             {
-                result.Errors.Add("UserModels not found");
-                return result;
+                throw new KeyNotFoundException("User not found");
             }
 
             if (!await _roleManager.RoleExistsAsync(roleName))
             {
-                result.Errors.Add("Role does not exist");
-                return result;
+                throw new KeyNotFoundException("Role doesnt exists");
             }
 
             var roleResult = await _userManager.AddToRoleAsync(user, roleName);
@@ -223,8 +195,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             if (user == null)
             {
-                result.Errors.Add("UserModels not found");
-                return result;
+                throw new KeyNotFoundException("User not found");
             }
 
             var roleResult = await _userManager.RemoveFromRoleAsync(user, roleName);
@@ -241,22 +212,16 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<List<string>>> GetUserRolesAsync(int userId)
         {
             var result = new ServiceResult<List<string>>();
-            try
-            {
-                var user = await _userManager.FindByIdAsync(userId.ToString());
-                if (user == null)
-                {
-                    result.Errors.Add("UserModels not found.");
-                    return result;
-                }
 
-                var roles = await _userManager.GetRolesAsync(user);
-                result.Data = roles.ToList();
-            }
-            catch (Exception)
+            var user = await _userManager.FindByIdAsync(userId.ToString());
+            if (user == null)
             {
-                result.Errors.Add($"Couldnt get user roles");
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
             }
+
+            var roles = await _userManager.GetRolesAsync(user);
+            result.Data = roles.ToList();
+
 
             return result;
         }
@@ -268,8 +233,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             if (user == null)
             {
-                result.Errors.Add("User not found");
-                return result;
+                throw new KeyNotFoundException($"User with ID {userId} not found.");
             }
 
             var passwordResult = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
