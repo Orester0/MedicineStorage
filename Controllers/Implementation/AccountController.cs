@@ -16,7 +16,6 @@ namespace MedicineStorage.Controllers.Implementation
         ) : BaseApiController
     {
 
-
         [HttpPost("register")]
         public async Task<ActionResult<UserTokenReturnDTO>> Register([FromBody] UserRegistrationDTO request)
         {

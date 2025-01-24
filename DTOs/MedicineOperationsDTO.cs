@@ -43,7 +43,7 @@ namespace MedicineStorage.DTOs
 
         [Required]
         [DataType(DataType.Date)]
-        [FutureDate]
+        [FutureDateAttribute]
         public DateTime RequiredByDate { get; set; }
 
         [StringLength(1000)]

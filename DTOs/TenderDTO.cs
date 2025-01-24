@@ -68,7 +68,7 @@ namespace MedicineStorage.DTOs
         public string Description { get; set; }
 
         [Required]
-        [FutureDate]
+        [FutureDateAttribute]
         public DateTime DeadlineDate { get; set; }
     }
 

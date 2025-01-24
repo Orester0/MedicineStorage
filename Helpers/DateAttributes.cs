@@ -7,7 +7,10 @@ namespace MedicineStorage.Helpers
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (value == null)
+            {
+
                 return new ValidationResult("Date is required.");
+            }
 
             DateTime date = (DateTime)value;
 
@@ -25,7 +28,9 @@ namespace MedicineStorage.Helpers
         protected override ValidationResult IsValid(object value, ValidationContext validationContext)
         {
             if (value == null)
+            {
                 return new ValidationResult("Date is required.");
+            }
 
             DateTime date = (DateTime)value;
 

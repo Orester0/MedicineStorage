@@ -60,7 +60,7 @@ namespace MedicineStorage.DTOs
 
         [Required]
         [DataType(DataType.Date)]
-        [FutureDate]
+        [FutureDateAttribute]
         public DateTime PlannedDate { get; set; }
     }
 

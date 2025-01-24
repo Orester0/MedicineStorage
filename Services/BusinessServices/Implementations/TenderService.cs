@@ -87,11 +87,14 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<IEnumerable<ReturnTenderProposalItemDTO>>> GetItemsByProposalId(int proposalId)
         {
             var result = new ServiceResult<IEnumerable<ReturnTenderProposalItemDTO>>();
+
+
+
             var proposalItems = await _unitOfWork.TenderProposalItemRepository.GetItemsByProposalIdAsync(proposalId);
+
             result.Data = _mapper.Map<IEnumerable<ReturnTenderProposalItemDTO>>(proposalItems);
             return result;
         }
-
 
 
 
@@ -525,6 +528,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 {
                     var transaction = new MedicineSupply
                     {
+                        MedicineId = proposalItem.MedicineId,
                         TenderProposalItemId = proposalItem.Id,
                         Quantity = proposalItem.Quantity,
                         TransactionDate = DateTime.UtcNow

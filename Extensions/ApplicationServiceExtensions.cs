@@ -49,6 +49,7 @@ namespace MedicineStorage.Extensions
             services.AddScoped<IMedicineOperationsService, MedicineOperationsService>();
             services.AddScoped<IAuditService, AuditService>();
             services.AddScoped<ITenderService, TenderService>();
+    
 
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();

@@ -33,6 +33,7 @@ namespace MedicineStorage.Data
 
             modelBuilder.Entity<User>(entity =>
             {
+                
                 entity.HasMany(u => u.UserRoles)
                     .WithOne(ur => ur.User)
                     .HasForeignKey(ur => ur.UserId)

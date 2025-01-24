@@ -1,4 +1,6 @@
-﻿using MedicineStorage.Models.MedicineModels;
+﻿using MedicineStorage.Helpers;
+using MedicineStorage.Models.MedicineModels;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -45,6 +47,7 @@ namespace MedicineStorage.DTOs
     {
         [Required]
         [StringLength(200)]
+        [UniqueMedicineName]
         public string Name { get; set; }
 
         [Required]
