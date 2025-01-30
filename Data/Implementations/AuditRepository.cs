@@ -65,7 +65,7 @@ namespace MedicineStorage.Data.Implementations
         }
 
 
-        public async Task<Audit?> GetAuditByIdAsync(int id)
+        public async Task<Audit?> GetByIdAsync(int id)
         {
             return await _context.Audits
                 .Include(a => a.PlannedByUser)

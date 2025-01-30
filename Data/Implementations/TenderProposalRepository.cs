@@ -6,7 +6,7 @@ namespace MedicineStorage.Data.Implementations
 {
     public class TenderProposalRepository(AppDbContext _context) : ITenderProposalRepository
     {
-        public async Task<TenderProposal> GetProposalByIdAsync(int id)
+        public async Task<TenderProposal> GetByIdAsync(int id)
         {
             return await _context.TenderProposals
                 .Include(tp => tp.CreatedByUser)

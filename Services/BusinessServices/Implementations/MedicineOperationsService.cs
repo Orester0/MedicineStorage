@@ -28,19 +28,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         }
 
 
-        public async Task<ServiceResult<PagedList<ReturnMedicineUsageDTO>>> GetAllUsagesAsync(MedicineUsageParams parameters)
-        {
-            var result = new ServiceResult<PagedList<ReturnMedicineUsageDTO>>();
-            var (usages, totalCount) = await _unitOfWork.MedicineUsageRepository.GetAllAsync(parameters);
-            var usageDtos = _mapper.Map<List<ReturnMedicineUsageDTO>>(usages);
-            result.Data = new PagedList<ReturnMedicineUsageDTO>(
-                usageDtos,
-                totalCount,
-                parameters.PageNumber,
-                parameters.PageSize
-            );
-            return result;
-        }
+       
 
         public async Task<ServiceResult<ReturnMedicineRequestDTO>> GetRequestByIdAsync(int id)
         {
@@ -49,25 +37,12 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             if (request == null)
             {
                 throw new KeyNotFoundException($"Request with ID {id} not found.");
-                return result;
             }
 
             result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
             return result;
         }
-        public async Task<ServiceResult<ReturnMedicineUsageDTO>> GetUsageByIdAsync(int id)
-        {
-            var result = new ServiceResult<ReturnMedicineUsageDTO>();
-            var usage = await _unitOfWork.MedicineUsageRepository.GetByIdAsync(id);
-            if (usage == null)
-            {
-                throw new KeyNotFoundException($"Usage with ID {id} not found.");
-            }
-
-            result.Data = _mapper.Map<ReturnMedicineUsageDTO>(usage);
-            return result;
-        }
-
+        
         public async Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetRequestsRequestedByUserId(int userId)
         {
             var result = new ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>();
@@ -104,13 +79,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
             return result;
         }
-        public async Task<ServiceResult<IEnumerable<ReturnMedicineUsageDTO>>> GetUsagesByRequestIdAsync(int requestId)
-        {
-            var result = new ServiceResult<IEnumerable<ReturnMedicineUsageDTO>>();
-            var usages = await _unitOfWork.MedicineUsageRepository.GetUsagesByRequestIdAsync(requestId);
-            result.Data = _mapper.Map<IEnumerable<ReturnMedicineUsageDTO>>(usages);
-            return result;
-        }
+        
 
 
 
@@ -122,60 +91,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
 
 
-
-
-
-
-
-
-
-
-
-        public async Task<ServiceResult<ReturnMedicineUsageDTO>> CreateUsageAsync(
-            CreateMedicineUsageDTO createUsageDTO,
-            int userId)
-        {
-            var result = new ServiceResult<ReturnMedicineUsageDTO>();
-
-            var request = await _unitOfWork.MedicineRequestRepository.GetByIdAsync(createUsageDTO.MedicineRequestId);
-            if (request == null)
-            {
-
-                throw new KeyNotFoundException($"Request not found for the given usage");
-            }
-            if (request.Status != RequestStatus.Approved)
-            {
-
-                throw new BadHttpRequestException("Request is not approved");
-            }
-
-            var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(createUsageDTO.MedicineId);
-            if (medicine == null)
-            {
-                throw new KeyNotFoundException($"Medicine not found for ID {createUsageDTO.MedicineId}");
-            }
-
-
-
-            //if (createUsageDTO.Quantity > request.Quantity)
-            //{
-            //    result.Errors.Add("Invalid usage quantity");
-            //    return result;
-            //}
-
-            var usage = _mapper.Map<MedicineUsage>(createUsageDTO);
-            usage.UsedByUserId = userId;
-            usage.UsageDate = DateTime.UtcNow;
-
-            var createdUsage = await _unitOfWork.MedicineUsageRepository.CreateUsageAsync(usage);
-
-            medicine.Stock -= createUsageDTO.Quantity;
-            _unitOfWork.MedicineRepository.UpdateMedicine(medicine);
-
-            await _unitOfWork.Complete();
-            result.Data = _mapper.Map<ReturnMedicineUsageDTO>(createdUsage);
-            return result;
-        }
 
 
 
@@ -201,7 +116,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 : RequestStatus.Pending;
 
             var createdRequest = await _unitOfWork.MedicineRequestRepository.CreateRequestAsync(request);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = _mapper.Map<ReturnMedicineRequestDTO>(createdRequest);
             return result;
@@ -252,7 +167,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             _unitOfWork.MedicineRepository.UpdateMedicine(medicine);
 
             _unitOfWork.MedicineRequestRepository.UpdateRequest(request);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
             return result;
@@ -292,7 +207,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             request.ApprovalDate = DateTime.UtcNow;
 
             _unitOfWork.MedicineRequestRepository.UpdateRequest(request);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
 
@@ -315,9 +230,96 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             }
 
             await _unitOfWork.MedicineRequestRepository.DeleteRequestAsync(request.Id);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = true;
+            return result;
+        }
+
+
+
+
+
+
+        public async Task<ServiceResult<ReturnMedicineUsageDTO>> CreateUsageAsync(
+            CreateMedicineUsageDTO createUsageDTO,
+            int userId)
+        {
+            var result = new ServiceResult<ReturnMedicineUsageDTO>();
+
+            var request = await _unitOfWork.MedicineRequestRepository.GetByIdAsync(createUsageDTO.MedicineRequestId);
+            if (request == null)
+            {
+
+                throw new KeyNotFoundException($"Request not found for the given usage");
+            }
+            if (request.Status != RequestStatus.Approved)
+            {
+
+                throw new BadHttpRequestException("Request is not approved");
+            }
+
+            var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(createUsageDTO.MedicineId);
+            if (medicine == null)
+            {
+                throw new KeyNotFoundException($"Medicine not found for ID {createUsageDTO.MedicineId}");
+            }
+
+
+
+            //if (createUsageDTO.Quantity > request.Quantity)
+            //{
+            //    result.Errors.Add("Invalid usage quantity");
+            //    return result;
+            //}
+
+            var usage = _mapper.Map<MedicineUsage>(createUsageDTO);
+            usage.UsedByUserId = userId;
+            usage.UsageDate = DateTime.UtcNow;
+
+            var createdUsage = await _unitOfWork.MedicineUsageRepository.CreateUsageAsync(usage);
+
+            medicine.Stock -= createUsageDTO.Quantity;
+            _unitOfWork.MedicineRepository.UpdateMedicine(medicine);
+
+            await _unitOfWork.CompleteAsync();
+            result.Data = _mapper.Map<ReturnMedicineUsageDTO>(createdUsage);
+            return result;
+        }
+
+
+        public async Task<ServiceResult<IEnumerable<ReturnMedicineUsageDTO>>> GetUsagesByRequestIdAsync(int requestId)
+        {
+            var result = new ServiceResult<IEnumerable<ReturnMedicineUsageDTO>>();
+            var usages = await _unitOfWork.MedicineUsageRepository.GetUsagesByRequestIdAsync(requestId);
+            result.Data = _mapper.Map<IEnumerable<ReturnMedicineUsageDTO>>(usages);
+            return result;
+        }
+
+
+        public async Task<ServiceResult<ReturnMedicineUsageDTO>> GetUsageByIdAsync(int id)
+        {
+            var result = new ServiceResult<ReturnMedicineUsageDTO>();
+            var usage = await _unitOfWork.MedicineUsageRepository.GetByIdAsync(id);
+            if (usage == null)
+            {
+                throw new KeyNotFoundException($"Usage with ID {id} not found.");
+            }
+
+            result.Data = _mapper.Map<ReturnMedicineUsageDTO>(usage);
+            return result;
+        }
+        public async Task<ServiceResult<PagedList<ReturnMedicineUsageDTO>>> GetAllUsagesAsync(MedicineUsageParams parameters)
+        {
+            var result = new ServiceResult<PagedList<ReturnMedicineUsageDTO>>();
+            var (usages, totalCount) = await _unitOfWork.MedicineUsageRepository.GetAllAsync(parameters);
+            var usageDtos = _mapper.Map<List<ReturnMedicineUsageDTO>>(usages);
+            result.Data = new PagedList<ReturnMedicineUsageDTO>(
+                usageDtos,
+                totalCount,
+                parameters.PageNumber,
+                parameters.PageSize
+            );
             return result;
         }
 

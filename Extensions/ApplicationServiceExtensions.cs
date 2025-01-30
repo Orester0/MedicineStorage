@@ -1,7 +1,9 @@
 ﻿using MedicineStorage.Data;
 using MedicineStorage.Data.Implementations;
 using MedicineStorage.Data.Interfaces;
+using MedicineStorage.DTOs;
 using MedicineStorage.Helpers;
+using MedicineStorage.Models.TemplateModels;
 using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.ApplicationServices.Implementations;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
@@ -72,6 +74,10 @@ namespace MedicineStorage.Extensions
             services.AddScoped<ITenderProposalItemRepository, TenderProposalItemRepository>();
             services.AddScoped<ITenderItemRepository, TenderItemRepository>();
             services.AddScoped<IMedicineSupplyRepository, MedicineSupplyRepository>();
+
+            services.AddScoped<INotificationTemplateRepository<MedicineRequestTemplate>, MedicineRequestTemplateRepository>();
+            services.AddScoped<INotificationTemplateRepository<AuditTemplate>, AuditTemplateRepository>();
+            services.AddScoped<INotificationTemplateRepository<TenderTemplate>, TenderTemplateRepository>();
 
 
 

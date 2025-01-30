@@ -17,11 +17,11 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 {
     public class TenderService(IUnitOfWork _unitOfWork, IMapper _mapper) : ITenderService
     {
-        public async Task<ServiceResult<PagedList<Tender>>> GetAllTendersAsync(TenderParams tenderParams)
+        public async Task<ServiceResult<PagedList<ReturnTenderDTO>>> GetAllTendersAsync(TenderParams tenderParams)
         {
-            var result = new ServiceResult<PagedList<Tender>>();
+            var result = new ServiceResult<PagedList<ReturnTenderDTO>>();
             var (tenders, totalCount) = await _unitOfWork.TenderRepository.GetAllTendersAsync(tenderParams);
-            result.Data = new PagedList<Tender>(tenders.ToList(), totalCount, tenderParams.PageNumber, tenderParams.PageSize);
+            result.Data = new PagedList<ReturnTenderDTO>(_mapper.Map<List<ReturnTenderDTO>>(tenders), totalCount, tenderParams.PageNumber, tenderParams.PageSize);
             return result;
         }
 
@@ -61,7 +61,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<ReturnTenderProposalDTO>> GetProposalByIdAsync(int proposalId)
         {
             var result = new ServiceResult<ReturnTenderProposalDTO>();
-            var proposal = await _unitOfWork.TenderProposalRepository.GetProposalByIdAsync(proposalId);
+            var proposal = await _unitOfWork.TenderProposalRepository.GetByIdAsync(proposalId);
             result.Data = _mapper.Map<ReturnTenderProposalDTO>(proposal);
             return result;
         }
@@ -116,7 +116,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             tender.CreatedByUserId = userId;
 
             var addedTender = await _unitOfWork.TenderRepository.CreateTenderAsync(tender);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = _mapper.Map<ReturnTenderDTO>(addedTender);
             return result;
@@ -161,7 +161,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             var tenderItem = _mapper.Map<TenderItem>(tenderItemDto);
             tenderItem.TenderId = tenderId;
             var addedTenderItem = await _unitOfWork.TenderItemRepository.CreateTenderItemAsync(tenderItem);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = _mapper.Map<ReturnTenderItemDTO>(addedTenderItem);
             return result;
@@ -202,7 +202,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             tender.OpenedByUserId = userId;
 
             _unitOfWork.TenderRepository.UpdateTender(tender);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = _mapper.Map<ReturnTenderDTO>(tender);
             return result;
@@ -283,7 +283,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             var addedProposal = await _unitOfWork.TenderProposalRepository.CreateTenderProposalAsync(proposal);
 
 
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
 
             foreach (var itemDto in proposalDto.ProposalItemsDTOs)
@@ -298,7 +298,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 await _unitOfWork.TenderProposalItemRepository.CreateTenderProposalItemAsync(proposalItem);
             }
 
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = _mapper.Map<ReturnTenderProposalDTO>(addedProposal);
             return result;
@@ -330,7 +330,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             tender.ClosedByUserId = userId;
 
             _unitOfWork.TenderRepository.UpdateTender(tender);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = _mapper.Map<ReturnTenderDTO>(tender);
             return result;
@@ -340,7 +340,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<ReturnTenderProposalDTO>> SelectWinningProposalAsync(int proposalId, int userId)
         {
             var result = new ServiceResult<ReturnTenderProposalDTO>();
-            var proposal = await _unitOfWork.TenderProposalRepository.GetProposalByIdAsync(proposalId);
+            var proposal = await _unitOfWork.TenderProposalRepository.GetByIdAsync(proposalId);
             if (proposal == null)
             {
 
@@ -375,7 +375,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             _unitOfWork.TenderRepository.UpdateTender(tender);
 
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = _mapper.Map<ReturnTenderProposalDTO>(proposal);
             return result;
@@ -389,7 +389,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<bool>> ExecuteTenderItemAsync(int tenderItemId, int proposalId, int userId)
         {
             var result = new ServiceResult<bool>();
-            var proposal = await _unitOfWork.TenderProposalRepository.GetProposalByIdAsync(proposalId);
+            var proposal = await _unitOfWork.TenderProposalRepository.GetByIdAsync(proposalId);
             if (proposal == null || proposal.Status != ProposalStatus.Accepted)
             {
                 throw new KeyNotFoundException($"Proposal with ID {proposalId} not found.");
@@ -478,7 +478,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             }
 
             _unitOfWork.TenderRepository.UpdateTender(tender);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = true;
             return result;
@@ -487,7 +487,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<bool>> ExecuteTenderAsync(int proposalId, int userId)
         {
             var result = new ServiceResult<bool>();
-            var proposal = await _unitOfWork.TenderProposalRepository.GetProposalByIdAsync(proposalId);
+            var proposal = await _unitOfWork.TenderProposalRepository.GetByIdAsync(proposalId);
             if (proposal == null || proposal.Status != ProposalStatus.Accepted)
             {
                 throw new KeyNotFoundException($"Proposal with ID {proposalId} not found.");
@@ -560,7 +560,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             _unitOfWork.TenderRepository.UpdateTender(tender);
 
 
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = true;
             return result;

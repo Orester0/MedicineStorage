@@ -1,6 +1,7 @@
 ﻿using MedicineStorage.DTOs;
 using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.TemplateModels;
 using MedicineStorage.Models.Tender;
 using MedicineStorage.Models.TenderModels;
 using MedicineStorage.Models.UserModels;
@@ -19,7 +20,6 @@ namespace MedicineStorage.Data
         public DbSet<TenderItem> TenderItems { get; set; }
         public DbSet<TenderProposal> TenderProposals { get; set; }
         public DbSet<TenderProposalItem> TenderProposalItems { get; set; }
-
         public DbSet<MedicineRequest> MedicineRequests { get; set; }
         public DbSet<MedicineUsage> MedicineUsages { get; set; }
         public DbSet<Audit> Audits { get; set; }
@@ -27,9 +27,47 @@ namespace MedicineStorage.Data
         public DbSet<MedicineSupply> MedicineSupplies { get; set; }
 
 
+
+        public DbSet<AuditTemplate> AuditTemplates { get; set; }
+        public DbSet<TenderTemplate> TenderTemplates { get; set; }
+        public DbSet<MedicineRequestTemplate> MedicineRequestTemplates { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<AuditTemplate>(entity =>
+            {
+                entity.ToTable("AuditTemplates");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.UserId).IsRequired();
+                entity.Property(e => e.RecurrenceInterval).IsRequired();
+                entity.Property(e => e.LastExecutedDate).IsRequired();
+                entity.Property(e => e.IsActive).IsRequired();
+            });
+
+            modelBuilder.Entity<TenderTemplate>(entity =>
+            {
+                entity.ToTable("TenderTemplates");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.UserId).IsRequired();
+                entity.Property(e => e.RecurrenceInterval).IsRequired();
+                entity.Property(e => e.LastExecutedDate).IsRequired();
+                entity.Property(e => e.IsActive).IsRequired();
+            });
+
+            modelBuilder.Entity<MedicineRequestTemplate>(entity =>
+            {
+                entity.ToTable("MedicineRequestTemplates");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Name).IsRequired();
+                entity.Property(e => e.UserId).IsRequired();
+                entity.Property(e => e.RecurrenceInterval).IsRequired();
+                entity.Property(e => e.LastExecutedDate).IsRequired();
+                entity.Property(e => e.IsActive).IsRequired();
+            });
 
             modelBuilder.Entity<User>(entity =>
             {

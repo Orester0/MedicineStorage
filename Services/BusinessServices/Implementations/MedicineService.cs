@@ -48,7 +48,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 var medicine = _mapper.Map<Medicine>(createMedicineDTO);
                 var createdMedicine = await _unitOfWork.MedicineRepository.CreateMedicineAsync(medicine);
 
-                await _unitOfWork.Complete();
+                await _unitOfWork.CompleteAsync();
                 result.Data = _mapper.Map<ReturnMedicineDTO>(createdMedicine);
 
             return result;
@@ -69,7 +69,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 _unitOfWork.MedicineRepository.UpdateMedicine(existingMedicine);
 
 
-                await _unitOfWork.Complete();
+                await _unitOfWork.CompleteAsync();
 
                 result.Data = true;
 
@@ -86,7 +86,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 }
 
                 _unitOfWork.MedicineRepository.DeleteMedicine(medicine);
-                await _unitOfWork.Complete();
+                await _unitOfWork.CompleteAsync();
 
                 result.Data = true;
 

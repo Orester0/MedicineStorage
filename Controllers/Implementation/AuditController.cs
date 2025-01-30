@@ -42,7 +42,7 @@ namespace MedicineStorage.Controllers.Implementation
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         [HttpPost("create")]
-        public async Task<IActionResult> CreateAudit([FromBody] CreateAuditRequest request)
+        public async Task<IActionResult> CreateAudit([FromBody] CreateAuditDTO request)
         {
             if (!ModelState.IsValid)
             {

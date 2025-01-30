@@ -1,4 +1,6 @@
 ﻿using MedicineStorage.Data.Interfaces;
+using MedicineStorage.DTOs;
+using MedicineStorage.Models.TemplateModels;
 namespace MedicineStorage.Data.Implementations
 {
     public class UnitOfWork(
@@ -11,7 +13,12 @@ namespace MedicineStorage.Data.Implementations
         ITenderItemRepository _tenderItemRepository,
         ITenderProposalRepository _tenderProposalRepository,
         ITenderProposalItemRepository _tenderProposalItemRepository,
-        IMedicineSupplyRepository _medicineSupplyRepository
+        IMedicineSupplyRepository _medicineSupplyRepository,
+
+
+        INotificationTemplateRepository<MedicineRequestTemplate> _medicineRequestTemplateRepository,
+        INotificationTemplateRepository<AuditTemplate> _auditTemplateRepository,
+        INotificationTemplateRepository<TenderTemplate> _tenderTemplateRepository
         ) : IUnitOfWork
     {
         public IAuditRepository AuditRepository => _auditRepository;
@@ -41,6 +48,9 @@ namespace MedicineStorage.Data.Implementations
 
 
 
+        public INotificationTemplateRepository<CreateMedicineRequestDTO> MedicineRequestTemplateRepository => _medicineRequestTemplateRepository;
+        public INotificationTemplateRepository<CreateAuditDTO> AuditTemplateRepository => _auditTemplateRepository;
+        public INotificationTemplateRepository<CreateTenderDTO> TenderTemplateRepository => _tenderTemplateRepository;
 
 
         public void BeginTransaction()
@@ -48,7 +58,7 @@ namespace MedicineStorage.Data.Implementations
             throw new NotImplementedException();
         }
 
-        public async Task<bool> Complete()
+        public async Task<bool> CompleteAsync()
         {
             return await _context.SaveChangesAsync() > 0;
         }

@@ -102,37 +102,6 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
                 throw;
             }
         }
-        public async Task SendEmailWithTemplateAsync(string toEmail, string subject, string templateName, Dictionary<string, string> parameters)
-        {
-            try
-            {
-                if (!await IsSmtpServerAvailableAsync())
-                {
-                    _logger.LogError("SMTP server is unavailable. Email cannot be sent.");
-                    throw new InvalidOperationException("SMTP server is unavailable.");
-                }
-
-                var templateContent = await LoadTemplateAsync(templateName);
-
-                foreach (var param in parameters)
-                {
-                    templateContent = templateContent.Replace($"{{{{{param.Key}}}}}", param.Value);
-                }
-
-                await SendEmailAsync(toEmail, subject, templateContent);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to send email with template to {Email}", toEmail);
-                throw;
-            }
-        }
-
-        private async Task<string> LoadTemplateAsync(string templateName)
-        {
-            var templatePath = Path.Combine("Templates", $"{templateName}.html");
-            return await File.ReadAllTextAsync(templatePath);
-        }
         public async Task SendEmailWithRetryAsync(string toEmail, string subject, string message, int maxRetries = 3)
         {
             int retryCount = 0;
@@ -155,6 +124,21 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
                 }
             }
         }
+
+        public async Task SendEmailConfirmationAsync(string toEmail, string confirmationLink)
+        {
+            var subject = "Підтвердження Email";
+            var message = $"Будь ласка, підтвердьте вашу електронну пошту, перейшовши за посиланням: <a href='{confirmationLink}'>Підтвердити Email</a>.";
+            await SendEmailAsync(toEmail, subject, message);
+        }
+        public async Task SendBulkEmailAsync(List<string> toEmails, string subject, string message, bool isHtml = true)
+        {
+            foreach (var email in toEmails)
+            {
+                await SendEmailAsync(email, subject, message, isHtml);
+            }
+        }
+
 
     }
 }

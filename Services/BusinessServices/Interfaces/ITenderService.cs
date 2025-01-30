@@ -9,7 +9,7 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
 {
     public interface ITenderService
     {
-        Task<ServiceResult<PagedList<Tender>>> GetAllTendersAsync(TenderParams tenderParams);
+        Task<ServiceResult<PagedList<ReturnTenderDTO>>> GetAllTendersAsync(TenderParams tenderParams);
         Task<ServiceResult<ReturnTenderDTO>> GetTenderByIdAsync(int tenderId);
         Task<ServiceResult<IEnumerable<ReturnTenderDTO>>> GetTendersCreatedByUserId(int userId);
         Task<ServiceResult<IEnumerable<ReturnTenderDTO>>> GetTendersAwardedByUserId(int userId);

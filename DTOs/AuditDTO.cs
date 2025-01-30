@@ -49,7 +49,7 @@ namespace MedicineStorage.DTOs
 
 
 
-    public class CreateAuditRequest
+    public class CreateAuditDTO
     {
         [Required]
         [MinLength(1)]

@@ -6,25 +6,26 @@ using MedicineStorage.Models;
 using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using MedicineStorage.Models.MedicineModels;
+using AutoMapper;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
-    public class AuditService(IUnitOfWork _unitOfWork, IUserService _userService) : IAuditService
+    public class AuditService(IUnitOfWork _unitOfWork, IUserService _userService, IMapper _mapper) : IAuditService
     {
 
-        public async Task<ServiceResult<PagedList<Audit>>> GetAllAuditsAsync(AuditParams auditParams)
+        public async Task<ServiceResult<PagedList<ReturnAuditDTO>>> GetAllAuditsAsync(AuditParams auditParams)
         {
-            var result = new ServiceResult<PagedList<Audit>>();
+            var result = new ServiceResult<PagedList<ReturnAuditDTO>>();
             var (audits, totalCount) = await _unitOfWork.AuditRepository.GetAllAuditsAsync(auditParams);
-            result.Data = new PagedList<Audit>(audits.ToList(), totalCount, auditParams.PageNumber, auditParams.PageSize);
+            result.Data = new PagedList<ReturnAuditDTO>(_mapper.Map<List<ReturnAuditDTO>>(audits), totalCount, auditParams.PageNumber, auditParams.PageSize);
             return result;
         }
 
 
-        public async Task<ServiceResult<Audit>> GetAuditByIdAsync(int auditId)
+        public async Task<ServiceResult<ReturnAuditDTO>> GetAuditByIdAsync(int auditId)
         {
-            var result = new ServiceResult<Audit>();
-            var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(auditId);
+            var result = new ServiceResult<ReturnAuditDTO>();
+            var audit = await _unitOfWork.AuditRepository.GetByIdAsync(auditId);
             if (audit == null)
             {
 
@@ -32,15 +33,15 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             }
 
-            result.Data = audit;
+            result.Data = _mapper.Map<ReturnAuditDTO>(audit);
 
 
             return result;
         }
 
-        public async Task<ServiceResult<IEnumerable<Audit>>> GetAuditsPlannedByUserId(int userId)
+        public async Task<ServiceResult<IEnumerable<ReturnAuditDTO>>> GetAuditsPlannedByUserId(int userId)
         {
-            var result = new ServiceResult<IEnumerable<Audit>>();
+            var result = new ServiceResult<IEnumerable<ReturnAuditDTO>>();
 
 
             var audits = await _unitOfWork.AuditRepository.GetAuditsByPlannedUserIdAsync(userId);
@@ -51,33 +52,32 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             }
 
-            result.Data = audits;
+            result.Data = _mapper.Map<List<ReturnAuditDTO>>(audits);
 
 
             return result;
         }
 
 
-        public async Task<ServiceResult<IEnumerable<Audit>>> GetAuditsExecutedByUserId(int userId)
+        public async Task<ServiceResult<IEnumerable<ReturnAuditDTO>>> GetAuditsExecutedByUserId(int userId)
         {
-            var result = new ServiceResult<IEnumerable<Audit>>();
+            var result = new ServiceResult<IEnumerable<ReturnAuditDTO>>();
 
             var audits = await _unitOfWork.AuditRepository.GetAuditsByExecutedUserIdAsync(userId);
             if (audits == null)
             {
                 throw new KeyNotFoundException($"Audits executed by user not found.");
             }
-            else
-            {
-                result.Data = audits;
-            }
+
+            result.Data = _mapper.Map<List<ReturnAuditDTO>>(audits);
+
 
 
             return result;
         }
 
 
-        public async Task<ServiceResult<Audit>> CreateAuditAsync(int userId, CreateAuditRequest request)
+        public async Task<ServiceResult<Audit>> CreateAuditAsync(int userId, CreateAuditDTO request)
         {
             var result = new ServiceResult<Audit>();
 
@@ -100,7 +100,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             };
 
             await _unitOfWork.AuditRepository.CreateAuditAsync(audit);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             var auditItems = new List<AuditItem>();
             foreach (var medicineId in request.MedicineIds)
@@ -127,7 +127,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 await _unitOfWork.AuditRepository.CreateAuditItemAsync(item);
             }
 
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = audit;
             return result;
@@ -137,7 +137,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<Audit>> StartAuditAsync(int userId, int auditId, AuditNotes request)
         {
             var result = new ServiceResult<Audit>();
-            var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(auditId);
+            var audit = await _unitOfWork.AuditRepository.GetByIdAsync(auditId);
             if (audit == null)
             {
 
@@ -170,7 +170,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             audit.Notes = request.Notes;
 
             _unitOfWork.AuditRepository.UpdateAudit(audit);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = audit;
             return result;
@@ -181,7 +181,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         {
             var result = new ServiceResult<Audit>();
 
-            var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(auditId);
+            var audit = await _unitOfWork.AuditRepository.GetByIdAsync(auditId);
             if (audit == null)
             {
                 throw new KeyNotFoundException($"Audit with ID {auditId} not found");
@@ -219,7 +219,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             audit.Notes = request.Notes;
 
             _unitOfWork.AuditRepository.UpdateAudit(audit);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = audit;
             return result;
@@ -250,7 +250,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         {
             var result = new ServiceResult<Audit>();
 
-            var audit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(auditId);
+            var audit = await _unitOfWork.AuditRepository.GetByIdAsync(auditId);
             if (audit == null)
             {
                 throw new KeyNotFoundException($"Audit with ID {auditId} not found");
@@ -269,7 +269,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             audit.Notes = request.Notes;
 
             _unitOfWork.AuditRepository.UpdateAudit(audit);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
 
             result.Data = audit;
             return result;
@@ -281,14 +281,14 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         {
             var result = new ServiceResult<Audit>();
 
-            var existingAudit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(audit.Id);
+            var existingAudit = await _unitOfWork.AuditRepository.GetByIdAsync(audit.Id);
             if (existingAudit == null)
             {
                 throw new KeyNotFoundException($"Audit not found");
             }
 
             _unitOfWork.AuditRepository.UpdateAudit(audit);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
             result.Data = audit;
 
 
@@ -299,14 +299,14 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         {
             var result = new ServiceResult<bool>();
 
-            var existingAudit = await _unitOfWork.AuditRepository.GetAuditByIdAsync(auditId);
+            var existingAudit = await _unitOfWork.AuditRepository.GetByIdAsync(auditId);
             if (existingAudit == null)
             {
                 throw new KeyNotFoundException($"Audit not found");
             }
 
             await _unitOfWork.AuditRepository.DeleteAuditAsync(auditId);
-            await _unitOfWork.Complete();
+            await _unitOfWork.CompleteAsync();
             result.Data = true;
 
             return result;

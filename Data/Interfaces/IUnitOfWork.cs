@@ -1,4 +1,7 @@
 ﻿
+using MedicineStorage.DTOs;
+using MedicineStorage.Models.TemplateModels;
+
 namespace MedicineStorage.Data.Interfaces
 {
     public interface IUnitOfWork
@@ -18,8 +21,12 @@ namespace MedicineStorage.Data.Interfaces
         IMedicineSupplyRepository MedicineSupplyRepository { get; }
 
 
+        INotificationTemplateRepository<MedicineRequestTemplate> MedicineRequestTemplateRepository { get; }
+        INotificationTemplateRepository<AuditTemplate> AuditTemplateRepository { get; }
+        INotificationTemplateRepository<TenderTemplate> TenderTemplateRepository { get; }
 
-        Task<bool> Complete();
+
+        Task<bool> CompleteAsync();
 
         bool HasChanges();
         void BeginTransaction();

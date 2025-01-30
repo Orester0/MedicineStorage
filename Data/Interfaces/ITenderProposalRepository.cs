@@ -4,7 +4,7 @@ namespace MedicineStorage.Data.Interfaces
 {
     public interface ITenderProposalRepository
     {
-        public Task<TenderProposal> GetProposalByIdAsync(int id);
+        public Task<TenderProposal> GetByIdAsync(int id);
         public Task<IEnumerable<TenderProposal>> GetAllAsync();
         public Task<TenderProposal> CreateTenderProposalAsync(TenderProposal tenderProposal);
         public void UpdateTenderProposal(TenderProposal tenderProposal);
