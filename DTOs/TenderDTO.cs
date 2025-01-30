@@ -2,6 +2,7 @@
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.TenderModels;
 using MedicineStorage.Models.UserModels;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -57,6 +58,8 @@ namespace MedicineStorage.DTOs
 
     }
 
+    [Keyless]
+    [NotMapped]
     public class CreateTenderDTO
     {
         [Required]

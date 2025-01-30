@@ -48,9 +48,9 @@ namespace MedicineStorage.Data.Implementations
 
 
 
-        public INotificationTemplateRepository<CreateMedicineRequestDTO> MedicineRequestTemplateRepository => _medicineRequestTemplateRepository;
-        public INotificationTemplateRepository<CreateAuditDTO> AuditTemplateRepository => _auditTemplateRepository;
-        public INotificationTemplateRepository<CreateTenderDTO> TenderTemplateRepository => _tenderTemplateRepository;
+        public INotificationTemplateRepository<MedicineRequestTemplate> MedicineRequestTemplateRepository => _medicineRequestTemplateRepository;
+        public INotificationTemplateRepository<AuditTemplate> AuditTemplateRepository => _auditTemplateRepository;
+        public INotificationTemplateRepository<TenderTemplate> TenderTemplateRepository => _tenderTemplateRepository;
 
 
         public void BeginTransaction()

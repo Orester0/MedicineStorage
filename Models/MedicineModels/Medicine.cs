@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace MedicineStorage.Models.MedicineModels
 {
     [Index(nameof(Name), IsUnique = true)]
-    public class Medicine
+    public class Medicine : ISoftDeletable
     {
         [Key]
         [Required]
@@ -42,6 +42,10 @@ namespace MedicineStorage.Models.MedicineModels
         [Required]
         [Range(1, 365)]
         public int AuditFrequencyDays { get; set; }
+
+
+
+        public bool IsDeleted { get; set; } = false;
 
     }
 

@@ -1,6 +1,7 @@
 ﻿using MedicineStorage.Helpers;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.UserModels;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -30,6 +31,8 @@ namespace MedicineStorage.DTOs
         public virtual UserDTO UsedByUser { get; set; }
     }
 
+    [Keyless]
+    [NotMapped]
     public class CreateMedicineRequestDTO
     {
         [Required]

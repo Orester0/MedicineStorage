@@ -1,4 +1,5 @@
 ﻿using MedicineStorage.DTOs;
+using MedicineStorage.Models;
 using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.TemplateModels;
@@ -14,7 +15,6 @@ namespace MedicineStorage.Data
     public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, AppRole, int, IdentityUserClaim<int>,
         UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>(options)
     {
-
         public DbSet<Medicine> Medicines { get; set; }
         public DbSet<Tender> Tenders { get; set; }
         public DbSet<TenderItem> TenderItems { get; set; }
@@ -32,9 +32,26 @@ namespace MedicineStorage.Data
         public DbSet<TenderTemplate> TenderTemplates { get; set; }
         public DbSet<MedicineRequestTemplate> MedicineRequestTemplates { get; set; }
 
+        public override int SaveChanges()
+        {
+            foreach (var entry in ChangeTracker.Entries())
+            {
+                if (entry.State == EntityState.Deleted && entry.Entity is ISoftDeletable)
+                {
+                    entry.State = EntityState.Modified;
+                    ((ISoftDeletable)entry.Entity).IsDeleted = true;
+                }
+            }
+            return base.SaveChanges();
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<Medicine>().HasQueryFilter(p => !p.IsDeleted);
+
+
+
 
             modelBuilder.Entity<AuditTemplate>(entity =>
             {
