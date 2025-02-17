@@ -53,12 +53,12 @@ namespace MedicineStorage.Models.TenderModels
 
     public enum TenderStatus
     {
-        Created,
-        Published,
-        Closed,
-        Awarded,
-        Executing,
-        Executed,
-        Cancelled
+        Created = 1,
+        Published = 2,
+        Closed = 3,
+        Awarded = 4,
+        Executing = 5,
+        Executed = 6,
+        Cancelled = 7
     }
 }

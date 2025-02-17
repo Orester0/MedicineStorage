@@ -9,10 +9,23 @@ namespace MedicineStorage.Data.Implementations
     public class MedicineRepository(AppDbContext _context) : IMedicineRepository
     {
 
+        public async Task<List<Medicine>> GetByIdsAsync(IEnumerable<int> medicineIds)
+        {
+            return await _context.Medicines
+                .Where(m => medicineIds.Contains(m.Id))
+                .ToListAsync();
+        }
+
         public async Task<Medicine?> GetByIdAsync(int id)
         {
             return await _context.Medicines
                 .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public async Task<List<Medicine>> GetAllAsync()
+        {
+            return await _context.Medicines
+               .ToListAsync();
         }
 
         public async Task<(IEnumerable<Medicine>, int)> GetAllAsync(MedicineParams parameters)
@@ -22,8 +35,6 @@ namespace MedicineStorage.Data.Implementations
             if (!string.IsNullOrWhiteSpace(parameters.Name))
                 query = query.Where(m => m.Name.Contains(parameters.Name));
 
-            if (!string.IsNullOrWhiteSpace(parameters.Description))
-                query = query.Where(m => m.Description.Contains(parameters.Description));
 
             if (!string.IsNullOrWhiteSpace(parameters.Category))
                 query = query.Where(m => m.Category == parameters.Category);
@@ -37,21 +48,10 @@ namespace MedicineStorage.Data.Implementations
             if (parameters.MaxStock.HasValue)
                 query = query.Where(m => m.Stock <= parameters.MaxStock);
 
-            if (parameters.MinMinimumStock.HasValue)
-                query = query.Where(m => m.MinimumStock >= parameters.MinMinimumStock);
-
-            if (parameters.MaxMinimumStock.HasValue)
-                query = query.Where(m => m.MinimumStock <= parameters.MaxMinimumStock);
-
             if (parameters.RequiresStrictAudit.HasValue)
                 query = query.Where(m => m.RequiresStrictAudit == parameters.RequiresStrictAudit);
 
-            if (parameters.MinAuditFrequencyDays.HasValue)
-                query = query.Where(m => m.AuditFrequencyDays >= parameters.MinAuditFrequencyDays);
-
-            if (parameters.MaxAuditFrequencyDays.HasValue)
-                query = query.Where(m => m.AuditFrequencyDays <= parameters.MaxAuditFrequencyDays);
-
+            
             query = parameters.SortBy?.ToLower() switch
             {
                 "name" => parameters.IsDescending ? query.OrderByDescending(m => m.Name) : query.OrderBy(m => m.Name),
@@ -72,19 +72,20 @@ namespace MedicineStorage.Data.Implementations
         }
 
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        public async Task<Medicine> CreateMedicineAsync(Medicine medicine)
+        public async Task<Medicine> AddAsync(Medicine medicine)
         {
             await _context.Medicines.AddAsync(medicine);
             return medicine;
         }
 
-        public void UpdateMedicine(Medicine medicine)
+        public void Update(Medicine medicine)
         {
             _context.Medicines.Update(medicine);
         }
 
-        public void DeleteMedicine(Medicine medicine)
+        public void DeleteAsync(Medicine medicine)
         {
             _context.Medicines.Remove(medicine);
         }

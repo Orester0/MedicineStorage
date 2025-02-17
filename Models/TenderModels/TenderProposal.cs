@@ -33,8 +33,8 @@ namespace MedicineStorage.Models.TenderModels
 
     public enum ProposalStatus
     {
-        Submitted,
-        Accepted,
-        Rejected
+        Submitted = 1,
+        Accepted = 2,
+        Rejected = 3
     }
 }

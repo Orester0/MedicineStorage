@@ -10,6 +10,8 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MedicineStorage.Controllers.Implementation
 {
+
+    [Authorize]
     public class TenderController(ITenderService _tenderService) : BaseApiController
     {
         [HttpGet]
@@ -61,16 +63,6 @@ namespace MedicineStorage.Controllers.Implementation
             return Ok(result.Data);
         }
 
-        [HttpGet("{tenderId:int}/tender-items")]
-        public async Task<IActionResult> GetTenderItemsByTender(int tenderId)
-        {
-            var result = await _tenderService.GetItemsByTenderId(tenderId);
-            if (!result.Success)
-            {
-                return BadRequest(new { result.Errors });
-            }
-            return Ok(result.Data);
-        }
 
         [HttpGet("{tenderId:int}/proposals")]
         public async Task<IActionResult> GetProposalsByTenderId(int tenderId)
@@ -82,6 +74,8 @@ namespace MedicineStorage.Controllers.Implementation
             }
             return Ok(result.Data);
         }
+
+
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -121,6 +115,9 @@ namespace MedicineStorage.Controllers.Implementation
             return Ok(result.Data);
         }
 
+
+
+
         [HttpPut("publish/{tenderId:int}")]
         public async Task<IActionResult> PublishTender(int tenderId)
         {
@@ -133,6 +130,35 @@ namespace MedicineStorage.Controllers.Implementation
                 }
                 return Ok(result.Data);
             
+        }
+
+        [HttpPost("proposals/submit/{proposalId:int}")]
+        public async Task<IActionResult> SubmitProposal(int proposalId, [FromBody] CreateTenderProposalDTO proposalDto)
+        {
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+
+            var userId = User.GetUserIdFromClaims();
+            var result = await _tenderService.SubmitProposalAsync(proposalId, proposalDto, userId);
+            if (!result.Success) return BadRequest(new { result.Errors });
+            return Ok(result.Data);
+        }
+
+        [HttpPut("proposals/execute/{proposalId:int}/{tenderItemId:int}")]
+        public async Task<IActionResult> ExecuteTenderItem(int tenderItemId, int proposalId)
+        {
+            var userId = User.GetUserIdFromClaims();
+            var result = await _tenderService.ExecuteTenderItemAsync(tenderItemId, proposalId, userId);
+            if (!result.Success) return BadRequest(new { result.Errors });
+            return Ok(result.Data);
+        }
+
+        [HttpPut("proposals/execute/{proposalId:int}")]
+        public async Task<IActionResult> ExecuteTender(int proposalId)
+        {
+            var userId = User.GetUserIdFromClaims();
+            var result = await _tenderService.ExecuteTenderAsync(proposalId, userId);
+            if (!result.Success) return BadRequest(new { result.Errors });
+            return Ok(result.Data);
         }
 
         [HttpPut("close/{tenderId:int}")]
@@ -163,5 +189,17 @@ namespace MedicineStorage.Controllers.Implementation
             
         }
 
+        [HttpDelete("{tenderId:int}")]
+        public async Task<IActionResult> DeleteTender(int tenderId)
+        {
+
+            var userId = User.GetUserIdFromClaims();
+            var result = await _tenderService.DeleteTenderAsync(tenderId, userId);
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(result.Data);
+        }
     }
 }

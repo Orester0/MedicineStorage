@@ -26,11 +26,13 @@ namespace MedicineStorage.Extensions
             {
                 options.AddPolicy("AllowLocalhost", policy =>
                 {
-                    policy.AllowAnyOrigin()
+                    policy.WithOrigins("http://localhost:4200")
                           .AllowAnyHeader()
-                          .AllowAnyMethod();
+                          .AllowAnyMethod()
+                          .AllowCredentials();
                 });
             });
+
             services.AddControllers();
             
 
@@ -45,26 +47,31 @@ namespace MedicineStorage.Extensions
                     options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 
 
-            // REPOSITORIES
+            // BUSINESS SERVICES
+ 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IMedicineService, MedicineService>();
-            services.AddScoped<IMedicineOperationsService, MedicineOperationsService>();
+            services.AddScoped<IMedicineRequestService, MedicineRequestService>();
+            services.AddScoped<IMedicineUsageService, MedicineUsageService>();
             services.AddScoped<IAuditService, AuditService>();
             services.AddScoped<ITenderService, TenderService>();
-    
+            services.AddScoped<ITemplateService, TemplateService>();
+            services.AddScoped<INotificationService, NotificationService>();
+            services.AddScoped<INotificationTextFactory, NotificationTextFactory>();
+            services.AddScoped<ITemplateExecutionService, TemplateExecutionService>();
 
 
-            services.AddScoped<IUnitOfWork, UnitOfWork>();
+            services.AddHostedService<TemplateExecutionBackgroundService>();
+
+
 
 
             // APPLICATION SERVICES
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmailService, EmailService>();
-            services.AddScoped<IPhotoService, PhotoService>();
             services.AddSignalR();
 
-
-            // BUSINESS SERVICES
+            // REPOSITORIES
             services.AddScoped<IAuditRepository, AuditRepository>();
             services.AddScoped<IMedicineRepository, MedicineRepository>();
             services.AddScoped<IMedicineRequestRepository, MedicineRequestRepository>();
@@ -74,12 +81,12 @@ namespace MedicineStorage.Extensions
             services.AddScoped<ITenderProposalItemRepository, TenderProposalItemRepository>();
             services.AddScoped<ITenderItemRepository, TenderItemRepository>();
             services.AddScoped<IMedicineSupplyRepository, MedicineSupplyRepository>();
+            services.AddScoped<ITemplateRepository<MedicineRequestTemplate>, MedicineRequestTemplateRepository>();
+            services.AddScoped<ITemplateRepository<AuditTemplate>, AuditTemplateRepository>();
+            services.AddScoped<ITemplateRepository<TenderTemplate>, TenderTemplateRepository>();
+            services.AddScoped<INotificationRepository, NotificationRepository>();
 
-            services.AddScoped<INotificationTemplateRepository<MedicineRequestTemplate>, MedicineRequestTemplateRepository>();
-            services.AddScoped<INotificationTemplateRepository<AuditTemplate>, AuditTemplateRepository>();
-            services.AddScoped<INotificationTemplateRepository<TenderTemplate>, TenderTemplateRepository>();
-
-
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
 
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
 

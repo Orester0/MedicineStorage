@@ -12,7 +12,6 @@ namespace MedicineStorage.Data.Implementations
             return await _context.MedicineUsages
                 .Include(u => u.UsedByUser)
                 .Include(u => u.Medicine)
-                .Include(u => u.MedicineRequest)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
         public async Task<(IEnumerable<MedicineUsage>, int)> GetAllAsync(MedicineUsageParams parameters)
@@ -20,7 +19,6 @@ namespace MedicineStorage.Data.Implementations
             var query = _context.MedicineUsages
                 .Include(u => u.UsedByUser)
                 .Include(u => u.Medicine)
-                .Include(u => u.MedicineRequest)
                 .AsQueryable();
 
             // Фільтрація
@@ -32,21 +30,11 @@ namespace MedicineStorage.Data.Implementations
 
             if (parameters.MedicineId.HasValue)
                 query = query.Where(u => u.MedicineId == parameters.MedicineId);
-
-            if (parameters.UsedByUserId.HasValue)
-                query = query.Where(u => u.UsedByUserId == parameters.UsedByUserId);
-
-            if (parameters.MedicineRequestId.HasValue)
-                query = query.Where(u => u.MedicineRequestId == parameters.MedicineRequestId);
-
             if (parameters.MinQuantity.HasValue)
                 query = query.Where(u => u.Quantity >= parameters.MinQuantity);
 
             if (parameters.MaxQuantity.HasValue)
                 query = query.Where(u => u.Quantity <= parameters.MaxQuantity);
-
-            if (!string.IsNullOrWhiteSpace(parameters.Notes))
-                query = query.Where(u => u.Notes != null && u.Notes.Contains(parameters.Notes));
 
             // Сортування
             query = parameters.SortBy?.ToLower() switch
@@ -73,36 +61,16 @@ namespace MedicineStorage.Data.Implementations
         }
 
 
-        public async Task<List<MedicineUsage>> GetUsagesByMedicineIdAsync(int medicineId)
-        {
-            return await _context.MedicineUsages
-                .Where(u => u.MedicineId == medicineId)
-                .Include(u => u.UsedByUser)
-                .Include(u => u.Medicine)
-                .Include(u => u.MedicineRequest)
-                .ToListAsync();
-        }
-
         public async Task<List<MedicineUsage>> GetUsagesByUserIdAsync(int userId)
         {
             return await _context.MedicineUsages
                 .Where(u => u.UsedByUserId == userId)
                 .Include(u => u.UsedByUser)
                 .Include(u => u.Medicine)
-                .Include(u => u.MedicineRequest)
                 .ToListAsync();
         }
 
-
-        public async Task<List<MedicineUsage>> GetUsagesByRequestIdAsync(int requestId)
-        {
-            return await _context.MedicineUsages
-                .Where(u => u.MedicineRequestId == requestId)
-                .Include(u => u.UsedByUser)
-                .Include(u => u.Medicine)
-                .Include(u => u.MedicineRequest)
-                .ToListAsync();
-        }
+        
 
         public async Task<MedicineUsage> CreateUsageAsync(MedicineUsage usage)
         {

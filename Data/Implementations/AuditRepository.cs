@@ -11,16 +11,22 @@ namespace MedicineStorage.Data.Implementations
         {
             var query = _context.Audits
                 .Include(a => a.PlannedByUser)
-                .Include(a => a.ExecutedByUser)
+                .Include(a => a.ClosedByUser)
+                .Include(a => a.Notes)
                 .Include(a => a.AuditItems)
+                    .ThenInclude(ai => ai.Medicine)
+                .Include(a => a.AuditItems)
+                    .ThenInclude(ai => ai.CheckedByUser)
                 .AsQueryable();
 
-            // Фільтрація
-            if (auditParams.FromDate.HasValue)
-                query = query.Where(x => x.PlannedDate >= auditParams.FromDate);
+            if (!string.IsNullOrWhiteSpace(auditParams.Title))
+                query = query.Where(x => x.Title.Contains(auditParams.Title));
 
-            if (auditParams.ToDate.HasValue)
-                query = query.Where(x => x.PlannedDate <= auditParams.ToDate);
+            if (auditParams.FromPlannedDate.HasValue)
+                query = query.Where(x => x.PlannedDate >= auditParams.FromPlannedDate);
+
+            if (auditParams.ToPlannedDate.HasValue)
+                query = query.Where(x => x.PlannedDate <= auditParams.ToPlannedDate);
 
             if (auditParams.Status.HasValue)
                 query = query.Where(x => x.Status == auditParams.Status);
@@ -28,16 +34,18 @@ namespace MedicineStorage.Data.Implementations
             if (auditParams.PlannedByUserId.HasValue)
                 query = query.Where(x => x.PlannedByUserId == auditParams.PlannedByUserId);
 
+            if (auditParams.ClosedByUserId.HasValue)
+                query = query.Where(x => x.ClosedByUserId == auditParams.ClosedByUserId);
+
             if (auditParams.ExecutedByUserId.HasValue)
-                query = query.Where(x => x.ExecutedByUserId == auditParams.ExecutedByUserId);
+                query = query.Where(x => x.ClosedByUserId == auditParams.ExecutedByUserId);
 
-            if (!string.IsNullOrWhiteSpace(auditParams.Notes))
-                query = query.Where(x => x.Notes != null && x.Notes.Contains(auditParams.Notes));
-
-            // Сортування
             query = auditParams.SortBy?.ToLower() switch
             {
-                "date" => auditParams.IsDescending
+                "title" => auditParams.IsDescending
+                    ? query.OrderByDescending(x => x.Title)
+                    : query.OrderBy(x => x.Title),
+                "planneddate" => auditParams.IsDescending
                     ? query.OrderByDescending(x => x.PlannedDate)
                     : query.OrderBy(x => x.PlannedDate),
                 "startdate" => auditParams.IsDescending
@@ -54,7 +62,6 @@ namespace MedicineStorage.Data.Implementations
                     : query.OrderBy(x => x.PlannedDate)
             };
 
-            // Пагінація
             var totalCount = await query.CountAsync();
             var items = await query
                 .Skip((auditParams.PageNumber - 1) * auditParams.PageSize)
@@ -65,12 +72,17 @@ namespace MedicineStorage.Data.Implementations
         }
 
 
+
         public async Task<Audit?> GetByIdAsync(int id)
         {
             return await _context.Audits
                 .Include(a => a.PlannedByUser)
-                .Include(a => a.ExecutedByUser)
+                .Include(a => a.ClosedByUser)
+                .Include(a => a.Notes)
                 .Include(a => a.AuditItems)
+                    .ThenInclude(ai => ai.Medicine)
+                .Include(a => a.AuditItems)
+                    .ThenInclude(ai => ai.CheckedByUser)
                 .FirstOrDefaultAsync(a => a.Id == id);
         }
 
@@ -79,6 +91,7 @@ namespace MedicineStorage.Data.Implementations
             return await _context.AuditItems
                 .Where(ai => ai.AuditId == auditId)
                 .Include(ai => ai.Medicine)
+                .Include (ai => ai.CheckedByUser)
                 .ToListAsync();
         }
 
@@ -86,10 +99,14 @@ namespace MedicineStorage.Data.Implementations
         public async Task<IEnumerable<Audit>> GetAuditsByPlannedUserIdAsync(int userId)
         {
             return await _context.Audits
-                .Where(ai => ai.ExecutedByUserId == userId)
+                .Where(ai => ai.ClosedByUserId == userId)
                 .Include(a => a.PlannedByUser)
-                .Include(a => a.ExecutedByUser)
+                .Include(a => a.ClosedByUser)
+                .Include(a => a.Notes)
                 .Include(a => a.AuditItems)
+                    .ThenInclude(ai => ai.Medicine)
+                .Include(a => a.AuditItems)
+                    .ThenInclude(ai => ai.CheckedByUser)
                 .ToListAsync();
         }
 
@@ -99,10 +116,16 @@ namespace MedicineStorage.Data.Implementations
             return await _context.Audits
                 .Where(ai => ai.PlannedByUserId == userId)
                 .Include(a => a.PlannedByUser)
-                .Include(a => a.ExecutedByUser)
+                .Include(a => a.ClosedByUser)
+                .Include(a => a.Notes)
                 .Include(a => a.AuditItems)
+                    .ThenInclude(ai => ai.Medicine)
+                .Include(a => a.AuditItems)
+                    .ThenInclude(ai => ai.CheckedByUser)
                 .ToListAsync();
         }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
 
         public async Task<Audit> CreateAuditAsync(Audit audit)
         {
@@ -130,6 +153,13 @@ namespace MedicineStorage.Data.Implementations
             await _context.AuditItems.AddAsync(auditItem);
             return auditItem;
         }
+
+        public async Task<IEnumerable<AuditItem>> CreateAuditItemsAsync(IEnumerable<AuditItem> auditItems)
+        {
+            await _context.AuditItems.AddRangeAsync(auditItems);
+            return auditItems;
+        }
+
 
         public void UpdateAuditItem(AuditItem auditItem)
         {

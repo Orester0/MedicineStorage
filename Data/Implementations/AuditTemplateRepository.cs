@@ -5,13 +5,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Implementations
 {
-    public class AuditTemplateRepository(AppDbContext _context) : INotificationTemplateRepository<AuditTemplate>
+    public class AuditTemplateRepository(AppDbContext _context) : ITemplateRepository<AuditTemplate>
     {
 
 
+        public async Task<IEnumerable<AuditTemplate>> GetAllActiveAndDueAsync()
+        {
+            return await _context.Set<AuditTemplate>()
+                .Where(t => t.IsActive && (t.LastExecutedDate == null ||
+                    t.LastExecutedDate.Value.AddDays(t.RecurrenceInterval) <= DateTime.UtcNow))
+                .ToListAsync();
+        }
         public async Task<AuditTemplate> GetByIdAsync(int id)
         {
-            return await _context.AuditTemplates.FindAsync(id);
+            return await _context.AuditTemplates
+               .FirstOrDefaultAsync(t => t.Id == id);
         }
 
 
@@ -26,15 +34,18 @@ namespace MedicineStorage.Data.Implementations
             return await _context.AuditTemplates.ToListAsync();
         }
 
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
         public async Task<AuditTemplate> AddAsync(AuditTemplate entity)
         {
             await _context.AuditTemplates.AddAsync(entity);
             return entity;
         }
 
-        public async Task UpdateAsync(AuditTemplate entity)
+        public async Task Update(AuditTemplate entity)
         {
-            _context.AuditTemplates.Update(entity);
+             _context.AuditTemplates.Update(entity);
         }
 
         public async Task DeleteAsync(int id)

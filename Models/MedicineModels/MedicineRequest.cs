@@ -41,7 +41,7 @@ namespace MedicineStorage.Models.MedicineModels
         [FutureDateAttribute]
         public DateTime RequiredByDate { get; set; }
 
-        [StringLength(1000)]
+        [StringLength(500, MinimumLength = 5)]
         public string? Justification { get; set; }
 
         [DataType(DataType.Date)]
@@ -55,9 +55,9 @@ namespace MedicineStorage.Models.MedicineModels
 
     public enum RequestStatus
     {
-        Pending,
-        PedingWithSpecial,
-        Approved,
-        Rejected
+        Pending = 1,
+        PedingWithSpecial = 2,
+        Approved = 3,
+        Rejected = 4
     }
 }

@@ -13,16 +13,14 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
         Task<ServiceResult<ReturnTenderDTO>> GetTenderByIdAsync(int tenderId);
         Task<ServiceResult<IEnumerable<ReturnTenderDTO>>> GetTendersCreatedByUserId(int userId);
         Task<ServiceResult<IEnumerable<ReturnTenderDTO>>> GetTendersAwardedByUserId(int userId);
-        Task<ServiceResult<IEnumerable<ReturnTenderItemDTO>>> GetItemsByTenderId(int tenderId);
 
-        Task<ServiceResult<ReturnTenderProposalDTO>> GetProposalByIdAsync(int proposalId);
         Task<ServiceResult<IEnumerable<ReturnTenderProposalDTO>>> GetProposalsByTenderId(int tenderId);
-        Task<ServiceResult<IEnumerable<ReturnTenderProposalItemDTO>>> GetItemsByProposalId(int proposalId);
         Task<ServiceResult<IEnumerable<ReturnTenderProposalDTO>>> GetProposalsCreatedByUserId(int userId);
 
 
 
 
+        Task<ServiceResult<bool>> DeleteTenderAsync(int requestId, int userId);
 
 
         Task<ServiceResult<ReturnTenderDTO>> CreateTenderAsync(CreateTenderDTO tenderDto, int userId);

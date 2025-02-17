@@ -23,6 +23,9 @@ namespace MedicineStorage.Data.Interfaces
 
         public Task<AuditItem> CreateAuditItemAsync(AuditItem auditItem);
 
+        public Task<IEnumerable<AuditItem>> CreateAuditItemsAsync(IEnumerable<AuditItem> auditItems);
+
+
         public void UpdateAuditItem(AuditItem auditItem);
 
         public Task DeleteAuditItemAsync(int auditItemId);

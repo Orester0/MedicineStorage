@@ -9,14 +9,11 @@ namespace MedicineStorage.Data.Interfaces
         public Task<MedicineRequest?> GetByIdAsync(int id);
         public Task<(IEnumerable<MedicineRequest>, int)> GetAllAsync(MedicineRequestParams parameters);
         public Task<List<MedicineRequest>> GetRequestsRequestedByUserIdAsync(int userId);
-        public Task<MedicineRequest?> GetRequestByUsageIdAsync(int usageId);
+
+
         public Task<List<MedicineRequest>> GetRequestsApprovedByUserIdAsync(int userId);
-        public Task<List<MedicineRequest>> GetRequestsForMedicineIdAsync(int medicineId);
-
-
-
-        public Task<MedicineRequest> CreateRequestAsync(MedicineRequest request);
-        public void UpdateRequest(MedicineRequest request);
-        public Task DeleteRequestAsync(int requestId);
+        public Task<MedicineRequest> AddAsync(MedicineRequest request);
+        public void Update(MedicineRequest request);
+        public Task DeleteAsync(int requestId);
     }
 }

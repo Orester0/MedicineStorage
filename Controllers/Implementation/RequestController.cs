@@ -5,10 +5,13 @@ using MedicineStorage.Helpers.Params;
 using MedicineStorage.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using MedicineStorage.Services.BusinessServices.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MedicineStorage.Controllers.Implementation
 {
-    public class RequestController(IMedicineOperationsService _operationsService) : BaseApiController
+
+    [Authorize]
+    public class RequestController(IMedicineRequestService _operationsService) : BaseApiController
     {
 
         [HttpGet]
@@ -44,38 +47,6 @@ namespace MedicineStorage.Controllers.Implementation
             return Ok(result.Data);
         }
 
-        [HttpGet("approved-by/{userId:int}")]
-        public async Task<IActionResult> GetRequestsApprovedByUser(int userId)
-        {
-            var result = await _operationsService.GetRequestsApprovedByUserId(userId);
-            if (!result.Success)
-            {
-                return BadRequest(new { result.Errors });
-            }
-            return Ok(result.Data);
-        }
-
-        [HttpGet("requests-for/{medicineId:int}")]
-        public async Task<IActionResult> GetRequestsForMedicine(int medicineId)
-        {
-            var result = await _operationsService.GetRequestsForMedicineId(medicineId);
-            if (!result.Success)
-            {
-                return BadRequest(new { result.Errors });
-            }
-            return Ok(result.Data);
-        }
-
-        [HttpGet("created-from/{usageId:int}")]
-        public async Task<IActionResult> GetRequestByUsageId(int usageId)
-        {
-            var result = await _operationsService.GetRequestByUsageIdAsync(usageId);
-            if (!result.Success)
-            {
-                return BadRequest(new { result.Errors });
-            }
-            return Ok(result.Data);
-        }
 
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -134,7 +105,9 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpDelete("{requestId:int}")]
         public async Task<IActionResult> DeleteRequest(int requestId)
         {
-            var result = await _operationsService.DeleteRequestAsync(requestId);
+
+            var userId = User.GetUserIdFromClaims();
+            var result = await _operationsService.DeleteRequestAsync(requestId, userId);
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });

@@ -16,6 +16,7 @@ namespace MedicineStorage.Data.Implementations
                 .Include(t => t.ClosedByUser)
                 .Include(t => t.WinnerSelectedByUser)
                 .Include(t => t.TenderItems)
+                .ThenInclude(ti => ti.Medicine)
                 .Include(t => t.TenderProposals)
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
@@ -28,24 +29,13 @@ namespace MedicineStorage.Data.Implementations
                 .Include(t => t.ClosedByUser)
                 .Include(t => t.WinnerSelectedByUser)
                 .Include(t => t.TenderItems)
+                    .ThenInclude(ti => ti.Medicine)
                 .Include(t => t.TenderProposals)
                 .AsQueryable();
 
             // Фільтрація
             if (!string.IsNullOrWhiteSpace(tenderParams.Title))
                 query = query.Where(t => t.Title.Contains(tenderParams.Title));
-
-            if (tenderParams.PublishDateFrom.HasValue)
-                query = query.Where(t => t.PublishDate >= tenderParams.PublishDateFrom);
-
-            if (tenderParams.PublishDateTo.HasValue)
-                query = query.Where(t => t.PublishDate <= tenderParams.PublishDateTo);
-
-            if (tenderParams.ClosingDateFrom.HasValue)
-                query = query.Where(t => t.ClosingDate >= tenderParams.ClosingDateFrom);
-
-            if (tenderParams.ClosingDateTo.HasValue)
-                query = query.Where(t => t.ClosingDate <= tenderParams.ClosingDateTo);
 
             if (tenderParams.DeadlineDateFrom.HasValue)
                 query = query.Where(t => t.DeadlineDate >= tenderParams.DeadlineDateFrom);
@@ -67,6 +57,9 @@ namespace MedicineStorage.Data.Implementations
 
             if (tenderParams.WinnerSelectedByUserId.HasValue)
                 query = query.Where(t => t.WinnerSelectedByUserId == tenderParams.WinnerSelectedByUserId);
+
+            if (tenderParams.MedicineId.HasValue)
+                query = query.Where(t => t.TenderItems.Any(ti => ti.MedicineId == tenderParams.MedicineId));
 
             // Сортування
             query = tenderParams.SortBy?.ToLower() switch

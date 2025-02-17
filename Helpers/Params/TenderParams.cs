@@ -8,18 +8,6 @@ namespace MedicineStorage.Helpers.Params
         public string? Title { get; set; }
 
         [DataType(DataType.Date)]
-        public DateTime? PublishDateFrom { get; set; }
-
-        [DataType(DataType.Date)]
-        public DateTime? PublishDateTo { get; set; }
-
-        [DataType(DataType.Date)]
-        public DateTime? ClosingDateFrom { get; set; }
-
-        [DataType(DataType.Date)]
-        public DateTime? ClosingDateTo { get; set; }
-
-        [DataType(DataType.Date)]
         public DateTime? DeadlineDateFrom { get; set; }
 
         [DataType(DataType.Date)]
@@ -35,6 +23,9 @@ namespace MedicineStorage.Helpers.Params
 
         [Range(0, int.MaxValue)]
         public int? ClosedByUserId { get; set; }
+
+        [Range(0, int.MaxValue)]
+        public int? MedicineId { get; set; }
 
         [Range(0, int.MaxValue)]
         public int? WinnerSelectedByUserId { get; set; }

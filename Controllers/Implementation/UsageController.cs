@@ -6,15 +6,18 @@ using MedicineStorage.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using System.Data;
 using MedicineStorage.Services.BusinessServices.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 
 namespace MedicineStorage.Controllers.Implementation
 {
-    public class UsageController(IMedicineOperationsService _operationsService) : BaseApiController
+
+    [Authorize]
+    public class UsageController(IMedicineUsageService _usageService) : BaseApiController
     {
         [HttpGet]
         public async Task<ActionResult<PagedList<ReturnMedicineUsageDTO>>> GetUsages([FromQuery] MedicineUsageParams parameters)
         {
-            var result = await _operationsService.GetAllUsagesAsync(parameters);
+            var result = await _usageService.GetAllUsagesAsync(parameters);
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });
@@ -22,11 +25,12 @@ namespace MedicineStorage.Controllers.Implementation
 
             return Ok(result.Data);
         }
+
 
         [HttpGet("{usageId:int}")]
         public async Task<IActionResult> GetUsageById(int usageId)
         {
-            var result = await _operationsService.GetUsageByIdAsync(usageId);
+            var result = await _usageService.GetUsageByIdAsync(usageId);
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });
@@ -35,10 +39,10 @@ namespace MedicineStorage.Controllers.Implementation
             return Ok(result.Data);
         }
 
-        [HttpGet("from-request/{requestId:int}")]
-        public async Task<IActionResult> GetUsagesByRequestId(int requestId)
+        [HttpGet("created-by/{userId:int}")]
+        public async Task<IActionResult> GetUsagesByUserId(int userId)
         {
-            var result = await _operationsService.GetUsagesByRequestIdAsync(requestId);
+            var result = await _usageService.GetUsagesByUserIdAsync(userId);
             if (!result.Success)
                 return BadRequest(new { result.Errors });
 
@@ -57,7 +61,7 @@ namespace MedicineStorage.Controllers.Implementation
             }
             
                 var userId = User.GetUserIdFromClaims();
-                var result = await _operationsService.CreateUsageAsync(createUsageDto, userId);
+                var result = await _usageService.CreateUsageAsync(createUsageDto, userId);
                 if (!result.Success)
                 {
                     return BadRequest(new { result.Errors });

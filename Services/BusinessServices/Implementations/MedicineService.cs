@@ -13,6 +13,17 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         IUnitOfWork _unitOfWork,
         IMapper _mapper) : IMedicineService
     {
+
+
+
+        public async Task<ServiceResult<List<ReturnMedicineDTO>>> GetAllMedicinesAsync()
+        {
+            var result = new ServiceResult<List<ReturnMedicineDTO>>();
+            var medicines = await _unitOfWork.MedicineRepository.GetAllAsync();
+            var dtos = _mapper.Map<List<ReturnMedicineDTO>>(medicines);
+            result.Data = dtos;
+            return result;
+        }
         public async Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetMedicinesAsync(MedicineParams parameters)
         {
             var result = new ServiceResult<PagedList<ReturnMedicineDTO>>();
@@ -46,7 +57,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         {
             var result = new ServiceResult<ReturnMedicineDTO>();
                 var medicine = _mapper.Map<Medicine>(createMedicineDTO);
-                var createdMedicine = await _unitOfWork.MedicineRepository.CreateMedicineAsync(medicine);
+                var createdMedicine = await _unitOfWork.MedicineRepository.AddAsync(medicine);
 
                 await _unitOfWork.CompleteAsync();
                 result.Data = _mapper.Map<ReturnMedicineDTO>(createdMedicine);
@@ -54,7 +65,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<bool>> UpdateMedicineAsync(int medicineId, CreateMedicineDTO medicineDTO)
+        public async Task<ServiceResult<bool>> UpdateMedicineAsync(int medicineId, UpdateMedicineDTO medicineDTO)
         {
             var result = new ServiceResult<bool>();
                 var existingMedicine = await _unitOfWork.MedicineRepository.GetByIdAsync(medicineId);
@@ -66,7 +77,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
                 _mapper.Map(medicineDTO, existingMedicine);
 
-                _unitOfWork.MedicineRepository.UpdateMedicine(existingMedicine);
+                _unitOfWork.MedicineRepository.Update(existingMedicine);
 
 
                 await _unitOfWork.CompleteAsync();
@@ -82,10 +93,9 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 if (medicine == null)
             {
                 throw new KeyNotFoundException($"Medicine with ID {medicineId} not found.");
-                return result;
                 }
 
-                _unitOfWork.MedicineRepository.DeleteMedicine(medicine);
+                _unitOfWork.MedicineRepository.DeleteAsync(medicine);
                 await _unitOfWork.CompleteAsync();
 
                 result.Data = true;

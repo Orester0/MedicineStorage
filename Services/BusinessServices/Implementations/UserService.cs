@@ -8,18 +8,118 @@ using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using MimeKit;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using SixLabors.ImageSharp.Processing;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
-    public class UserService(UserManager<User> _userManager, RoleManager<AppRole> _roleManager, AppDbContext _context, IMapper _mapper) : IUserService
+    public class UserService(
+     UserManager<User> _userManager,
+     RoleManager<AppRole> _roleManager,
+     AppDbContext _context,
+     IMapper _mapper,
+     IConfiguration configuration) : IUserService
     {
+
+        private readonly string defaultImagePath =
+            configuration["ProfileSettings:DefaultImagePath"]
+            ?? throw new Exception("Default image path cannot be null.");
+
+        public string GetDefaultProfileImage()
+        {
+            return defaultImagePath;
+        }
+
+        public async Task SetDefaultProfilePicturesWhereNull()
+        {
+            if (!File.Exists(defaultImagePath))
+                return;
+
+            byte[] defaultImageBytes = await CompressImageAsync(defaultImagePath);
+
+            var users = _userManager.Users.Where(u => u.ProfilePicture == null).ToList();
+            foreach (var user in users)
+            {
+                user.ProfilePicture = defaultImageBytes;
+                await _userManager.UpdateAsync(user);
+            }
+        }
+
+        public async Task UploadPhotoAsync(IFormFile file, int userId)
+        {
+            var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == userId);
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("Unauthorized");
+            }
+
+            byte[] compressedImage = await CompressImageAsync(file);
+            user.ProfilePicture = compressedImage;
+
+            await _userManager.UpdateAsync(user);
+        }
+
+        private async Task<byte[]> CompressImageAsync(IFormFile file)
+        {
+            using (var stream = file.OpenReadStream())
+            using (var image = await Image.LoadAsync(stream))
+            {
+                image.Mutate(x => x.Resize(128, 128));
+
+                using (var ms = new MemoryStream())
+                {
+                    await image.SaveAsync(ms, new JpegEncoder { Quality = 85 });
+                    return ms.ToArray();
+                }
+            }
+        }
+
+        private async Task<byte[]> CompressImageAsync(string filePath)
+        {
+            using (var image = await Image.LoadAsync(filePath))
+            {
+                image.Mutate(x => x.Resize(256, 256));
+
+                using (var ms = new MemoryStream())
+                {
+                    await image.SaveAsync(ms, new JpegEncoder { Quality = 90 });
+                    return ms.ToArray();
+                }
+            }
+        }
+
+
+        public async Task<byte[]> GetPhotoAsync(int userId)
+        {
+            var user = await _userManager.Users
+                    .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user == null)
+            {
+                throw new UnauthorizedAccessException("Unauthorized");
+            }
+           
+            if (user.ProfilePicture == null)
+            {
+                if (System.IO.File.Exists(defaultImagePath))
+                {
+                    return await File.ReadAllBytesAsync(defaultImagePath);
+                }
+                throw new Exception();
+            }
+
+            return user.ProfilePicture;
+        }
+
+
         public async Task<ServiceResult<User>> GetUserByIdAsync(int id)
         {
             var result = new ServiceResult<User>();
             var user = await _userManager.Users
                     .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
-            .FirstOrDefaultAsync(u => u.Id == id);
+                    .FirstOrDefaultAsync(u => u.Id == id);
             if (user == null)
             {
                 throw new KeyNotFoundException("User not found");
@@ -48,22 +148,23 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<List<UserDTO>>> GetAllAsync()
+        public async Task<ServiceResult<List<ReturnUserDTO>>> GetAllAsync()
         {
-            var result = new ServiceResult<List<UserDTO>>();
+            var result = new ServiceResult<List<ReturnUserDTO>>();
             var users = await _userManager.Users
                     .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
                     .ToListAsync();
-
-            _mapper.Map(users, result.Data);
+            var usersDTO = new List<ReturnUserDTO>(); 
+            _mapper.Map(users, usersDTO);
+            result.Data = usersDTO;
 
             return result;
         }
 
-        public async Task<ServiceResult<List<UserDTO>>> GetUsersByRoleAsync(string roleName)
+        public async Task<ServiceResult<List<ReturnUserDTO>>> GetUsersByRoleAsync(string roleName)
         {
-            var result = new ServiceResult<List<UserDTO>>();
+            var result = new ServiceResult<List<ReturnUserDTO>>();
             var role = await _roleManager.FindByNameAsync(roleName);
             if (role == null)
             {
@@ -161,8 +262,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             result.Data = true;
             return result;
         }
-
-        public async Task<ServiceResult<bool>> AssignRoleAsync(int userId, string roleName)
+        public async Task<ServiceResult<bool>> UpdateRolesAsync(int userId, List<string> roleNames)
         {
             var result = new ServiceResult<bool>();
             var user = await _userManager.FindByIdAsync(userId.ToString());
@@ -172,42 +272,43 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new KeyNotFoundException("User not found");
             }
 
-            if (!await _roleManager.RoleExistsAsync(roleName))
+            var allRoles = _roleManager.Roles.Select(r => r.Name).ToList();
+            var invalidRoles = roleNames.Except(allRoles).ToList();
+
+            if (invalidRoles.Any())
             {
-                throw new KeyNotFoundException("Role doesnt exists");
+                result.Errors.Add($"Invalid roles: {string.Join(", ", invalidRoles)}");
+                return result;
             }
 
-            var roleResult = await _userManager.AddToRoleAsync(user, roleName);
-            if (!roleResult.Succeeded)
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            var rolesToRemove = currentRoles.Except(roleNames).ToList();
+            var rolesToAdd = roleNames.Except(currentRoles).ToList();
+
+            if (rolesToRemove.Any())
             {
-                result.Errors.AddRange(roleResult.Errors.Select(e => e.Description));
-                return result;
+                var removeResult = await _userManager.RemoveFromRolesAsync(user, rolesToRemove);
+                if (!removeResult.Succeeded)
+                {
+                    result.Errors.AddRange(removeResult.Errors.Select(e => e.Description));
+                    return result;
+                }
+            }
+
+            if (rolesToAdd.Any())
+            {
+                var addResult = await _userManager.AddToRolesAsync(user, rolesToAdd);
+                if (!addResult.Succeeded)
+                {
+                    result.Errors.AddRange(addResult.Errors.Select(e => e.Description));
+                    return result;
+                }
             }
 
             result.Data = true;
             return result;
         }
 
-        public async Task<ServiceResult<bool>> RemoveRoleAsync(int userId, string roleName)
-        {
-            var result = new ServiceResult<bool>();
-            var user = await _userManager.FindByIdAsync(userId.ToString());
-
-            if (user == null)
-            {
-                throw new KeyNotFoundException("User not found");
-            }
-
-            var roleResult = await _userManager.RemoveFromRoleAsync(user, roleName);
-            if (!roleResult.Succeeded)
-            {
-                result.Errors.AddRange(roleResult.Errors.Select(e => e.Description));
-                return result;
-            }
-
-            result.Data = true;
-            return result;
-        }
 
         public async Task<ServiceResult<List<string>>> GetUserRolesAsync(int userId)
         {

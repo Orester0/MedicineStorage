@@ -30,15 +30,11 @@ namespace MedicineStorage.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<DateTime?>("EndDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int?>("ExecutedByUserId")
+                    b.Property<int?>("ClosedByUserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Notes")
-                        .HasMaxLength(500)
-                        .HasColumnType("nvarchar(500)");
+                    b.Property<DateTime?>("EndDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<int>("PlannedByUserId")
                         .HasColumnType("int");
@@ -52,9 +48,14 @@ namespace MedicineStorage.Migrations
                     b.Property<int>("Status")
                         .HasColumnType("int");
 
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ExecutedByUserId");
+                    b.HasIndex("ClosedByUserId");
 
                     b.HasIndex("PlannedByUserId");
 
@@ -75,6 +76,9 @@ namespace MedicineStorage.Migrations
                     b.Property<int>("AuditId")
                         .HasColumnType("int");
 
+                    b.Property<int?>("CheckedByUserId")
+                        .HasColumnType("int");
+
                     b.Property<decimal>("ExpectedQuantity")
                         .HasColumnType("decimal(18,2)");
 
@@ -85,9 +89,37 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("AuditId");
 
+                    b.HasIndex("CheckedByUserId");
+
                     b.HasIndex("MedicineId");
 
                     b.ToTable("AuditItems");
+                });
+
+            modelBuilder.Entity("MedicineStorage.Models.AuditModels.AuditNote", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AuditId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuditId");
+
+                    b.ToTable("AuditNote");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.MedicineModels.Medicine", b =>
@@ -154,8 +186,8 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Justification")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<int>("MedicineId")
                         .HasColumnType("int");
@@ -197,13 +229,6 @@ namespace MedicineStorage.Migrations
                     b.Property<int>("MedicineId")
                         .HasColumnType("int");
 
-                    b.Property<int>("MedicineRequestId")
-                        .HasColumnType("int");
-
-                    b.Property<string>("Notes")
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
-
                     b.Property<decimal>("Quantity")
                         .HasColumnType("decimal(18,2)");
 
@@ -217,11 +242,68 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("MedicineId");
 
-                    b.HasIndex("MedicineRequestId");
-
                     b.HasIndex("UsedByUserId");
 
                     b.ToTable("MedicineUsages");
+                });
+
+            modelBuilder.Entity("MedicineStorage.Models.NotificationModels.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRead")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<string>("Title")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Notifications");
+                });
+
+            modelBuilder.Entity("MedicineStorage.Models.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TemplateModels.AuditTemplate", b =>
@@ -232,16 +314,20 @@ namespace MedicineStorage.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CreateDTOJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastExecutedDate")
-                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("RecurrenceInterval")
                         .HasColumnType("int");
@@ -262,16 +348,20 @@ namespace MedicineStorage.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CreateDTOJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastExecutedDate")
-                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("RecurrenceInterval")
                         .HasColumnType("int");
@@ -292,16 +382,20 @@ namespace MedicineStorage.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CreateDTOJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastExecutedDate")
-                        .IsRequired()
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("RecurrenceInterval")
                         .HasColumnType("int");
@@ -529,6 +623,10 @@ namespace MedicineStorage.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("Company")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -572,6 +670,13 @@ namespace MedicineStorage.Migrations
 
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
+
+                    b.Property<string>("Position")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("ProfilePicture")
+                        .HasColumnType("varbinary(MAX)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -701,9 +806,9 @@ namespace MedicineStorage.Migrations
 
             modelBuilder.Entity("MedicineStorage.Models.AuditModels.Audit", b =>
                 {
-                    b.HasOne("MedicineStorage.Models.UserModels.User", "ExecutedByUser")
+                    b.HasOne("MedicineStorage.Models.UserModels.User", "ClosedByUser")
                         .WithMany()
-                        .HasForeignKey("ExecutedByUserId")
+                        .HasForeignKey("ClosedByUserId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("MedicineStorage.Models.UserModels.User", "PlannedByUser")
@@ -712,7 +817,7 @@ namespace MedicineStorage.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.Navigation("ExecutedByUser");
+                    b.Navigation("ClosedByUser");
 
                     b.Navigation("PlannedByUser");
                 });
@@ -725,13 +830,28 @@ namespace MedicineStorage.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("MedicineStorage.Models.UserModels.User", "CheckedByUser")
+                        .WithMany()
+                        .HasForeignKey("CheckedByUserId");
+
                     b.HasOne("MedicineStorage.Models.MedicineModels.Medicine", "Medicine")
                         .WithMany()
                         .HasForeignKey("MedicineId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.Navigation("CheckedByUser");
+
                     b.Navigation("Medicine");
+                });
+
+            modelBuilder.Entity("MedicineStorage.Models.AuditModels.AuditNote", b =>
+                {
+                    b.HasOne("MedicineStorage.Models.AuditModels.Audit", null)
+                        .WithMany("Notes")
+                        .HasForeignKey("AuditId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineRequest", b =>
@@ -768,12 +888,6 @@ namespace MedicineStorage.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("MedicineStorage.Models.MedicineModels.MedicineRequest", "MedicineRequest")
-                        .WithMany()
-                        .HasForeignKey("MedicineRequestId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.HasOne("MedicineStorage.Models.UserModels.User", "UsedByUser")
                         .WithMany()
                         .HasForeignKey("UsedByUserId")
@@ -782,9 +896,18 @@ namespace MedicineStorage.Migrations
 
                     b.Navigation("Medicine");
 
-                    b.Navigation("MedicineRequest");
-
                     b.Navigation("UsedByUser");
+                });
+
+            modelBuilder.Entity("MedicineStorage.Models.RefreshToken", b =>
+                {
+                    b.HasOne("MedicineStorage.Models.UserModels.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.Tender.MedicineSupply", b =>
@@ -947,6 +1070,8 @@ namespace MedicineStorage.Migrations
             modelBuilder.Entity("MedicineStorage.Models.AuditModels.Audit", b =>
                 {
                     b.Navigation("AuditItems");
+
+                    b.Navigation("Notes");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.Tender", b =>

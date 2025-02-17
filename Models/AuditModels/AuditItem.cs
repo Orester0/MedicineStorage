@@ -1,5 +1,6 @@
 ﻿using MedicineStorage.DTOs;
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.UserModels;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -27,6 +28,11 @@ namespace MedicineStorage.Models.AuditModels
         [Column(TypeName = "decimal(18,2)")]
         [Range(0, double.MaxValue)]
         public decimal ActualQuantity { get; set; }
+
+        [ForeignKey("CheckedByUser")]
+        public int? CheckedByUserId { get; set; }
+
+        public virtual User? CheckedByUser { get; set; }
 
         public virtual Medicine Medicine { get; set; }
     }

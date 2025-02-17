@@ -7,8 +7,8 @@ namespace MedicineStorage.Models.TenderModels
 {
     public enum TenderItemStatus
     {
-        Pending,
-        Executed
+        Pending = 1,
+        Executed = 2
     }
 
     public class TenderItem

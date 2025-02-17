@@ -19,11 +19,12 @@ namespace MedicineStorage.Data.Interfaces
 
 
         IMedicineSupplyRepository MedicineSupplyRepository { get; }
+        INotificationRepository NotificationRepository { get; }
 
 
-        INotificationTemplateRepository<MedicineRequestTemplate> MedicineRequestTemplateRepository { get; }
-        INotificationTemplateRepository<AuditTemplate> AuditTemplateRepository { get; }
-        INotificationTemplateRepository<TenderTemplate> TenderTemplateRepository { get; }
+        ITemplateRepository<MedicineRequestTemplate> MedicineRequestTemplateRepository { get; }
+        ITemplateRepository<AuditTemplate> AuditTemplateRepository { get; }
+        ITemplateRepository<TenderTemplate> TenderTemplateRepository { get; }
 
 
         Task<bool> CompleteAsync();

@@ -46,8 +46,38 @@ namespace MedicineStorage.DTOs
     public class CreateMedicineDTO
     {
         [Required]
-        [StringLength(200)]
+        [StringLength(200, MinimumLength = 3)]
         [UniqueMedicineName]
+        public string Name { get; set; }
+
+        [Required]
+        [StringLength(500, MinimumLength = 3)]
+        public string Description { get; set; }
+
+        [Required]
+        [StringLength(100, MinimumLength = 3)]
+        public string Category { get; set; }
+
+        [Required]
+        public bool RequiresSpecialApproval { get; set; }
+
+        [Required]
+        [Range(1, double.MaxValue)]
+        [Column(TypeName = "decimal(18,2)")]
+        public decimal MinimumStock { get; set; }
+
+        [Required]
+        public bool RequiresStrictAudit { get; set; }
+
+        [Required]
+        [Range(1, 365)]
+        public int AuditFrequencyDays { get; set; }
+    }
+
+    public class UpdateMedicineDTO
+    {
+        [Required]
+        [StringLength(200)]
         public string Name { get; set; }
 
         [Required]
@@ -73,6 +103,5 @@ namespace MedicineStorage.DTOs
         [Range(1, 365)]
         public int AuditFrequencyDays { get; set; }
     }
-
 
 }

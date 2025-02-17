@@ -4,13 +4,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Implementations
 {
-    public class TenderTemplateRepository(AppDbContext _context) : INotificationTemplateRepository<TenderTemplate>
+    public class TenderTemplateRepository(AppDbContext _context) : ITemplateRepository<TenderTemplate>
     {
+        public async Task<IEnumerable<TenderTemplate>> GetAllActiveAndDueAsync()
+        {
+            return await _context.Set<TenderTemplate>()
+                .Where(t => t.IsActive && (t.LastExecutedDate == null ||
+                    t.LastExecutedDate.Value.AddDays(t.RecurrenceInterval) <= DateTime.UtcNow))
+                .ToListAsync();
+        }
 
 
         public async Task<TenderTemplate> GetByIdAsync(int id)
         {
-            return await _context.TenderTemplates.FindAsync(id);
+            return await _context.TenderTemplates
+               .FirstOrDefaultAsync(t => t.Id == id);
         }
 
 
@@ -30,7 +38,7 @@ namespace MedicineStorage.Data.Implementations
             return entity;
         }
 
-        public async Task UpdateAsync(TenderTemplate entity)
+        public async Task Update(TenderTemplate entity)
         {
             _context.TenderTemplates.Update(entity);
         }

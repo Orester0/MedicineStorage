@@ -12,22 +12,23 @@ namespace MedicineStorage.Models.MedicineModels
         public int Id { get; set; }
 
         [Required]
-        [StringLength(200)]
+        [StringLength(200, MinimumLength = 3)]
+
         public string Name { get; set; }
 
         [Required]
-        [StringLength(500)]
+        [StringLength(500, MinimumLength = 3)]
         public string Description { get; set; }
 
         [Required]
-        [StringLength(100)]
+        [StringLength(100, MinimumLength = 3)]
         public string Category { get; set; }
 
         [Required]
         public bool RequiresSpecialApproval { get; set; }
 
         [Required]
-        [Range(0, double.MaxValue)]
+        [Range(1, double.MaxValue)]
         [Column(TypeName = "decimal(18,2)")]
         public decimal MinimumStock { get; set; }
 

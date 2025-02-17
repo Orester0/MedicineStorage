@@ -2,6 +2,7 @@
 using MedicineStorage.Models;
 using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.NotificationModels;
 using MedicineStorage.Models.TemplateModels;
 using MedicineStorage.Models.Tender;
 using MedicineStorage.Models.TenderModels;
@@ -27,10 +28,15 @@ namespace MedicineStorage.Data
         public DbSet<MedicineSupply> MedicineSupplies { get; set; }
 
 
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
+
+
 
         public DbSet<AuditTemplate> AuditTemplates { get; set; }
         public DbSet<TenderTemplate> TenderTemplates { get; set; }
         public DbSet<MedicineRequestTemplate> MedicineRequestTemplates { get; set; }
+
 
         public override int SaveChanges()
         {
@@ -52,7 +58,6 @@ namespace MedicineStorage.Data
 
 
 
-
             modelBuilder.Entity<AuditTemplate>(entity =>
             {
                 entity.ToTable("AuditTemplates");
@@ -60,7 +65,6 @@ namespace MedicineStorage.Data
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.UserId).IsRequired();
                 entity.Property(e => e.RecurrenceInterval).IsRequired();
-                entity.Property(e => e.LastExecutedDate).IsRequired();
                 entity.Property(e => e.IsActive).IsRequired();
             });
 
@@ -71,7 +75,6 @@ namespace MedicineStorage.Data
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.UserId).IsRequired();
                 entity.Property(e => e.RecurrenceInterval).IsRequired();
-                entity.Property(e => e.LastExecutedDate).IsRequired();
                 entity.Property(e => e.IsActive).IsRequired();
             });
 
@@ -82,7 +85,6 @@ namespace MedicineStorage.Data
                 entity.Property(e => e.Name).IsRequired();
                 entity.Property(e => e.UserId).IsRequired();
                 entity.Property(e => e.RecurrenceInterval).IsRequired();
-                entity.Property(e => e.LastExecutedDate).IsRequired();
                 entity.Property(e => e.IsActive).IsRequired();
             });
 
@@ -223,10 +225,6 @@ namespace MedicineStorage.Data
                     .HasForeignKey(mu => mu.MedicineId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(mu => mu.MedicineRequest)
-                    .WithMany()
-                    .HasForeignKey(mu => mu.MedicineRequestId)
-                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Audit>(entity =>
@@ -236,9 +234,9 @@ namespace MedicineStorage.Data
                     .HasForeignKey(a => a.PlannedByUserId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                entity.HasOne(a => a.ExecutedByUser)
+                entity.HasOne(a => a.ClosedByUser)
                     .WithMany()
-                    .HasForeignKey(a => a.ExecutedByUserId)
+                    .HasForeignKey(a => a.ClosedByUserId)
                     .OnDelete(DeleteBehavior.Restrict)
                     .IsRequired(false);
 

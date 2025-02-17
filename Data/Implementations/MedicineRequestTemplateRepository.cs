@@ -4,11 +4,21 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Implementations
 {
-    public class MedicineRequestTemplateRepository(AppDbContext _context) : INotificationTemplateRepository<MedicineRequestTemplate>
+    public class MedicineRequestTemplateRepository(AppDbContext _context) : ITemplateRepository<MedicineRequestTemplate>
     {
+
+        public async Task<IEnumerable<MedicineRequestTemplate>> GetAllActiveAndDueAsync()
+        {
+            return await _context.Set<MedicineRequestTemplate>()
+                .Where(t => t.IsActive && (t.LastExecutedDate == null ||
+                    t.LastExecutedDate.Value.AddDays(t.RecurrenceInterval) <= DateTime.UtcNow))
+                .ToListAsync();
+        }
+
         public async Task<MedicineRequestTemplate> GetByIdAsync(int id)
         {
-            return await _context.MedicineRequestTemplates.FindAsync(id);
+            return await _context.MedicineRequestTemplates
+                .FirstOrDefaultAsync(t => t.Id == id);
         }
 
         public async Task<IEnumerable<MedicineRequestTemplate>> GetByUserIdAsync(int id)
@@ -21,13 +31,16 @@ namespace MedicineStorage.Data.Implementations
             return await _context.MedicineRequestTemplates.ToListAsync();
         }
 
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
+        ///
         public async Task<MedicineRequestTemplate> AddAsync(MedicineRequestTemplate entity)
         {
             await _context.MedicineRequestTemplates.AddAsync(entity);
             return entity;
         }
 
-        public async Task UpdateAsync(MedicineRequestTemplate entity)
+        public async Task Update(MedicineRequestTemplate entity)
         {
             _context.MedicineRequestTemplates.Update(entity);
         }

@@ -4,7 +4,7 @@ using MedicineStorage.Helpers;
 using MedicineStorage.Middleware;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.UserModels;
-using MedicineStorage.Services.ApplicationServices.SignalR;
+using MedicineStorage.Services.ApplicationServices.Implementations;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -36,7 +36,8 @@ app.UseAuthorization();
 
 
 app.MapControllers();
-app.MapHub<UserHub>("/userHub");
+app.MapHub<NotificationHub>("/notificationHub");
+
 
 
 app.Run();

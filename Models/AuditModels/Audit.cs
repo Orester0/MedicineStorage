@@ -11,11 +11,15 @@ namespace MedicineStorage.Models.AuditModels
         public int Id { get; set; }
 
         [Required]
+        [StringLength(200, MinimumLength = 5)]
+        public string Title { get; set; }
+
+        [Required]
         [ForeignKey("PlannedByUser")]
         public int PlannedByUserId { get; set; }
 
-        [ForeignKey("ExecutedByUser")]
-        public int? ExecutedByUserId { get; set; }
+        [ForeignKey("ClosedByUser")]
+        public int? ClosedByUserId { get; set; }
 
         [Required]
         [DataType(DataType.Date)]
@@ -27,25 +31,25 @@ namespace MedicineStorage.Models.AuditModels
         [DataType(DataType.Date)]
         public DateTime? EndDate { get; set; }
 
-        [StringLength(500)]
-        public string? Notes { get; set; }
-
         [Required]
         [EnumDataType(typeof(AuditStatus))]
         public AuditStatus Status { get; set; }
 
         public virtual User PlannedByUser { get; set; }
-        public virtual User? ExecutedByUser { get; set; }
+        public virtual User? ClosedByUser { get; set; }
         public virtual ICollection<AuditItem> AuditItems { get; set; }
+
+        public virtual ICollection<AuditNote> Notes { get; set; } = new List<AuditNote>();
+
     }
 
     public enum AuditStatus
     {
-        Planned,
-        InProgress,
-        Completed,
-        RequiresFollowUp,
-        Cancelled
+        Planned = 1,
+        InProgress = 2,
+        Completed = 3,
+        RequiresFollowUp = 4,
+        Cancelled = 5
     }
 
 

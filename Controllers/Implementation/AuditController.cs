@@ -10,6 +10,8 @@ using System.Security.Claims;
 
 namespace MedicineStorage.Controllers.Implementation
 {
+
+    [Authorize]
     public class AuditController(IAuditService _auditService) : BaseApiController
     {
 
@@ -62,10 +64,11 @@ namespace MedicineStorage.Controllers.Implementation
         }
 
         [HttpPut("start/{auditId:int}")]
-        public async Task<IActionResult> StartAudit(int auditId, [FromBody] AuditNotes request)
+        public async Task<IActionResult> StartAudit(int auditId, [FromBody] CreateAuditNoteDTO request)
         {
             
                 var userId = User.GetUserIdFromClaims();
+                var userRoles = User.GetUserRolesFromClaims();
                 var result = await _auditService.StartAuditAsync(userId, auditId, request);
 
                 if (!result.Success)
@@ -98,9 +101,8 @@ namespace MedicineStorage.Controllers.Implementation
         }
 
         [HttpPut("close/{auditId:int}")]
-        public async Task<IActionResult> CloseAudit(int auditId, [FromBody] AuditNotes request)
+        public async Task<IActionResult> CloseAudit(int auditId, [FromBody] CreateAuditNoteDTO request)
         {
-            
                 var userId = User.GetUserIdFromClaims();
                 var result = await _auditService.CloseAuditAsync(userId, auditId, request);
 
@@ -113,27 +115,6 @@ namespace MedicineStorage.Controllers.Implementation
             
         }
 
-        [HttpPut("update/{auditId:int}")]
-        public async Task<IActionResult> UpdateAudit(int auditId, [FromBody] Audit audit)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            if (auditId != audit.Id)
-            {
-                return BadRequest("Audit ID mismatch");
-            }
-
-            var result = await _auditService.UpdateAuditAsync(audit);
-
-            if (!result.Success)
-            {
-                return BadRequest(new { result.Errors });
-            }
-
-            return Ok(result.Data);
-        }
 
         [HttpDelete("{auditId:int}")]
         public async Task<IActionResult> DeleteAudit(int auditId)

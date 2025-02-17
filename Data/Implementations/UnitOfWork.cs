@@ -14,43 +14,25 @@ namespace MedicineStorage.Data.Implementations
         ITenderProposalRepository _tenderProposalRepository,
         ITenderProposalItemRepository _tenderProposalItemRepository,
         IMedicineSupplyRepository _medicineSupplyRepository,
-
-
-        INotificationTemplateRepository<MedicineRequestTemplate> _medicineRequestTemplateRepository,
-        INotificationTemplateRepository<AuditTemplate> _auditTemplateRepository,
-        INotificationTemplateRepository<TenderTemplate> _tenderTemplateRepository
+        INotificationRepository _notificationRepository,
+        ITemplateRepository<MedicineRequestTemplate> _medicineRequestTemplateRepository,
+        ITemplateRepository<AuditTemplate> _auditTemplateRepository,
+        ITemplateRepository<TenderTemplate> _tenderTemplateRepository
         ) : IUnitOfWork
     {
         public IAuditRepository AuditRepository => _auditRepository;
-
         public IMedicineRepository MedicineRepository => _medicineRepository;
-
         public IMedicineRequestRepository MedicineRequestRepository => _medicineRequestRepository;
-
         public IMedicineUsageRepository MedicineUsageRepository => _medicineUsageRepository;
-
         public ITenderRepository TenderRepository => _tenderRepository;
-
         public ITenderProposalRepository TenderProposalRepository => _tenderProposalRepository;
-
-
-
+        public INotificationRepository NotificationRepository => _notificationRepository;
         public ITenderItemRepository TenderItemRepository => _tenderItemRepository;
-
         public ITenderProposalItemRepository TenderProposalItemRepository => _tenderProposalItemRepository;
-
-
-
-
-
         public IMedicineSupplyRepository MedicineSupplyRepository => _medicineSupplyRepository;
-
-
-
-
-        public INotificationTemplateRepository<MedicineRequestTemplate> MedicineRequestTemplateRepository => _medicineRequestTemplateRepository;
-        public INotificationTemplateRepository<AuditTemplate> AuditTemplateRepository => _auditTemplateRepository;
-        public INotificationTemplateRepository<TenderTemplate> TenderTemplateRepository => _tenderTemplateRepository;
+        public ITemplateRepository<MedicineRequestTemplate> MedicineRequestTemplateRepository => _medicineRequestTemplateRepository;
+        public ITemplateRepository<AuditTemplate> AuditTemplateRepository => _auditTemplateRepository;
+        public ITemplateRepository<TenderTemplate> TenderTemplateRepository => _tenderTemplateRepository;
 
 
         public void BeginTransaction()

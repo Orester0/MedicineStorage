@@ -2,7 +2,7 @@
 
 namespace MedicineStorage.Models.TemplateModels
 {
-    public class AuditTemplate : NotificationTemplate<CreateAuditDTO>
+    public class AuditTemplate : TemplateBase<CreateAuditTemplate>
     {
 
     }

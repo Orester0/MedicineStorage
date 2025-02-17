@@ -1,10 +1,14 @@
-﻿using MedicineStorage.Models.UserModels;
+﻿using MedicineStorage.DTOs;
+using MedicineStorage.Models.UserModels;
 
 namespace MedicineStorage.Services.ApplicationServices.Interfaces
 {
     public interface ITokenService
     {
-        Task<string> CreateToken(User user);
+        Task<string> CreateAccessToken(User user);
+        Task<string> CreateRefreshToken(User user);
+        Task<ReturnUserTokenDTO> RefreshAccessToken(string refreshToken);
+        Task RevokeRefreshToken(string refreshToken);
 
     }
 }

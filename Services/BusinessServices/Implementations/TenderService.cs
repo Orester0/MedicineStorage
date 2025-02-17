@@ -12,10 +12,14 @@ using System.Collections.Generic;
 using MimeKit;
 using Humanizer;
 using System.CodeDom.Compiler;
+using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.NotificationModels;
+using MedicineStorage.Patterns;
+using MedicineStorage.Services.ApplicationServices.Interfaces;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
-    public class TenderService(IUnitOfWork _unitOfWork, IMapper _mapper) : ITenderService
+    public class TenderService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationTextFactory _notificationTextFactory, INotificationService _notificationService) : ITenderService
     {
         public async Task<ServiceResult<PagedList<ReturnTenderDTO>>> GetAllTendersAsync(TenderParams tenderParams)
         {
@@ -49,22 +53,8 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<IEnumerable<ReturnTenderItemDTO>>> GetItemsByTenderId(int tenderId)
-        {
-            var result = new ServiceResult<IEnumerable<ReturnTenderItemDTO>>();
-            var tenderItems = await _unitOfWork.TenderItemRepository.GetItemsByTenderIdAsync(tenderId);
-            result.Data = _mapper.Map<IEnumerable<ReturnTenderItemDTO>>(tenderItems);
-            return result;
-        }
 
 
-        public async Task<ServiceResult<ReturnTenderProposalDTO>> GetProposalByIdAsync(int proposalId)
-        {
-            var result = new ServiceResult<ReturnTenderProposalDTO>();
-            var proposal = await _unitOfWork.TenderProposalRepository.GetByIdAsync(proposalId);
-            result.Data = _mapper.Map<ReturnTenderProposalDTO>(proposal);
-            return result;
-        }
 
         public async Task<ServiceResult<IEnumerable<ReturnTenderProposalDTO>>> GetProposalsByTenderId(int tenderId)
         {
@@ -84,20 +74,8 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         }
 
 
-        public async Task<ServiceResult<IEnumerable<ReturnTenderProposalItemDTO>>> GetItemsByProposalId(int proposalId)
-        {
-            var result = new ServiceResult<IEnumerable<ReturnTenderProposalItemDTO>>();
 
-
-
-            var proposalItems = await _unitOfWork.TenderProposalItemRepository.GetItemsByProposalIdAsync(proposalId);
-
-            result.Data = _mapper.Map<IEnumerable<ReturnTenderProposalItemDTO>>(proposalItems);
-            return result;
-        }
-
-
-
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 
 
@@ -186,7 +164,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new BadHttpRequestException($"Only draft tenders can be published.");
             }
 
-            if (tender.DeadlineDate <= DateTime.UtcNow)
+            if (tender.DeadlineDate < DateTime.UtcNow)
             {
                 throw new BadHttpRequestException($"Cannot publish tender with passed deadline date.");
             }
@@ -330,8 +308,23 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             tender.ClosedByUserId = userId;
 
             _unitOfWork.TenderRepository.UpdateTender(tender);
-            await _unitOfWork.CompleteAsync();
 
+
+
+            var (title, message) = _notificationTextFactory.GetNotificationText(NotificationType.TenderClosed, tender.Title);
+            foreach (var proposal in proposals)
+            {
+                var notification = new Notification
+                {
+                    UserId = proposal.CreatedByUserId,
+                    Title = title,
+                    Message = message,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+                await _notificationService.SendNotificationAsync(notification);
+            }
+            await _unitOfWork.CompleteAsync();
             result.Data = _mapper.Map<ReturnTenderDTO>(tender);
             return result;
 
@@ -374,6 +367,21 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             tender.WinnerSelectedByUserId = userId;
 
             _unitOfWork.TenderRepository.UpdateTender(tender);
+
+
+
+            var (title, message) = _notificationTextFactory.GetNotificationText(NotificationType.TenderProposalWon, tender.Title);
+
+            var notification = new Notification
+            {
+                UserId = proposal.CreatedByUserId,
+                Title = title,
+                Message = message,
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow
+            };
+            await _notificationService.SendNotificationAsync(notification);
+
 
             await _unitOfWork.CompleteAsync();
 
@@ -460,7 +468,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             if (updatedMedicine != null)
             {
                 updatedMedicine.Stock += createdMedicineSupply.Quantity;
-                _unitOfWork.MedicineRepository.UpdateMedicine(updatedMedicine);
+                _unitOfWork.MedicineRepository.Update(updatedMedicine);
             }
             else
             {
@@ -524,6 +532,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             foreach (var tenderItem in tenderItems)
             {
                 var proposalItem = proposalItems.FirstOrDefault(x => x.MedicineId == tenderItem.MedicineId);
+
                 if (proposalItem != null)
                 {
                     var transaction = new MedicineSupply
@@ -540,10 +549,10 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
 
                     var updatedMedicine = tenderItem.Medicine;
-                    if (updatedMedicine != null)
+                    if (updatedMedicine != null)    
                     {
                         updatedMedicine.Stock += transaction.Quantity;
-                        _unitOfWork.MedicineRepository.UpdateMedicine(updatedMedicine);
+                        _unitOfWork.MedicineRepository.Update(updatedMedicine);
                     }
                     else
                     {
@@ -566,7 +575,31 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
+        public async Task<ServiceResult<bool>> DeleteTenderAsync(int tenderId, int userId)
+        {
+            var result = new ServiceResult<bool>();
+            var tender = await _unitOfWork.TenderRepository.GetByIdAsync(tenderId);
+            if (tender == null)
+            {
+                throw new KeyNotFoundException($"Tender not found for ID {tenderId}");
+            }
 
+            if (tender.CreatedByUserId != userId)
+            {
+                throw new UnauthorizedAccessException($"Unauthorized");
+            }
 
+            if (tender.Status != TenderStatus.Created)
+            {
+
+                throw new BadHttpRequestException("Only created tenders can be deleted");
+            }
+
+            await _unitOfWork.TenderRepository.DeleteTenderAsync(tender.Id);
+            await _unitOfWork.CompleteAsync();
+
+            result.Data = true;
+            return result;
+        }
     }
 }

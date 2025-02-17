@@ -8,6 +8,8 @@ using NuGet.Protocol;
 
 namespace MedicineStorage.Controllers.Implementation
 {
+
+    //[Authorize(Roles = "Admin")]
     public class AdminController(IUserService _userService, IMapper _mapper) : BaseApiController
     {
         [HttpGet("users")]
@@ -30,8 +32,7 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 return BadRequest(new { result.Errors });
             }
-
-            var userDto = _mapper.Map<UserDTO>(result.Data);
+            var userDto = _mapper.Map<ReturnUserDTO>(result.Data);
             return Ok(userDto);
         }
 
@@ -65,33 +66,10 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            var userDto = _mapper.Map<UserDTO>(result.Data);
+            var userDto = _mapper.Map<ReturnUserDTO>(result.Data);
             return CreatedAtAction(nameof(GetUserById), new { id = result.Data!.Id }, userDto);
         }
 
-        [HttpPut("users/{userId:int}")]
-        public async Task<IActionResult> UpdateUser(int userId, [FromBody] UserUpdateDTO updateDto)
-        {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest(ModelState);
-            }
-            var userResult = await _userService.GetUserByIdAsync(userId);
-            if (!userResult.Success)
-            {
-                return BadRequest(new { userResult.Errors });
-            }
-
-            _mapper.Map(updateDto, userResult.Data);
-            var result = await _userService.UpdateUserAsync(userResult.Data);
-
-            if (!result.Success)
-            {
-                return BadRequest(new { result.Errors });
-            }
-
-            return NoContent();
-        }
 
         [HttpDelete("users/{userId:int}")]
         public async Task<IActionResult> DeleteUser(int userId)
@@ -107,10 +85,10 @@ namespace MedicineStorage.Controllers.Implementation
             return NoContent();
         }
 
-        [HttpPost("users/{userId:int}/roles/{roleName}")]
-        public async Task<IActionResult> AssignRole(int userId, string roleName)
+        [HttpPut("users/{userId:int}/roles")]
+        public async Task<IActionResult> UpdateRoles(int userId, [FromBody] List<string> roleNames)
         {
-            var result = await _userService.AssignRoleAsync(userId, roleName);
+            var result = await _userService.UpdateRolesAsync(userId, roleNames);
 
             if (!result.Success)
             {
@@ -119,17 +97,6 @@ namespace MedicineStorage.Controllers.Implementation
             return Ok();
         }
 
-        [HttpDelete("users/{userId:int}/roles/{roleName}")]
-        public async Task<IActionResult> RemoveRole(int userId, string roleName)
-        {
-            var result = await _userService.RemoveRoleAsync(userId, roleName);
-
-            if (!result.Success)
-            {
-                return BadRequest(new { result.Errors });
-            }
-            return Ok();
-        }
 
     }
 }

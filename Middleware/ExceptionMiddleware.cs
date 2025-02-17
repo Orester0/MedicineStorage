@@ -39,8 +39,8 @@ namespace MedicineStorage.Middleware
             context.Response.StatusCode = (int)statusCode;
 
             var response = _env.IsDevelopment()
-                ? new ApiError(context.Response.StatusCode, message, ex.StackTrace)
-                : new ApiError(context.Response.StatusCode, message, null);
+                ? new HttpError(context.Response.StatusCode, message, ex.StackTrace)
+                : new HttpError(context.Response.StatusCode, message, null);
 
             var options = new JsonSerializerOptions
             {

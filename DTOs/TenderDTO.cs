@@ -17,10 +17,10 @@ namespace MedicineStorage.DTOs
         public DateTime? ClosingDate { get; set; }
         public DateTime DeadlineDate { get; set; }
         public TenderStatus Status { get; set; }
-        public virtual UserDTO CreatedByUser { get; set; }
-        public virtual UserDTO? OpenedByUser { get; set; }
-        public virtual UserDTO? ClosedByUser { get; set; }
-        public virtual UserDTO? WinnerSelectedByUser { get; set; }
+        public virtual ReturnUserDTO CreatedByUser { get; set; }
+        public virtual ReturnUserDTO? OpenedByUser { get; set; }
+        public virtual ReturnUserDTO? ClosedByUser { get; set; }
+        public virtual ReturnUserDTO? WinnerSelectedByUser { get; set; }
 
         public virtual ICollection<ReturnTenderItemDTO> Items { get; set; }
         public virtual ICollection<ReturnTenderProposalDTO> Proposals { get; set; }
@@ -44,7 +44,7 @@ namespace MedicineStorage.DTOs
         public decimal TotalPrice { get; set; }
         public DateTime SubmissionDate { get; set; }
         public ProposalStatus Status { get; set; }
-        public virtual UserDTO CreatedByUser { get; set; }
+        public virtual ReturnUserDTO CreatedByUser { get; set; }
         public virtual ICollection<ReturnTenderProposalItemDTO> Items { get; set; }
     }
 
@@ -58,8 +58,6 @@ namespace MedicineStorage.DTOs
 
     }
 
-    [Keyless]
-    [NotMapped]
     public class CreateTenderDTO
     {
         [Required]
@@ -70,9 +68,10 @@ namespace MedicineStorage.DTOs
         [StringLength(2000, MinimumLength = 5)]
         public string Description { get; set; }
 
+
         [Required]
         [FutureDateAttribute]
-        public DateTime DeadlineDate { get; set; }
+        public DateTime? DeadlineDate { get; set; }
     }
 
     

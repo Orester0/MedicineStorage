@@ -2,7 +2,7 @@
 
 namespace MedicineStorage.Models.TemplateModels
 {
-    public class TenderTemplate : NotificationTemplate<CreateTenderDTO>
+    public class TenderTemplate : TemplateBase<CreateTenderTemplate>
     {
     }
 }

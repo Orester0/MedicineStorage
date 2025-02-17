@@ -13,11 +13,6 @@ namespace MedicineStorage.Helpers.Params
         [Range(1, int.MaxValue)]
         public int? MedicineId { get; set; }
 
-        [Range(1, int.MaxValue)]
-        public int? UsedByUserId { get; set; }
-
-        [Range(1, int.MaxValue)]
-        public int? MedicineRequestId { get; set; }
 
         [Range(0.1, double.MaxValue)]
         public decimal? MinQuantity { get; set; }
@@ -25,8 +20,6 @@ namespace MedicineStorage.Helpers.Params
         [Range(0.1, double.MaxValue)]
         public decimal? MaxQuantity { get; set; }
 
-        [StringLength(1000)]
-        public string? Notes { get; set; }
 
         public string? SortBy { get; set; }
         public bool IsDescending { get; set; }

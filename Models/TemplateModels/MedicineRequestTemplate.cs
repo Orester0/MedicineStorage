@@ -2,7 +2,7 @@
 
 namespace MedicineStorage.Models.TemplateModels
 {
-    public class MedicineRequestTemplate : NotificationTemplate<CreateMedicineRequestDTO>
+    public class MedicineRequestTemplate : TemplateBase<CreateMedicineRequestTemplate>
     {
     }
 }

@@ -2,17 +2,30 @@
 using MedicineStorage.DTOs;
 using MedicineStorage.Helpers.Params;
 using MedicineStorage.Services.BusinessServices.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MedicineStorage.Controllers.Implementation
 {
+
+    [Authorize]
     public class MedicinesController(IMedicineService _medicineService) : BaseApiController
     {
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllMedicines()
+        {
+            var result = await _medicineService.GetAllMedicinesAsync();
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(result.Data);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetMedicines([FromQuery] MedicineParams parameters)
         {
             var result = await _medicineService.GetMedicinesAsync(parameters);
-
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });
@@ -50,7 +63,7 @@ namespace MedicineStorage.Controllers.Implementation
         }
 
         [HttpPut("{medicineId:int}")]
-        public async Task<IActionResult> UpdateMedicine(int medicineId, [FromBody] CreateMedicineDTO medicineDTO)
+        public async Task<IActionResult> UpdateMedicine(int medicineId, [FromBody] UpdateMedicineDTO medicineDTO)
         {
             if (!ModelState.IsValid)
             {

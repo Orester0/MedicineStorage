@@ -25,12 +25,11 @@ namespace MedicineStorage.Data.Implementations
                 .Include(r => r.Medicine)
                 .AsQueryable();
 
-            // Фільтрація
             if (parameters.FromDate.HasValue)
-                query = query.Where(r => r.RequestDate >= parameters.FromDate);
+                query = query.Where(r => r.RequiredByDate >= parameters.FromDate);
 
             if (parameters.ToDate.HasValue)
-                query = query.Where(r => r.RequestDate <= parameters.ToDate);
+                query = query.Where(r => r.RequiredByDate <= parameters.ToDate);
 
             if (parameters.Status.HasValue)
                 query = query.Where(r => r.Status == parameters.Status);
@@ -53,7 +52,6 @@ namespace MedicineStorage.Data.Implementations
             if (!string.IsNullOrWhiteSpace(parameters.Justification))
                 query = query.Where(r => r.Justification != null && r.Justification.Contains(parameters.Justification));
 
-            // Сортування
             query = parameters.SortBy?.ToLower() switch
             {
                 "requestdate" => parameters.IsDescending
@@ -73,7 +71,6 @@ namespace MedicineStorage.Data.Implementations
                     : query.OrderBy(r => r.RequestDate)
             };
 
-            // Пагінація
             var totalCount = await query.CountAsync();
             var items = await query
                 .Skip((parameters.PageNumber - 1) * parameters.PageSize)
@@ -94,6 +91,7 @@ namespace MedicineStorage.Data.Implementations
                 .ToListAsync();
         }
 
+
         public async Task<List<MedicineRequest>> GetRequestsApprovedByUserIdAsync(int userId)
         {
             return await _context.MedicineRequests
@@ -104,40 +102,22 @@ namespace MedicineStorage.Data.Implementations
                 .ToListAsync();
         }
 
-        public async Task<List<MedicineRequest>> GetRequestsForMedicineIdAsync(int medicineId)
-        {
-            return await _context.MedicineRequests
-                .Where(r => r.MedicineId == medicineId)
-                .Include(r => r.RequestedByUser)
-                .Include(r => r.ApprovedByUser)
-                .Include(r => r.Medicine)
-                .ToListAsync();
-        }
-
-        public async Task<MedicineRequest?> GetRequestByUsageIdAsync(int usageId)
-        {
-            var usage = await _context.MedicineUsages
-                .Where(u => u.Id == usageId)
-
-                .FirstOrDefaultAsync();
-
-            return usage?.MedicineRequest;
-        }
 
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-        public async Task<MedicineRequest> CreateRequestAsync(MedicineRequest request)
+        public async Task<MedicineRequest> AddAsync(MedicineRequest request)
         {
             await _context.MedicineRequests.AddAsync(request);
             return request;
         }
 
-        public void UpdateRequest(MedicineRequest request)
+        public void Update(MedicineRequest request)
         {
             _context.MedicineRequests.Update(request);
         }
 
-        public async Task DeleteRequestAsync(int requestId)
+        public async Task DeleteAsync(int requestId)
         {
             var medicineRequest = await _context.MedicineRequests.FindAsync(requestId);
             if (medicineRequest != null)
