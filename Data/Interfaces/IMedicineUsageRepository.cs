@@ -1,17 +1,12 @@
-﻿using MedicineStorage.Helpers.Params;
+﻿using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.Params;
 
 namespace MedicineStorage.Data.Interfaces
 {
-    public interface IMedicineUsageRepository
+    public interface IMedicineUsageRepository : IGenericRepository<MedicineUsage>
     {
-        public Task<MedicineUsage?> GetByIdAsync(int id);
-        public Task<(IEnumerable<MedicineUsage>, int)> GetAllAsync(MedicineUsageParams parameters);
+        public Task<(IEnumerable<MedicineUsage>, int)> GetByParams(MedicineUsageParams parameters);
         public Task<List<MedicineUsage>> GetUsagesByUserIdAsync(int userId);
-
-
-        public Task<MedicineUsage> CreateUsageAsync(MedicineUsage usage);
-        public void UpdateUsage(MedicineUsage usage);
-        public Task DeleteUsageAsync(int id);
     }
 }

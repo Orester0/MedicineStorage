@@ -1,17 +1,14 @@
-﻿using MedicineStorage.DTOs;
-using MedicineStorage.Helpers.Params;
+﻿
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.Params;
 
 namespace MedicineStorage.Data.Interfaces
 {
-    public interface IMedicineRepository
+    public interface IMedicineRepository : IGenericRepository<Medicine>
     {
+        Task<IEnumerable<Medicine>> GetAllRequiringAuditAsync();
         public Task<List<Medicine>> GetByIdsAsync(IEnumerable<int> medicineIds);
-        public Task<Medicine?> GetByIdAsync(int id);
-        public Task<(IEnumerable<Medicine>, int)> GetAllAsync(MedicineParams parameters);
-        public Task<List<Medicine>> GetAllAsync();
-        public Task<Medicine> AddAsync(Medicine medicine);
-        public void Update(Medicine medicine);
-        public void DeleteAsync(Medicine medicine);
+        public Task<(IEnumerable<Medicine>, int)> GetByParams(MedicineParams parameters);
+      
     }
 }

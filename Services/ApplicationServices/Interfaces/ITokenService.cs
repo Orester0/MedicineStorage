@@ -1,4 +1,4 @@
-﻿using MedicineStorage.DTOs;
+﻿using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.UserModels;
 
 namespace MedicineStorage.Services.ApplicationServices.Interfaces

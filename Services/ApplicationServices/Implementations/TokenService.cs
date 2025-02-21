@@ -1,6 +1,6 @@
 ﻿using MedicineStorage.Data;
-using MedicineStorage.DTOs;
 using MedicineStorage.Models;
+using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
 using Microsoft.AspNetCore.Identity;

@@ -1,21 +1,35 @@
-﻿using MedicineStorage.DTOs;
-using MedicineStorage.Models;
+﻿using MedicineStorage.Models;
 using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.NotificationModels;
 using MedicineStorage.Models.TemplateModels;
-using MedicineStorage.Models.Tender;
 using MedicineStorage.Models.TenderModels;
 using MedicineStorage.Models.UserModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 
 namespace MedicineStorage.Data
 {
     public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, AppRole, int, IdentityUserClaim<int>,
         UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>(options)
     {
+
+            //public class CustomNameValueGenerator : ValueGenerator<string>
+            //{
+            //    public override bool GeneratesTemporaryValues => false;
+
+            //    public override string Next(EntityEntry entry)
+            //    {
+            //        var isDeleted = (bool)entry.Property("IsDeleted").CurrentValue!;
+            //        var name = (string)entry.Property("Name").CurrentValue!;
+
+            //        return isDeleted ? $"{name} [DELETED]" : name;
+            //    }
+            //}
         public DbSet<Medicine> Medicines { get; set; }
         public DbSet<Tender> Tenders { get; set; }
         public DbSet<TenderItem> TenderItems { get; set; }
@@ -26,13 +40,8 @@ namespace MedicineStorage.Data
         public DbSet<Audit> Audits { get; set; }
         public DbSet<AuditItem> AuditItems { get; set; }
         public DbSet<MedicineSupply> MedicineSupplies { get; set; }
-
-
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-
-
-
         public DbSet<AuditTemplate> AuditTemplates { get; set; }
         public DbSet<TenderTemplate> TenderTemplates { get; set; }
         public DbSet<MedicineRequestTemplate> MedicineRequestTemplates { get; set; }
@@ -54,8 +63,23 @@ namespace MedicineStorage.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-            modelBuilder.Entity<Medicine>().HasQueryFilter(p => !p.IsDeleted);
+            //modelBuilder.Entity<Medicine>().HasQueryFilter(p => !p.IsDeleted);
 
+
+           // var nameConverter = new ValueConverter<string, string>(
+           //    v => v,
+           //    v => v 
+           //);
+
+           // modelBuilder.Entity<Medicine>()
+           //     .Property(m => m.Name)
+           //     .HasConversion(nameConverter);
+
+           // modelBuilder.Entity<Medicine>()
+           //     .HasQueryFilter(m => !m.IsDeleted) 
+           //     .Metadata
+           //     .FindProperty(nameof(Medicine.Name))
+           //     ?.SetValueGeneratorFactory((_, __) => new CustomNameValueGenerator());
 
 
             modelBuilder.Entity<AuditTemplate>(entity =>
@@ -260,10 +284,6 @@ namespace MedicineStorage.Data
                     .HasForeignKey(ms => ms.MedicineId)
                     .OnDelete(DeleteBehavior.NoAction); 
 
-                entity.HasOne(ms => ms.TenderProposalItem)
-                    .WithMany()
-                    .HasForeignKey(ms => ms.TenderProposalItemId)
-                    .OnDelete(DeleteBehavior.NoAction); 
             });
         }
     }

@@ -43,13 +43,16 @@ namespace MedicineStorage.Extensions
                     };
                 });
 
+            var roles = config.GetSection("Roles").Get<List<string>>();
+
             services.AddAuthorization(options =>
             {
-                options.AddPolicy("Admin", policy => policy.RequireRole("Admin"));
-                options.AddPolicy("Manager", policy => policy.RequireRole("Manager"));
-                options.AddPolicy("Doctor", policy => policy.RequireRole("Doctor"));
-                options.AddPolicy("Distributor", policy => policy.RequireRole("Distributor"));
+                foreach (var role in roles)
+                {
+                    options.AddPolicy(role, policy => policy.RequireRole(role));
+                }
             });
+
 
             return services;
         }

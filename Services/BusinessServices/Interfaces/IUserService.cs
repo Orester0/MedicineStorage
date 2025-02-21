@@ -1,5 +1,5 @@
-﻿using MedicineStorage.DTOs;
-using MedicineStorage.Models;
+﻿using MedicineStorage.Models;
+using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.UserModels;
 
 namespace MedicineStorage.Services.BusinessServices.Interfaces
@@ -7,7 +7,6 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
     public interface IUserService
     {
         Task<ServiceResult<bool>> UpdateRolesAsync(int userId, List<string> roleNames);
-        Task<byte[]> GetPhotoAsync(int userId);
         Task UploadPhotoAsync(IFormFile file, int userId);
         Task<ServiceResult<User>> GetUserByIdAsync(int id);
         Task<ServiceResult<User>> GetByUserNameAsync(string username);

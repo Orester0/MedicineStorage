@@ -1,5 +1,5 @@
 ﻿
-using MedicineStorage.DTOs;
+
 using MedicineStorage.Models.TemplateModels;
 
 namespace MedicineStorage.Data.Interfaces

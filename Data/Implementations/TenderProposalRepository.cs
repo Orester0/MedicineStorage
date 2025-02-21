@@ -1,12 +1,14 @@
 ﻿using MedicineStorage.Data.Interfaces;
+using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.TenderModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Implementations
 {
-    public class TenderProposalRepository(AppDbContext _context) : ITenderProposalRepository
+    public class TenderProposalRepository(AppDbContext _context)
+    : GenericRepository<TenderProposal>(_context), ITenderProposalRepository
     {
-        public async Task<TenderProposal> GetByIdAsync(int id)
+        public override async Task<TenderProposal?> GetByIdAsync(int id)
         {
             return await _context.TenderProposals
                 .Include(tp => tp.CreatedByUser)
@@ -14,7 +16,7 @@ namespace MedicineStorage.Data.Implementations
                 .FirstOrDefaultAsync(tp => tp.Id == id);
         }
 
-        public async Task<IEnumerable<TenderProposal>> GetAllAsync()
+        public override async Task<List<TenderProposal>> GetAllAsync()
         {
             return await _context.TenderProposals
                 .Include(tp => tp.CreatedByUser)
@@ -47,28 +49,6 @@ namespace MedicineStorage.Data.Implementations
                 .Include(tp => tp.CreatedByUser)
                 .Include(tp => tp.Items)
                 .ToListAsync();
-        }
-
-
-
-        public async Task<TenderProposal> CreateTenderProposalAsync(TenderProposal tenderProposal)
-        {
-            await _context.TenderProposals.AddAsync(tenderProposal);
-            return tenderProposal;
-        }
-
-        public void UpdateTenderProposal(TenderProposal tenderProposal)
-        {
-            _context.TenderProposals.Update(tenderProposal);
-        }
-
-        public async Task DeleteTenderProposalAsync(int id)
-        {
-            var tenderProposal = await _context.TenderProposals.FindAsync(id);
-            if (tenderProposal != null)
-            {
-                _context.TenderProposals.Remove(tenderProposal);
-            }
         }
 
     }

@@ -1,6 +1,7 @@
-﻿using MedicineStorage.DTOs;
+﻿
 using MedicineStorage.Helpers;
 using MedicineStorage.Models.UserModels;
+using MedicineStorage.Validators;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -38,7 +39,7 @@ namespace MedicineStorage.Models.MedicineModels
 
         [Required]
         [DataType(DataType.Date)]
-        [FutureDateAttribute]
+        [FutureDate]
         public DateTime RequiredByDate { get; set; }
 
         [StringLength(500, MinimumLength = 5)]

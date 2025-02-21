@@ -1,17 +1,16 @@
 ﻿using AutoMapper;
 using MedicineStorage.Data.Interfaces;
-using MedicineStorage.DTOs;
 using MedicineStorage.Helpers;
-using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models;
+using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.Params;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
     public class MedicineUsageService(IUnitOfWork _unitOfWork, IMapper _mapper) : IMedicineUsageService
     {
-
         public async Task<ServiceResult<ReturnMedicineUsageDTO>> CreateUsageAsync(
             CreateMedicineUsageDTO createUsageDTO,
             int userId)
@@ -29,7 +28,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             usage.UsedByUserId = userId;
             usage.UsageDate = DateTime.UtcNow;
 
-            var createdUsage = await _unitOfWork.MedicineUsageRepository.CreateUsageAsync(usage);
+            var createdUsage = await _unitOfWork.MedicineUsageRepository.AddAsync(usage);
 
             await _unitOfWork.CompleteAsync();
             result.Data = _mapper.Map<ReturnMedicineUsageDTO>(createdUsage);
@@ -49,10 +48,9 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-
-        public async Task<ServiceResult<ReturnMedicineUsageDTO>> GetUsagesByUserIdAsync(int userId)
+        public async Task<ServiceResult<List<ReturnMedicineUsageDTO>>> GetUsagesByUserIdAsync(int userId)
         {
-            var result = new ServiceResult<ReturnMedicineUsageDTO>();
+            var result = new ServiceResult<List<ReturnMedicineUsageDTO>>();
 
             var usages = await _unitOfWork.MedicineUsageRepository.GetUsagesByUserIdAsync(userId);
             if (usages == null)
@@ -60,14 +58,14 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new KeyNotFoundException($"Usages for user with ID {userId} not found.");
             }
 
-            result.Data = _mapper.Map<ReturnMedicineUsageDTO>(usages);
+            result.Data = _mapper.Map<List<ReturnMedicineUsageDTO>>(usages);
             return result;
         }
 
-        public async Task<ServiceResult<PagedList<ReturnMedicineUsageDTO>>> GetAllUsagesAsync(MedicineUsageParams parameters)
+        public async Task<ServiceResult<PagedList<ReturnMedicineUsageDTO>>> GetPaginatedUsages(MedicineUsageParams parameters)
         {
             var result = new ServiceResult<PagedList<ReturnMedicineUsageDTO>>();
-            var (usages, totalCount) = await _unitOfWork.MedicineUsageRepository.GetAllAsync(parameters);
+            var (usages, totalCount) = await _unitOfWork.MedicineUsageRepository.GetByParams(parameters);
             var usageDtos = _mapper.Map<List<ReturnMedicineUsageDTO>>(usages);
             result.Data = new PagedList<ReturnMedicineUsageDTO>(
                 usageDtos,

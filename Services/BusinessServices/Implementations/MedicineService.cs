@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
 using MedicineStorage.Data.Interfaces;
-using MedicineStorage.DTOs;
 using MedicineStorage.Helpers;
-using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models;
+using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.Params;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
@@ -13,9 +13,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         IUnitOfWork _unitOfWork,
         IMapper _mapper) : IMedicineService
     {
-
-
-
         public async Task<ServiceResult<List<ReturnMedicineDTO>>> GetAllMedicinesAsync()
         {
             var result = new ServiceResult<List<ReturnMedicineDTO>>();
@@ -24,10 +21,11 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             result.Data = dtos;
             return result;
         }
-        public async Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetMedicinesAsync(MedicineParams parameters)
+
+        public async Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetPaginatedMedicines(MedicineParams parameters)
         {
             var result = new ServiceResult<PagedList<ReturnMedicineDTO>>();
-                var (medicines, totalCount) = await _unitOfWork.MedicineRepository.GetAllAsync(parameters);
+                var (medicines, totalCount) = await _unitOfWork.MedicineRepository.GetByParams(parameters);
                 var dtos = _mapper.Map<IEnumerable<ReturnMedicineDTO>>(medicines);
                 result.Data = new PagedList<ReturnMedicineDTO>(dtos.ToList(), totalCount, parameters.PageNumber, parameters.PageSize);
 
@@ -49,18 +47,15 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-
-
-
-
         public async Task<ServiceResult<ReturnMedicineDTO>> CreateMedicineAsync(CreateMedicineDTO createMedicineDTO)
         {
             var result = new ServiceResult<ReturnMedicineDTO>();
-                var medicine = _mapper.Map<Medicine>(createMedicineDTO);
-                var createdMedicine = await _unitOfWork.MedicineRepository.AddAsync(medicine);
+            var medicine = _mapper.Map<Medicine>(createMedicineDTO);
+            medicine.LastAuditDate = null;
+            var createdMedicine = await _unitOfWork.MedicineRepository.AddAsync(medicine);
 
-                await _unitOfWork.CompleteAsync();
-                result.Data = _mapper.Map<ReturnMedicineDTO>(createdMedicine);
+            await _unitOfWork.CompleteAsync();
+            result.Data = _mapper.Map<ReturnMedicineDTO>(createdMedicine);
 
             return result;
         }
@@ -86,6 +81,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             return result;
         }
+
         public async Task<ServiceResult<bool>> DeleteMedicineAsync(int medicineId)
         {
             var result = new ServiceResult<bool>();
@@ -95,14 +91,13 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new KeyNotFoundException($"Medicine with ID {medicineId} not found.");
                 }
 
-                _unitOfWork.MedicineRepository.DeleteAsync(medicine);
+                await _unitOfWork.MedicineRepository.DeleteAsync(medicine.Id);
                 await _unitOfWork.CompleteAsync();
 
                 result.Data = true;
 
             return result;
         }
-
     }
 }
 

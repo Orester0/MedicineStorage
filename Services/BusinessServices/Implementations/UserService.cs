@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using MedicineStorage.Data;
-using MedicineStorage.DTOs;
 using MedicineStorage.Models;
+using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.TenderModels;
 using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.BusinessServices.Interfaces;
@@ -26,26 +26,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             configuration["ProfileSettings:DefaultImagePath"]
             ?? throw new Exception("Default image path cannot be null.");
 
-        public string GetDefaultProfileImage()
-        {
-            return defaultImagePath;
-        }
-
-        public async Task SetDefaultProfilePicturesWhereNull()
-        {
-            if (!File.Exists(defaultImagePath))
-                return;
-
-            byte[] defaultImageBytes = await CompressImageAsync(defaultImagePath);
-
-            var users = _userManager.Users.Where(u => u.ProfilePicture == null).ToList();
-            foreach (var user in users)
-            {
-                user.ProfilePicture = defaultImageBytes;
-                await _userManager.UpdateAsync(user);
-            }
-        }
-
         public async Task UploadPhotoAsync(IFormFile file, int userId)
         {
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == userId);
@@ -55,7 +35,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             }
 
             byte[] compressedImage = await CompressImageAsync(file);
-            user.ProfilePicture = compressedImage;
+            user.Photo = compressedImage;
 
             await _userManager.UpdateAsync(user);
         }
@@ -75,44 +55,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             }
         }
 
-        private async Task<byte[]> CompressImageAsync(string filePath)
-        {
-            using (var image = await Image.LoadAsync(filePath))
-            {
-                image.Mutate(x => x.Resize(256, 256));
-
-                using (var ms = new MemoryStream())
-                {
-                    await image.SaveAsync(ms, new JpegEncoder { Quality = 90 });
-                    return ms.ToArray();
-                }
-            }
-        }
-
-
-        public async Task<byte[]> GetPhotoAsync(int userId)
-        {
-            var user = await _userManager.Users
-                    .FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user == null)
-            {
-                throw new UnauthorizedAccessException("Unauthorized");
-            }
-           
-            if (user.ProfilePicture == null)
-            {
-                if (System.IO.File.Exists(defaultImagePath))
-                {
-                    return await File.ReadAllBytesAsync(defaultImagePath);
-                }
-                throw new Exception();
-            }
-
-            return user.ProfilePicture;
-        }
-
-
         public async Task<ServiceResult<User>> GetUserByIdAsync(int id)
         {
             var result = new ServiceResult<User>();
@@ -120,12 +62,13 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                     .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
                     .FirstOrDefaultAsync(u => u.Id == id);
+
             if (user == null)
             {
                 throw new KeyNotFoundException("User not found");
             }
-            result.Data = user;
 
+            result.Data = user;
             return result;
         }
 
@@ -155,8 +98,8 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                     .Include(u => u.UserRoles)
                     .ThenInclude(ur => ur.Role)
                     .ToListAsync();
-            var usersDTO = new List<ReturnUserDTO>(); 
-            _mapper.Map(users, usersDTO);
+
+            var usersDTO = _mapper.Map<List<ReturnUserDTO>>(users);
             result.Data = usersDTO;
 
             return result;
@@ -186,6 +129,12 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         {
             var result = new ServiceResult<User>();
             var user = _mapper.Map<User>(registerDto);
+
+
+            if (File.Exists(defaultImagePath))
+            {
+                user.Photo = await File.ReadAllBytesAsync(defaultImagePath);
+            }
 
             using var transaction = await _context.Database.BeginTransactionAsync();
             try

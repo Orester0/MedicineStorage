@@ -1,14 +1,15 @@
 ﻿using MedicineStorage.Data.Interfaces;
-using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.Params;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Implementations
 {
-    public class MedicineRequestRepository(AppDbContext _context) : IMedicineRequestRepository
+    public class MedicineRequestRepository(AppDbContext _context)
+    : GenericRepository<MedicineRequest>(_context), IMedicineRequestRepository
     {
-        public async Task<MedicineRequest?> GetByIdAsync(int id)
+        public override async Task<MedicineRequest?> GetByIdAsync(int id)
         {
             return await _context.MedicineRequests
                 .Include(r => r.RequestedByUser)
@@ -17,7 +18,8 @@ namespace MedicineStorage.Data.Implementations
                 .FirstOrDefaultAsync(r => r.Id == id);
         }
 
-        public async Task<(IEnumerable<MedicineRequest>, int)> GetAllAsync(MedicineRequestParams parameters)
+        
+        public async Task<(IEnumerable<MedicineRequest>, int)> GetByParams(MedicineRequestParams parameters)
         {
             var query = _context.MedicineRequests
                 .Include(r => r.RequestedByUser)
@@ -54,21 +56,12 @@ namespace MedicineStorage.Data.Implementations
 
             query = parameters.SortBy?.ToLower() switch
             {
-                "requestdate" => parameters.IsDescending
-                    ? query.OrderByDescending(r => r.RequestDate)
-                    : query.OrderBy(r => r.RequestDate),
-                "requireddate" => parameters.IsDescending
-                    ? query.OrderByDescending(r => r.RequiredByDate)
-                    : query.OrderBy(r => r.RequiredByDate),
-                "quantity" => parameters.IsDescending
-                    ? query.OrderByDescending(r => r.Quantity)
-                    : query.OrderBy(r => r.Quantity),
-                "status" => parameters.IsDescending
-                    ? query.OrderByDescending(r => r.Status)
-                    : query.OrderBy(r => r.Status),
-                _ => parameters.IsDescending
-                    ? query.OrderByDescending(r => r.RequestDate)
-                    : query.OrderBy(r => r.RequestDate)
+                "id" => parameters.IsDescending ? query.OrderByDescending(r => r.Id) : query.OrderBy(r => r.Id),
+                "medicine" => parameters.IsDescending? query.OrderByDescending(r => r.Medicine.Name) : query.OrderBy(r => r.Medicine.Name),
+                "requestedByUser" => parameters.IsDescending? query.OrderByDescending(r => r.RequestedByUser.FirstName + " " + r.RequestedByUser.LastName) : query.OrderBy(r => r.RequestedByUser.FirstName + " " + r.RequestedByUser.LastName),
+                "requiredByDate" => parameters.IsDescending? query.OrderByDescending(r => r.RequiredByDate) : query.OrderBy(r => r.RequiredByDate),
+                "status" => parameters.IsDescending ? query.OrderByDescending(r => r.Status) : query.OrderBy(r => r.Status),
+                _ => parameters.IsDescending ? query.OrderByDescending(r => r.Id) : query.OrderBy(r => r.Id)
             };
 
             var totalCount = await query.CountAsync();
@@ -100,31 +93,6 @@ namespace MedicineStorage.Data.Implementations
                 .Include(r => r.ApprovedByUser)
                 .Include(r => r.Medicine)
                 .ToListAsync();
-        }
-
-
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        public async Task<MedicineRequest> AddAsync(MedicineRequest request)
-        {
-            await _context.MedicineRequests.AddAsync(request);
-            return request;
-        }
-
-        public void Update(MedicineRequest request)
-        {
-            _context.MedicineRequests.Update(request);
-        }
-
-        public async Task DeleteAsync(int requestId)
-        {
-            var medicineRequest = await _context.MedicineRequests.FindAsync(requestId);
-            if (medicineRequest != null)
-            {
-                _context.MedicineRequests.Remove(medicineRequest);
-
-            }
         }
 
     }

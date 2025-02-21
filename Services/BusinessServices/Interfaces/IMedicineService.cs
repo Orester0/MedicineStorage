@@ -1,14 +1,14 @@
-﻿using MedicineStorage.DTOs;
-using MedicineStorage.Helpers.Params;
-using MedicineStorage.Helpers;
+﻿using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.DTOs;
+using MedicineStorage.Models.Params;
 
 namespace MedicineStorage.Services.BusinessServices.Interfaces
 {
     public interface IMedicineService
     {
-        public Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetMedicinesAsync(MedicineParams parameters);
+        public Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetPaginatedMedicines(MedicineParams parameters);
         public Task<ServiceResult<List<ReturnMedicineDTO>>> GetAllMedicinesAsync();
         public Task<ServiceResult<ReturnMedicineDTO>> GetMedicineByIdAsync(int id);
         public Task<ServiceResult<ReturnMedicineDTO>> CreateMedicineAsync(CreateMedicineDTO createMedicineDTO);

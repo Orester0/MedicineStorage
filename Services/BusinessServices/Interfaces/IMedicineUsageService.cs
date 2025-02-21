@@ -1,8 +1,8 @@
-﻿using MedicineStorage.DTOs;
-using MedicineStorage.Helpers.Params;
-using MedicineStorage.Helpers;
+﻿using MedicineStorage.Helpers;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models;
+using MedicineStorage.Models.DTOs;
+using MedicineStorage.Models.Params;
 
 namespace MedicineStorage.Services.BusinessServices.Interfaces
 {
@@ -16,8 +16,8 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
         public Task<ServiceResult<ReturnMedicineUsageDTO>> GetUsageByIdAsync(int id);
 
 
-        public Task<ServiceResult<ReturnMedicineUsageDTO>> GetUsagesByUserIdAsync(int userId);
+        public Task<ServiceResult<List<ReturnMedicineUsageDTO>>> GetUsagesByUserIdAsync(int userId);
 
-        public Task<ServiceResult<PagedList<ReturnMedicineUsageDTO>>> GetAllUsagesAsync(MedicineUsageParams parameters);
+        public Task<ServiceResult<PagedList<ReturnMedicineUsageDTO>>> GetPaginatedUsages(MedicineUsageParams parameters);
     }
 }

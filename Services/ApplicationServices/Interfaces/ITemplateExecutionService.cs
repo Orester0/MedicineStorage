@@ -5,7 +5,7 @@ using MedicineStorage.Services.ApplicationServices.Implementations;
 
 namespace MedicineStorage.Services.ApplicationServices.Interfaces
 {
-    public interface ITemplateExecutionService
+    public interface ITemplateCheckService
     {
         public Task CheckAndNotifyAsync();
 

@@ -1,16 +1,9 @@
 ﻿using MedicineStorage.Controllers.Interface;
-using MedicineStorage.DTOs;
 using MedicineStorage.Extensions;
 using MedicineStorage.Models.NotificationModels;
-using MedicineStorage.Models.TemplateModels;
-using MedicineStorage.Services.ApplicationServices.Implementations;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
-using MedicineStorage.Services.BusinessServices.Implementations;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.SignalR;
-using Microsoft.EntityFrameworkCore;
-using NuGet.Protocol;
 
 namespace MedicineStorage.Controllers.Implementation
 {

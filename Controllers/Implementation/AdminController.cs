@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using MedicineStorage.Controllers.Interface;
-using MedicineStorage.DTOs;
+using MedicineStorage.Models.DTOs;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;

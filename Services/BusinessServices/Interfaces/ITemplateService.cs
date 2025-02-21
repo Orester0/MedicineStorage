@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using MedicineStorage.Data.Interfaces;
-using MedicineStorage.DTOs;
 using MedicineStorage.Models;
+using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.TemplateModels;
 
 namespace MedicineStorage.Services.BusinessServices.Interfaces

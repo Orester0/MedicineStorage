@@ -1,6 +1,6 @@
 ﻿using MedicineStorage.Controllers.Interface;
-using MedicineStorage.DTOs;
 using MedicineStorage.Extensions;
+using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.TemplateModels;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
 using MedicineStorage.Services.BusinessServices.Interfaces;

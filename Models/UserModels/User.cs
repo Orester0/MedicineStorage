@@ -24,7 +24,7 @@ namespace MedicineStorage.Models.UserModels
         public string? Company { get; set; }
 
         [Column(TypeName = "varbinary(MAX)")]
-        public byte[]? ProfilePicture { get; set; }
+        public byte[]? Photo { get; set; }
 
         public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 

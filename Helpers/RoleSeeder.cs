@@ -5,34 +5,27 @@ namespace MedicineStorage.Helpers
 {
     public static class RoleSeeder
     {
-        public static async Task SeedRoles(IServiceProvider serviceProvider)
+        public static async Task SeedRoles(IServiceProvider serviceProvider, IConfiguration configuration)
         {
             using var scope = serviceProvider.CreateScope();
             var services = scope.ServiceProvider;
             try
             {
                 var roleManager = services.GetRequiredService<RoleManager<AppRole>>();
-                var roles = new List<AppRole>
-            {
-                new() { Name = "Doctor" },
-                new() { Name = "Manager" },
-                new() { Name = "Admin" },
-                new() { Name = "Distributor" }
-            };
-                foreach (var role in roles)
+                var roles = configuration.GetSection("Roles").Get<List<string>>();
+
+                foreach (var roleName in roles)
                 {
-                    if (!await roleManager.RoleExistsAsync(role.Name))
+                    if (!await roleManager.RoleExistsAsync(roleName))
                     {
-                        await roleManager.CreateAsync(role);
+                        await roleManager.CreateAsync(new AppRole { Name = roleName });
                     }
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating roles: {ex.Message}");
+                throw new Exception("Couldnt seed roles");
             }
         }
-
-
     }
 }

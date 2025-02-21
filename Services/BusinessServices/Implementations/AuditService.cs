@@ -1,6 +1,4 @@
 ﻿using MedicineStorage.Data.Interfaces;
-using MedicineStorage.DTOs;
-using MedicineStorage.Helpers.Params;
 using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.AuditModels;
@@ -8,19 +6,21 @@ using MedicineStorage.Services.BusinessServices.Interfaces;
 using MedicineStorage.Models.MedicineModels;
 using AutoMapper;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
+using MedicineStorage.Models.DTOs;
+using MedicineStorage.Models.Params;
+using MedicineStorage.Models.TenderModels;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
-    public class AuditService(IUnitOfWork _unitOfWork, IUserService _userService, IMapper _mapper, INotificationService _notificationService) : IAuditService
+    public class AuditService(IUnitOfWork _unitOfWork, IUserService _userService, IMapper _mapper) : IAuditService
     {
-        public async Task<ServiceResult<PagedList<ReturnAuditDTO>>> GetAllAuditsAsync(AuditParams auditParams)
+        public async Task<ServiceResult<PagedList<ReturnAuditDTO>>> GetPaginatedAudits(AuditParams auditParams)
         {
             var result = new ServiceResult<PagedList<ReturnAuditDTO>>();
-            var (audits, totalCount) = await _unitOfWork.AuditRepository.GetAllAuditsAsync(auditParams);
+            var (audits, totalCount) = await _unitOfWork.AuditRepository.GetByParams(auditParams);
             result.Data = new PagedList<ReturnAuditDTO>(_mapper.Map<List<ReturnAuditDTO>>(audits), totalCount, auditParams.PageNumber, auditParams.PageSize);
             return result;
         }
-
 
         public async Task<ServiceResult<ReturnAuditDTO>> GetAuditByIdAsync(int auditId)
         {
@@ -58,7 +58,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-
         public async Task<ServiceResult<IEnumerable<ReturnAuditDTO>>> GetAuditsExecutedByUserId(int userId)
         {
             var result = new ServiceResult<IEnumerable<ReturnAuditDTO>>();
@@ -75,7 +74,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             return result;
         }
-
 
         public async Task<ServiceResult<Audit>> CreateAuditAsync(int userId, CreateAuditDTO request)
         {
@@ -98,7 +96,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 });
             }
 
-            await _unitOfWork.AuditRepository.CreateAuditAsync(audit);
+            await _unitOfWork.AuditRepository.AddAsync(audit);
             await _unitOfWork.CompleteAsync();
 
             var medicines = await _unitOfWork.MedicineRepository.GetByIdsAsync(request.MedicineIds);
@@ -128,6 +126,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
 
         }
+
         public async Task<ServiceResult<Audit>> StartAuditAsync(int userId, int auditId, CreateAuditNoteDTO request)
         {
             var result = new ServiceResult<Audit>();
@@ -156,13 +155,14 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 });
             }
 
-            _unitOfWork.AuditRepository.UpdateAudit(audit);
+            _unitOfWork.AuditRepository.Update(audit);
             await _unitOfWork.CompleteAsync();
 
             result.Data = audit;
             return result;
 
         }
+
         public async Task<ServiceResult<Audit>> UpdateAuditItemsAsync(int userId, int auditId, UpdateAuditItemsRequest request)
         {
             
@@ -227,14 +227,12 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 });
             }
 
-            _unitOfWork.AuditRepository.UpdateAudit(audit);
+            _unitOfWork.AuditRepository.Update(audit);
             await _unitOfWork.CompleteAsync();
 
             result.Data = audit;
             return result;
         }
-
-
 
         public async Task<ServiceResult<Audit>> CloseAuditAsync(int userId, int auditId, CreateAuditNoteDTO request)
         {
@@ -255,6 +253,14 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             audit.EndDate ??= DateTime.UtcNow;
             audit.Status = AuditStatus.Completed;
 
+            foreach (var auditItem in audit.AuditItems)
+            {
+                if (auditItem.Medicine != null)
+                {
+                    auditItem.Medicine.LastAuditDate = DateTime.UtcNow;
+                }
+            }
+
             if (!string.IsNullOrEmpty(request.Note))
             {
                 audit.Notes.Add(new AuditNote
@@ -265,24 +271,38 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 });
             }
 
-            _unitOfWork.AuditRepository.UpdateAudit(audit);
+            _unitOfWork.AuditRepository.Update(audit);
             await _unitOfWork.CompleteAsync();
 
             result.Data = audit;
             return result;
         }
 
-        public async Task<ServiceResult<bool>> DeleteAuditAsync(int auditId)
+        public async Task<ServiceResult<bool>> DeleteAuditAsync(int auditId, int userId, List<string> userRoles)
         {
             var result = new ServiceResult<bool>();
 
-            var existingAudit = await _unitOfWork.AuditRepository.GetByIdAsync(auditId);
-            if (existingAudit == null)
+            var audit = await _unitOfWork.AuditRepository.GetByIdAsync(auditId);
+            if (audit == null)
             {
                 throw new KeyNotFoundException($"Audit not found");
             }
 
-            await _unitOfWork.AuditRepository.DeleteAuditAsync(auditId);
+
+            if (audit.PlannedByUserId != userId && !userRoles.Contains("Admin"))
+            {
+                throw new UnauthorizedAccessException("Unauthorized");
+            }
+
+
+            if (audit.Status != AuditStatus.Planned)
+            {
+
+                throw new BadHttpRequestException("Only planned audits can be deleted");
+            }
+
+
+            await _unitOfWork.AuditRepository.DeleteAsync(audit.Id);
             await _unitOfWork.CompleteAsync();
             result.Data = true;
 

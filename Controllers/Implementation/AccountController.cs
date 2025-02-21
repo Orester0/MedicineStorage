@@ -1,8 +1,8 @@
 ﻿using AutoMapper;
 using CloudinaryDotNet.Actions;
 using MedicineStorage.Controllers.Interface;
-using MedicineStorage.DTOs;
 using MedicineStorage.Extensions;
+using MedicineStorage.Models.DTOs;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
 using MedicineStorage.Services.BusinessServices.Implementations;
 using MedicineStorage.Services.BusinessServices.Interfaces;
@@ -27,19 +27,6 @@ namespace MedicineStorage.Controllers.Implementation
         ) : BaseApiController
     {
 
-
-
-
-
-        [HttpGet("photo")]
-        public async Task<IActionResult> GetPhoto()
-        {
-            var userId = User.GetUserIdFromClaims();
-            byte[] photoBytes = await _userService.GetPhotoAsync(userId);
-
-            return File(photoBytes, "image/jpeg");
-        }
-
         [HttpGet("info")]
         public async Task<IActionResult> GetInformationAboutCurrentUser()
         {
@@ -49,9 +36,10 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 return BadRequest(new { result.Errors });
             }
-            var userDTO = _mapper.Map<ReturnUserDTO>(result.Data);
-            return Ok(userDTO);
 
+            var userDTO = _mapper.Map<ReturnUserDTO>(result.Data);
+
+            return Ok(userDTO);
         }
 
         [HttpGet("audits/planned")]
@@ -243,10 +231,11 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            var user = result.Data; ;
+            var user = result.Data;
             var accessToken = await _tokenService.CreateAccessToken(user);
             var refreshToken = await _tokenService.CreateRefreshToken(user);
-            var returnUserDTO = _mapper.Map<ReturnUserDTO>(result.Data);
+
+            var returnUserDTO = _mapper.Map<ReturnUserDTO>(user);
 
             var returnUserLoginDTO = new ReturnUserLoginDTO
             {
@@ -255,17 +244,7 @@ namespace MedicineStorage.Controllers.Implementation
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 },
-                returnUserDTO = new ReturnUserDTO
-                {
-                    Id = returnUserDTO.Id,
-                    FirstName = returnUserDTO.FirstName,
-                    LastName = returnUserDTO.LastName,
-                    UserName = returnUserDTO.UserName,
-                    Position = returnUserDTO.Position,
-                    Company = returnUserDTO.Company,
-                    Email = returnUserDTO.Email,
-                    Roles = returnUserDTO.Roles
-                }
+                returnUserDTO = returnUserDTO,
             };
 
             return Ok(returnUserLoginDTO);
@@ -300,7 +279,7 @@ namespace MedicineStorage.Controllers.Implementation
             var accessToken = await _tokenService.CreateAccessToken(user);
             var refreshToken = await _tokenService.CreateRefreshToken(user);
 
-            var returnUserDTO = _mapper.Map<ReturnUserDTO>(userResult.Data);
+            var returnUserDTO = _mapper.Map<ReturnUserDTO>(user);
 
             var returnUserLoginDTO = new ReturnUserLoginDTO
             {
@@ -309,17 +288,7 @@ namespace MedicineStorage.Controllers.Implementation
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 },
-                returnUserDTO = new ReturnUserDTO
-                {
-                    Id = returnUserDTO.Id,
-                    FirstName = returnUserDTO.FirstName,
-                    LastName = returnUserDTO.LastName,
-                    UserName = returnUserDTO.UserName,
-                    Position = returnUserDTO.Position,
-                    Company = returnUserDTO.Company,
-                    Email = returnUserDTO.Email,
-                    Roles = returnUserDTO.Roles
-                }
+                returnUserDTO = returnUserDTO
             };
 
             return Ok(returnUserLoginDTO);

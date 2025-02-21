@@ -1,13 +1,30 @@
 ﻿using MedicineStorage.Data.Interfaces;
-using MedicineStorage.DTOs;
-using MedicineStorage.Helpers.Params;
+
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.Params;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Implementations
 {
-    public class MedicineRepository(AppDbContext _context) : IMedicineRepository
+    public class MedicineRepository(AppDbContext _context)
+    : GenericRepository<Medicine>(_context), IMedicineRepository
+
     {
+
+        public override async Task<List<Medicine>> GetAllAsync()
+        {
+            return await _context.Medicines.OrderBy(m => m.Name).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Medicine>> GetAllRequiringAuditAsync()
+        {
+            var currentDate = DateTime.UtcNow;
+            return await _context.Medicines
+                .Where(m => m.LastAuditDate != null &&
+                           m.LastAuditDate.Value.AddDays(m.AuditFrequencyDays) <= currentDate)
+                .ToListAsync();
+        }
+
 
         public async Task<List<Medicine>> GetByIdsAsync(IEnumerable<int> medicineIds)
         {
@@ -16,19 +33,7 @@ namespace MedicineStorage.Data.Implementations
                 .ToListAsync();
         }
 
-        public async Task<Medicine?> GetByIdAsync(int id)
-        {
-            return await _context.Medicines
-                .FirstOrDefaultAsync(m => m.Id == id);
-        }
-
-        public async Task<List<Medicine>> GetAllAsync()
-        {
-            return await _context.Medicines
-               .ToListAsync();
-        }
-
-        public async Task<(IEnumerable<Medicine>, int)> GetAllAsync(MedicineParams parameters)
+        public async Task<(IEnumerable<Medicine>, int)> GetByParams(MedicineParams parameters)
         {
             var query = _context.Medicines.AsQueryable();
 
@@ -47,18 +52,13 @@ namespace MedicineStorage.Data.Implementations
 
             if (parameters.MaxStock.HasValue)
                 query = query.Where(m => m.Stock <= parameters.MaxStock);
-
-            if (parameters.RequiresStrictAudit.HasValue)
-                query = query.Where(m => m.RequiresStrictAudit == parameters.RequiresStrictAudit);
-
             
             query = parameters.SortBy?.ToLower() switch
             {
+                "id" => parameters.IsDescending ? query.OrderByDescending(m => m.Id) : query.OrderBy(m => m.Id),
                 "name" => parameters.IsDescending ? query.OrderByDescending(m => m.Name) : query.OrderBy(m => m.Name),
                 "category" => parameters.IsDescending ? query.OrderByDescending(m => m.Category) : query.OrderBy(m => m.Category),
                 "stock" => parameters.IsDescending ? query.OrderByDescending(m => m.Stock) : query.OrderBy(m => m.Stock),
-                "minimumstock" => parameters.IsDescending ? query.OrderByDescending(m => m.MinimumStock) : query.OrderBy(m => m.MinimumStock),
-                "auditfrequencydays" => parameters.IsDescending ? query.OrderByDescending(m => m.AuditFrequencyDays) : query.OrderBy(m => m.AuditFrequencyDays),
                 _ => query.OrderBy(m => m.Id)
             };
 
@@ -71,24 +71,6 @@ namespace MedicineStorage.Data.Implementations
             return (items, totalCount);
         }
 
-
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        public async Task<Medicine> AddAsync(Medicine medicine)
-        {
-            await _context.Medicines.AddAsync(medicine);
-            return medicine;
-        }
-
-        public void Update(Medicine medicine)
-        {
-            _context.Medicines.Update(medicine);
-        }
-
-        public void DeleteAsync(Medicine medicine)
-        {
-            _context.Medicines.Remove(medicine);
-        }
 
     }
 }

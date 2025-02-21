@@ -1,13 +1,29 @@
 ﻿using MedicineStorage.Data.Interfaces;
-using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models.AuditModels;
+using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.Params;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Implementations
 {
-    public class AuditRepository(AppDbContext _context) : IAuditRepository
+    public class AuditRepository(AppDbContext _context) : GenericRepository<Audit>(_context), IAuditRepository
     {
-        public async Task<(IEnumerable<Audit>, int)> GetAllAuditsAsync(AuditParams auditParams)
+        public override async Task<Audit?> GetByIdAsync(int id)
+        {
+            return await _context.Audits
+                .Include(a => a.PlannedByUser)
+                .Include(a => a.ClosedByUser)
+                .Include(a => a.Notes)
+                .Include(a => a.AuditItems)
+                    .ThenInclude(ai => ai.Medicine)
+                .Include(a => a.AuditItems)
+                    .ThenInclude(ai => ai.CheckedByUser)
+                .FirstOrDefaultAsync(a => a.Id == id);
+        }
+
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+        public async Task<(IEnumerable<Audit>, int)> GetByParams(AuditParams auditParams)
         {
             var query = _context.Audits
                 .Include(a => a.PlannedByUser)
@@ -42,24 +58,13 @@ namespace MedicineStorage.Data.Implementations
 
             query = auditParams.SortBy?.ToLower() switch
             {
-                "title" => auditParams.IsDescending
-                    ? query.OrderByDescending(x => x.Title)
-                    : query.OrderBy(x => x.Title),
-                "planneddate" => auditParams.IsDescending
-                    ? query.OrderByDescending(x => x.PlannedDate)
-                    : query.OrderBy(x => x.PlannedDate),
-                "startdate" => auditParams.IsDescending
-                    ? query.OrderByDescending(x => x.StartDate)
-                    : query.OrderBy(x => x.StartDate),
-                "enddate" => auditParams.IsDescending
-                    ? query.OrderByDescending(x => x.EndDate)
-                    : query.OrderBy(x => x.EndDate),
-                "status" => auditParams.IsDescending
-                    ? query.OrderByDescending(x => x.Status)
-                    : query.OrderBy(x => x.Status),
-                _ => auditParams.IsDescending
-                    ? query.OrderByDescending(x => x.PlannedDate)
-                    : query.OrderBy(x => x.PlannedDate)
+                "id" => auditParams.IsDescending ? query.OrderByDescending(x => x.Id) : query.OrderBy(x => x.Id),
+                "title" => auditParams.IsDescending ? query.OrderByDescending(x => x.Title) : query.OrderBy(x => x.Title),
+                "planneddate" => auditParams.IsDescending ? query.OrderByDescending(x => x.PlannedDate) : query.OrderBy(x => x.PlannedDate),
+                "startdate" => auditParams.IsDescending ? query.OrderByDescending(x => x.StartDate) : query.OrderBy(x => x.StartDate),
+                "enddate" => auditParams.IsDescending ? query.OrderByDescending(x => x.EndDate) : query.OrderBy(x => x.EndDate),
+                "status" => auditParams.IsDescending ? query.OrderByDescending(x => x.Status) : query.OrderBy(x => x.Status),
+                _ => auditParams.IsDescending? query.OrderByDescending(x => x.Id): query.OrderBy(x => x.Id)
             };
 
             var totalCount = await query.CountAsync();
@@ -73,25 +78,13 @@ namespace MedicineStorage.Data.Implementations
 
 
 
-        public async Task<Audit?> GetByIdAsync(int id)
-        {
-            return await _context.Audits
-                .Include(a => a.PlannedByUser)
-                .Include(a => a.ClosedByUser)
-                .Include(a => a.Notes)
-                .Include(a => a.AuditItems)
-                    .ThenInclude(ai => ai.Medicine)
-                .Include(a => a.AuditItems)
-                    .ThenInclude(ai => ai.CheckedByUser)
-                .FirstOrDefaultAsync(a => a.Id == id);
-        }
 
         public async Task<IEnumerable<AuditItem>> GetAuditItemsByAuditIdAsync(int auditId)
         {
             return await _context.AuditItems
                 .Where(ai => ai.AuditId == auditId)
                 .Include(ai => ai.Medicine)
-                .Include (ai => ai.CheckedByUser)
+                .Include(ai => ai.CheckedByUser)
                 .ToListAsync();
         }
 
@@ -125,56 +118,17 @@ namespace MedicineStorage.Data.Implementations
                 .ToListAsync();
         }
 
-        ////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-        public async Task<Audit> CreateAuditAsync(Audit audit)
-        {
-            await _context.Audits.AddAsync(audit);
-            return audit;
-        }
-
-        public void UpdateAudit(Audit audit)
-        {
-            _context.Audits.Update(audit);
-             
-        }
-
-        public async Task DeleteAuditAsync(int auditId)
-        {
-            var audit = await _context.Audits.FindAsync(auditId);
-            if (audit != null)
-            {
-                _context.Audits.Remove(audit);
-            }
-        }
-
-        public async Task<AuditItem> CreateAuditItemAsync(AuditItem auditItem)
-        {
-            await _context.AuditItems.AddAsync(auditItem);
-            return auditItem;
-        }
-
+   
         public async Task<IEnumerable<AuditItem>> CreateAuditItemsAsync(IEnumerable<AuditItem> auditItems)
         {
             await _context.AuditItems.AddRangeAsync(auditItems);
             return auditItems;
         }
 
-
         public void UpdateAuditItem(AuditItem auditItem)
         {
             _context.AuditItems.Update(auditItem);
-             
-        }
 
-        public async Task DeleteAuditItemAsync(int auditItemId)
-        {
-            var auditItem = await _context.AuditItems.FindAsync(auditItemId);
-            if (auditItem != null)
-            {
-                _context.AuditItems.Remove(auditItem);
-                 
-            }
         }
     }
 }

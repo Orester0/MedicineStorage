@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using MedicineStorage.DTOs;
+using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.TenderModels;
 
 namespace MedicineStorage.Mappers

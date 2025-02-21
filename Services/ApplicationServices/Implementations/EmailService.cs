@@ -127,8 +127,8 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
 
         public async Task SendEmailConfirmationAsync(string toEmail, string confirmationLink)
         {
-            var subject = "Підтвердження Email";
-            var message = $"Будь ласка, підтвердьте вашу електронну пошту, перейшовши за посиланням: <a href='{confirmationLink}'>Підтвердити Email</a>.";
+            var subject = "Confirm Email";
+            var message = $"Please confirm your email <a href='{confirmationLink}'>Confirm Email</a>.";
             await SendEmailAsync(toEmail, subject, message);
         }
         public async Task SendBulkEmailAsync(List<string> toEmails, string subject, string message, bool isHtml = true)

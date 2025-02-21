@@ -1,10 +1,11 @@
 ﻿using MedicineStorage.Data;
 using MedicineStorage.Data.Implementations;
 using MedicineStorage.Data.Interfaces;
-using MedicineStorage.DTOs;
+
 using MedicineStorage.Helpers;
 using MedicineStorage.Models.TemplateModels;
 using MedicineStorage.Models.UserModels;
+using MedicineStorage.Patterns;
 using MedicineStorage.Services.ApplicationServices.Implementations;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
 using MedicineStorage.Services.BusinessServices.Implementations;
@@ -48,7 +49,6 @@ namespace MedicineStorage.Extensions
 
 
             // BUSINESS SERVICES
- 
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IMedicineService, MedicineService>();
             services.AddScoped<IMedicineRequestService, MedicineRequestService>();
@@ -57,21 +57,22 @@ namespace MedicineStorage.Extensions
             services.AddScoped<ITenderService, TenderService>();
             services.AddScoped<ITemplateService, TemplateService>();
             services.AddScoped<INotificationService, NotificationService>();
-            services.AddScoped<INotificationTextFactory, NotificationTextFactory>();
-            services.AddScoped<ITemplateExecutionService, TemplateExecutionService>();
+            services.AddScoped<IMedicineSupplyService, MedicineSupplyService>();
+            services.AddScoped<ITemplateCheckService, TemplateCheckService>();
 
-
-            services.AddHostedService<TemplateExecutionBackgroundService>();
 
 
 
 
             // APPLICATION SERVICES
+            services.AddScoped<INotificationTextFactory, NotificationTextFactory>();
+            services.AddHostedService<TimeCheckerBackgroundService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddSignalR();
 
             // REPOSITORIES
+            services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
             services.AddScoped<IAuditRepository, AuditRepository>();
             services.AddScoped<IMedicineRepository, MedicineRepository>();
             services.AddScoped<IMedicineRequestRepository, MedicineRequestRepository>();

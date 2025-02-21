@@ -25,7 +25,7 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
                 IsRead = false
             };
 
-            await _unitOfWork.NotificationRepository.AddNotificationAsync(notification); 
+            await _unitOfWork.NotificationRepository.AddAsync(notification); 
             await _hubContext.Clients.Group(userId.ToString()).SendAsync("ReceiveNotification", notification);
 
             await _unitOfWork.CompleteAsync();
@@ -33,7 +33,7 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
 
         public async Task SendNotificationAsync(Notification notification)
         {
-            await _unitOfWork.NotificationRepository.AddNotificationAsync(notification);
+            await _unitOfWork.NotificationRepository.AddAsync(notification);
             await _hubContext.Clients.Group(notification.UserId.ToString()).SendAsync("ReceiveNotification", notification);
 
 

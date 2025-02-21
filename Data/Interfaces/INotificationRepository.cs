@@ -1,12 +1,11 @@
-﻿using MedicineStorage.Models.NotificationModels;
+﻿using MedicineStorage.Models.AuditModels;
+using MedicineStorage.Models.NotificationModels;
 
 namespace MedicineStorage.Data.Interfaces
 {
-    public interface INotificationRepository
+    public interface INotificationRepository : IGenericRepository<Notification>
     {
         Task<IEnumerable<Notification>> GetUserNotificationsAsync(int userId);
-        Task<Notification?> GetNotificationByIdAsync(int id);
-        Task AddNotificationAsync(Notification notification);
         Task MarkAsReadAsync(int id);
     }
 }

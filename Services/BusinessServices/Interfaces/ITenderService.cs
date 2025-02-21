@@ -1,15 +1,15 @@
-﻿using MedicineStorage.DTOs;
-using MedicineStorage.Helpers.Params;
-using MedicineStorage.Helpers;
+﻿using MedicineStorage.Helpers;
 using MedicineStorage.Models;
-using MedicineStorage.Models.Tender;
-using MedicineStorage.Models.TenderModels;
+using MedicineStorage.Models.DTOs;
+using MedicineStorage.Models.Params;
 
 namespace MedicineStorage.Services.BusinessServices.Interfaces
 {
     public interface ITenderService
     {
-        Task<ServiceResult<PagedList<ReturnTenderDTO>>> GetAllTendersAsync(TenderParams tenderParams);
+
+        Task<ServiceResult<List<ReturnTenderDTO>>> GetAllTendersAsync();
+        Task<ServiceResult<PagedList<ReturnTenderDTO>>> GetPaginatedTenders(TenderParams tenderParams);
         Task<ServiceResult<ReturnTenderDTO>> GetTenderByIdAsync(int tenderId);
         Task<ServiceResult<IEnumerable<ReturnTenderDTO>>> GetTendersCreatedByUserId(int userId);
         Task<ServiceResult<IEnumerable<ReturnTenderDTO>>> GetTendersAwardedByUserId(int userId);
@@ -20,7 +20,7 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
 
 
 
-        Task<ServiceResult<bool>> DeleteTenderAsync(int requestId, int userId);
+        Task<ServiceResult<bool>> DeleteTenderAsync(int requestId, int userId, List<string> userRoles);
 
 
         Task<ServiceResult<ReturnTenderDTO>> CreateTenderAsync(CreateTenderDTO tenderDto, int userId);

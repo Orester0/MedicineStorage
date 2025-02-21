@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
 using MedicineStorage.Data.Interfaces;
-using MedicineStorage.DTOs;
-using MedicineStorage.Helpers.Params;
 using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
@@ -11,18 +9,19 @@ using MedicineStorage.Services.ApplicationServices.Implementations;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
 using MedicineStorage.Models.NotificationModels;
 using MedicineStorage.Patterns;
+using MedicineStorage.Models.DTOs;
+using MedicineStorage.Models.Params;
+using MedicineStorage.Models.TenderModels;
+using MedicineStorage.Models.UserModels;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
     public class MedicineRequestService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationTextFactory _notificationTextFactory, INotificationService _notificationService) : IMedicineRequestService
     {
-
-
-
-        public async Task<ServiceResult<PagedList<ReturnMedicineRequestDTO>>> GetAllRequestsAsync(MedicineRequestParams parameters)
+        public async Task<ServiceResult<PagedList<ReturnMedicineRequestDTO>>> GetPaginatedAudits(MedicineRequestParams parameters)
         {
             var result = new ServiceResult<PagedList<ReturnMedicineRequestDTO>>();
-            var (requests, totalCount) = await _unitOfWork.MedicineRequestRepository.GetAllAsync(parameters);
+            var (requests, totalCount) = await _unitOfWork.MedicineRequestRepository.GetByParams(parameters);
             var requestDtos = _mapper.Map<List<ReturnMedicineRequestDTO>>(requests);
             result.Data = new PagedList<ReturnMedicineRequestDTO>(
                 requestDtos,
@@ -32,9 +31,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             );
             return result;
         }
-
-
-       
 
         public async Task<ServiceResult<ReturnMedicineRequestDTO>> GetRequestByIdAsync(int id)
         {
@@ -230,18 +226,18 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<bool>> DeleteRequestAsync(int requestId, int userId)
+        public async Task<ServiceResult<bool>> DeleteRequestAsync(int requestId, int userId, List<string> userRoles)
         {
             var result = new ServiceResult<bool>();
             var request = await _unitOfWork.MedicineRequestRepository.GetByIdAsync(requestId);
             if (request == null)
             {
-                throw new KeyNotFoundException($"Request not found for ID {requestId}");
+                throw new KeyNotFoundException($"Request not");
             }
 
-            if (request.RequestedByUserId != userId)
+            if (request.RequestedByUserId != userId && !userRoles.Contains("Admin"))
             {
-                throw new UnauthorizedAccessException($"Unauthorized");
+                throw new UnauthorizedAccessException("Unauthorized");
             }
 
             if (request.Status != RequestStatus.Pending && request.Status != RequestStatus.PedingWithSpecial)

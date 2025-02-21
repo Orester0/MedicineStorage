@@ -1,8 +1,8 @@
 ﻿using MedicineStorage.Controllers.Interface;
-using MedicineStorage.DTOs;
 using MedicineStorage.Extensions;
-using MedicineStorage.Helpers.Params;
 using MedicineStorage.Models.AuditModels;
+using MedicineStorage.Models.DTOs;
+using MedicineStorage.Models.Params;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,7 +18,7 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpGet]
         public async Task<IActionResult> GetAllAudits([FromQuery] AuditParams auditParams)
         {
-            var result = await _auditService.GetAllAuditsAsync(auditParams);
+            var result = await _auditService.GetPaginatedAudits(auditParams);
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });
@@ -119,7 +119,10 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpDelete("{auditId:int}")]
         public async Task<IActionResult> DeleteAudit(int auditId)
         {
-            var result = await _auditService.DeleteAuditAsync(auditId);
+
+            var userId = User.GetUserIdFromClaims();
+            var roles = User.GetUserRolesFromClaims();
+            var result = await _auditService.DeleteAuditAsync(auditId, userId, roles);
 
             if (!result.Success)
             {

@@ -16,7 +16,7 @@ builder.Services.AddIdentityServices(builder.Configuration);
 
 var app = builder.Build();
 
-await RoleSeeder.SeedRoles(app.Services);
+await RoleSeeder.SeedRoles(app.Services, builder.Configuration);
 
 app.UseCors("AllowLocalhost");
 

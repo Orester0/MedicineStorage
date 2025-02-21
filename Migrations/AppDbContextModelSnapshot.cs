@@ -146,6 +146,9 @@ namespace MedicineStorage.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime?>("LastAuditDate")
+                        .HasColumnType("datetime2");
+
                     b.Property<decimal>("MinimumStock")
                         .HasColumnType("decimal(18,2)");
 
@@ -155,9 +158,6 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("nvarchar(200)");
 
                     b.Property<bool>("RequiresSpecialApproval")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("RequiresStrictAudit")
                         .HasColumnType("bit");
 
                     b.Property<decimal>("Stock")
@@ -218,6 +218,40 @@ namespace MedicineStorage.Migrations
                     b.ToTable("MedicineRequests");
                 });
 
+            modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineSupply", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CreatedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MedicineId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("TenderId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("TransactionDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("MedicineId");
+
+                    b.HasIndex("TenderId");
+
+                    b.ToTable("MedicineSupplies");
+                });
+
             modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineUsage", b =>
                 {
                     b.Property<int>("Id")
@@ -276,34 +310,6 @@ namespace MedicineStorage.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Notifications");
-                });
-
-            modelBuilder.Entity("MedicineStorage.Models.RefreshToken", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("ExpiryDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<bool>("IsRevoked")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("UserId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TemplateModels.AuditTemplate", b =>
@@ -406,35 +412,6 @@ namespace MedicineStorage.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("TenderTemplates", (string)null);
-                });
-
-            modelBuilder.Entity("MedicineStorage.Models.Tender.MedicineSupply", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("MedicineId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Quantity")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("TenderProposalItemId")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("TransactionDate")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MedicineId");
-
-                    b.HasIndex("TenderProposalItemId");
-
-                    b.ToTable("MedicineSupplies");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.Tender", b =>
@@ -612,6 +589,34 @@ namespace MedicineStorage.Migrations
                     b.ToTable("AspNetRoles", (string)null);
                 });
 
+            modelBuilder.Entity("MedicineStorage.Models.UserModels.RefreshToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("ExpiryDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsRevoked")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
+                });
+
             modelBuilder.Entity("MedicineStorage.Models.UserModels.User", b =>
                 {
                     b.Property<int>("Id")
@@ -671,12 +676,12 @@ namespace MedicineStorage.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<byte[]>("Photo")
+                        .HasColumnType("varbinary(MAX)");
+
                     b.Property<string>("Position")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
-
-                    b.Property<byte[]>("ProfilePicture")
-                        .HasColumnType("varbinary(MAX)");
 
                     b.Property<string>("SecurityStamp")
                         .HasColumnType("nvarchar(max)");
@@ -880,6 +885,29 @@ namespace MedicineStorage.Migrations
                     b.Navigation("RequestedByUser");
                 });
 
+            modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineSupply", b =>
+                {
+                    b.HasOne("MedicineStorage.Models.UserModels.User", "CreatedByUser")
+                        .WithMany()
+                        .HasForeignKey("CreatedByUserId");
+
+                    b.HasOne("MedicineStorage.Models.MedicineModels.Medicine", "Medicine")
+                        .WithMany()
+                        .HasForeignKey("MedicineId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .IsRequired();
+
+                    b.HasOne("MedicineStorage.Models.TenderModels.Tender", "Tender")
+                        .WithMany()
+                        .HasForeignKey("TenderId");
+
+                    b.Navigation("CreatedByUser");
+
+                    b.Navigation("Medicine");
+
+                    b.Navigation("Tender");
+                });
+
             modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineUsage", b =>
                 {
                     b.HasOne("MedicineStorage.Models.MedicineModels.Medicine", "Medicine")
@@ -897,36 +925,6 @@ namespace MedicineStorage.Migrations
                     b.Navigation("Medicine");
 
                     b.Navigation("UsedByUser");
-                });
-
-            modelBuilder.Entity("MedicineStorage.Models.RefreshToken", b =>
-                {
-                    b.HasOne("MedicineStorage.Models.UserModels.User", "User")
-                        .WithMany()
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("User");
-                });
-
-            modelBuilder.Entity("MedicineStorage.Models.Tender.MedicineSupply", b =>
-                {
-                    b.HasOne("MedicineStorage.Models.MedicineModels.Medicine", "Medicine")
-                        .WithMany()
-                        .HasForeignKey("MedicineId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.HasOne("MedicineStorage.Models.TenderModels.TenderProposalItem", "TenderProposalItem")
-                        .WithMany()
-                        .HasForeignKey("TenderProposalItemId")
-                        .OnDelete(DeleteBehavior.NoAction)
-                        .IsRequired();
-
-                    b.Navigation("Medicine");
-
-                    b.Navigation("TenderProposalItem");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.Tender", b =>
@@ -1010,6 +1008,17 @@ namespace MedicineStorage.Migrations
                         .IsRequired();
 
                     b.Navigation("Medicine");
+                });
+
+            modelBuilder.Entity("MedicineStorage.Models.UserModels.RefreshToken", b =>
+                {
+                    b.HasOne("MedicineStorage.Models.UserModels.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.UserModels.UserRole", b =>

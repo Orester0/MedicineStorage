@@ -1,14 +1,23 @@
 ﻿using MedicineStorage.Data.Interfaces;
-using MedicineStorage.Helpers.Params;
 using MedicineStorage.Helpers;
 using MedicineStorage.Models.TenderModels;
 using Microsoft.EntityFrameworkCore;
+using MedicineStorage.Models.AuditModels;
+using MedicineStorage.Models.Params;
+using MedicineStorage.Models.MedicineModels;
 
 namespace MedicineStorage.Data.Implementations
 {
-    public class TenderRepository(AppDbContext _context) : ITenderRepository
+    public class TenderRepository(AppDbContext _context)
+    : GenericRepository<Tender>(_context), ITenderRepository
     {
-        public async Task<Tender> GetByIdAsync(int id)
+
+        public override async Task<List<Tender>> GetAllAsync()
+        {
+            return await _context.Tenders.OrderBy(m => m.Title).ToListAsync();
+        }
+
+        public override async Task<Tender?> GetByIdAsync(int id)
         {
             return await _context.Tenders
                 .Include(t => t.CreatedByUser)
@@ -21,7 +30,7 @@ namespace MedicineStorage.Data.Implementations
                 .FirstOrDefaultAsync(t => t.Id == id);
         }
 
-        public async Task<(IEnumerable<Tender>, int)> GetAllTendersAsync(TenderParams tenderParams)
+        public async Task<(IEnumerable<Tender>, int)> GetByParams(TenderParams tenderParams)
         {
             var query = _context.Tenders
                 .Include(t => t.CreatedByUser)
@@ -64,24 +73,11 @@ namespace MedicineStorage.Data.Implementations
             // Сортування
             query = tenderParams.SortBy?.ToLower() switch
             {
-                "title" => tenderParams.IsDescending
-                    ? query.OrderByDescending(t => t.Title)
-                    : query.OrderBy(t => t.Title),
-                "publishdate" => tenderParams.IsDescending
-                    ? query.OrderByDescending(t => t.PublishDate)
-                    : query.OrderBy(t => t.PublishDate),
-                "closingdate" => tenderParams.IsDescending
-                    ? query.OrderByDescending(t => t.ClosingDate)
-                    : query.OrderBy(t => t.ClosingDate),
-                "deadlinedate" => tenderParams.IsDescending
-                    ? query.OrderByDescending(t => t.DeadlineDate)
-                    : query.OrderBy(t => t.DeadlineDate),
-                "status" => tenderParams.IsDescending
-                    ? query.OrderByDescending(t => t.Status)
-                    : query.OrderBy(t => t.Status),
-                _ => tenderParams.IsDescending
-                    ? query.OrderByDescending(t => t.PublishDate)
-                    : query.OrderBy(t => t.PublishDate)
+                "id" => tenderParams.IsDescending? query.OrderByDescending(t => t.Id) : query.OrderBy(t => t.Id),
+                "title" => tenderParams.IsDescending? query.OrderByDescending(t => t.Title) : query.OrderBy(t => t.Title),
+                "status" => tenderParams.IsDescending ? query.OrderByDescending(t => t.Status) : query.OrderBy(t => t.Status),
+                "deadlinedate" => tenderParams.IsDescending? query.OrderByDescending(t => t.DeadlineDate) : query.OrderBy(t => t.DeadlineDate),
+                _ => tenderParams.IsDescending? query.OrderByDescending(t => t.PublishDate) : query.OrderBy(t => t.PublishDate)
             };
 
             var totalCount = await query.CountAsync();
@@ -93,9 +89,6 @@ namespace MedicineStorage.Data.Implementations
 
             return (items, totalCount);
         }
-
-
-
 
         public async Task<IEnumerable<Tender>> GetTendersCreatedByUserIdAsync(int userId)
         {
@@ -134,26 +127,6 @@ namespace MedicineStorage.Data.Implementations
                             .Include(t => t.TenderItems)
                               .FirstOrDefaultAsync(t => t.TenderProposals.Any(p => p.Id == proposalId));
 
-        }
-
-        public async Task<Tender> CreateTenderAsync(Tender tender)
-        {
-            await _context.Tenders.AddAsync(tender);
-            return tender;
-        }
-
-        public void UpdateTender(Tender tender)
-        {
-            _context.Tenders.Update(tender);
-        }
-
-        public async Task DeleteTenderAsync(int id)
-        {
-            var tender = await _context.Tenders.FindAsync(id);
-            if (tender != null)
-            {
-                _context.Tenders.Remove(tender);
-            }
         }
 
     }

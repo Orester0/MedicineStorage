@@ -1,20 +1,12 @@
-﻿using MedicineStorage.Models.TenderModels;
+﻿using MedicineStorage.Models.AuditModels;
+using MedicineStorage.Models.TenderModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Interfaces
 {
-    public interface ITenderItemRepository
+    public interface ITenderItemRepository : IGenericRepository<TenderItem>
     {
-        public Task<TenderItem?> GetByIdAsync(int id);
-
-        public Task<IEnumerable<TenderItem>> GetAllAsync();
-
         public Task<IEnumerable<TenderItem>> GetItemsByTenderIdAsync(int tenderId);
 
-        public Task<TenderItem> CreateTenderItemAsync(TenderItem tenderItem);
-
-        public void UpdateTenderItem(TenderItem tenderItem);
-
-        public void DeleteTenderItem(TenderItem tenderItem);
     }
 }

@@ -1,27 +1,28 @@
 ﻿using MedicineStorage.Data.Interfaces;
-using MedicineStorage.Helpers.Params;
+using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.Params;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Implementations
 {
-    public class MedicineUsageRepository(AppDbContext _context) : IMedicineUsageRepository
+    public class MedicineUsageRepository(AppDbContext _context)
+    : GenericRepository<MedicineUsage>(_context), IMedicineUsageRepository
     {
-        public async Task<MedicineUsage?> GetByIdAsync(int id)
+        public override async Task<MedicineUsage?> GetByIdAsync(int id)
         {
             return await _context.MedicineUsages
                 .Include(u => u.UsedByUser)
                 .Include(u => u.Medicine)
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
-        public async Task<(IEnumerable<MedicineUsage>, int)> GetAllAsync(MedicineUsageParams parameters)
+        public async Task<(IEnumerable<MedicineUsage>, int)> GetByParams(MedicineUsageParams parameters)
         {
             var query = _context.MedicineUsages
                 .Include(u => u.UsedByUser)
                 .Include(u => u.Medicine)
                 .AsQueryable();
 
-            // Фільтрація
             if (parameters.FromDate.HasValue)
                 query = query.Where(u => u.UsageDate >= parameters.FromDate);
 
@@ -30,27 +31,16 @@ namespace MedicineStorage.Data.Implementations
 
             if (parameters.MedicineId.HasValue)
                 query = query.Where(u => u.MedicineId == parameters.MedicineId);
-            if (parameters.MinQuantity.HasValue)
-                query = query.Where(u => u.Quantity >= parameters.MinQuantity);
 
-            if (parameters.MaxQuantity.HasValue)
-                query = query.Where(u => u.Quantity <= parameters.MaxQuantity);
-
-            // Сортування
             query = parameters.SortBy?.ToLower() switch
             {
-                "usagedate" => parameters.IsDescending
-                    ? query.OrderByDescending(u => u.UsageDate)
-                    : query.OrderBy(u => u.UsageDate),
-                "quantity" => parameters.IsDescending
-                    ? query.OrderByDescending(u => u.Quantity)
-                    : query.OrderBy(u => u.Quantity),
-                _ => parameters.IsDescending
-                    ? query.OrderByDescending(u => u.UsageDate)
-                    : query.OrderBy(u => u.UsageDate)
+                "id" => parameters.IsDescending ? query.OrderByDescending(u => u.Id) : query.OrderBy(u => u.Id),
+                "medicine" => parameters.IsDescending ? query.OrderByDescending(r => r.Medicine.Name) : query.OrderBy(r => r.Medicine.Name),
+                "usagedate" => parameters.IsDescending ? query.OrderByDescending(u => u.UsageDate) : query.OrderBy(u => u.UsageDate),
+                "usedbyuser" => parameters.IsDescending ? query.OrderByDescending(u => u.UsedByUserId) : query.OrderBy(u => u.UsedByUserId),
+                _ => parameters.IsDescending ? query.OrderByDescending(u => u.Id) : query.OrderBy(u => u.Id)
             };
 
-            // Пагінація
             var totalCount = await query.CountAsync();
             var items = await query
                 .Skip((parameters.PageNumber - 1) * parameters.PageSize)
@@ -70,29 +60,7 @@ namespace MedicineStorage.Data.Implementations
                 .ToListAsync();
         }
 
-        
-
-        public async Task<MedicineUsage> CreateUsageAsync(MedicineUsage usage)
-        {
-            await _context.MedicineUsages.AddAsync(usage);
-            return usage;
-        }
-
-        public void UpdateUsage(MedicineUsage usage)
-        {
-            _context.MedicineUsages.Update(usage);
-        }
-
-        public async Task DeleteUsageAsync(int usageId)
-        {
-            var usage = await _context.MedicineUsages.FindAsync(usageId);
-            if (usage != null)
-            {
-                _context.MedicineUsages.Remove(usage);
-            }
-        }
-
-
+       
 
     }
 }

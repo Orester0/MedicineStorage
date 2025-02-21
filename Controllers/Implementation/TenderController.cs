@@ -1,8 +1,9 @@
 ﻿using MedicineStorage.Controllers.Interface;
-using MedicineStorage.DTOs;
 using MedicineStorage.Extensions;
-using MedicineStorage.Helpers.Params;
+using MedicineStorage.Models.DTOs;
+using MedicineStorage.Models.Params;
 using MedicineStorage.Models.TenderModels;
+using MedicineStorage.Services.BusinessServices.Implementations;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -14,10 +15,21 @@ namespace MedicineStorage.Controllers.Implementation
     [Authorize]
     public class TenderController(ITenderService _tenderService) : BaseApiController
     {
+        [HttpGet("all")]
+        public async Task<IActionResult> GetAllTenders()
+        {
+            var result = await _tenderService.GetAllTendersAsync();
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(result.Data);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetTenders([FromQuery] TenderParams tenderParams)
         {
-            var result = await _tenderService.GetAllTendersAsync(tenderParams);
+            var result = await _tenderService.GetPaginatedTenders(tenderParams);
 
             if (!result.Success)
             {
@@ -63,7 +75,6 @@ namespace MedicineStorage.Controllers.Implementation
             return Ok(result.Data);
         }
 
-
         [HttpGet("{tenderId:int}/proposals")]
         public async Task<IActionResult> GetProposalsByTenderId(int tenderId)
         {
@@ -74,8 +85,6 @@ namespace MedicineStorage.Controllers.Implementation
             }
             return Ok(result.Data);
         }
-
-
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -114,9 +123,6 @@ namespace MedicineStorage.Controllers.Implementation
             }
             return Ok(result.Data);
         }
-
-
-
 
         [HttpPut("publish/{tenderId:int}")]
         public async Task<IActionResult> PublishTender(int tenderId)
@@ -194,7 +200,8 @@ namespace MedicineStorage.Controllers.Implementation
         {
 
             var userId = User.GetUserIdFromClaims();
-            var result = await _tenderService.DeleteTenderAsync(tenderId, userId);
+            var roles = User.GetUserRolesFromClaims();
+            var result = await _tenderService.DeleteTenderAsync(tenderId, userId, roles);
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });
