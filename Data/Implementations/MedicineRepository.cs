@@ -41,8 +41,9 @@ namespace MedicineStorage.Data.Implementations
                 query = query.Where(m => m.Name.Contains(parameters.Name));
 
 
-            if (!string.IsNullOrWhiteSpace(parameters.Category))
-                query = query.Where(m => m.Category == parameters.Category);
+            if (parameters.Category != null && parameters.Category.Any())
+                query = query.Where(m => parameters.Category.Contains(m.Category));
+
 
             if (parameters.RequiresSpecialApproval.HasValue)
                 query = query.Where(m => m.RequiresSpecialApproval == parameters.RequiresSpecialApproval);

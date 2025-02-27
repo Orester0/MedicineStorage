@@ -12,8 +12,7 @@ namespace MedicineStorage.Models.Params
 
         [DataType(DataType.Date)]
         public DateTime? ToPlannedDate { get; set; }
-
-        public AuditStatus? Status { get; set; }
+        public List<AuditStatus>? Statuses { get; set; }
 
         [Range(0, int.MaxValue)]
         public int? PlannedByUserId { get; set; }

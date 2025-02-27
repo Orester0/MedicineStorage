@@ -73,6 +73,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 query = query.Where(u => u.UserRoles.Any(ur => parameters.Roles.Contains(ur.Role.Name)));
             }
 
+
             query = parameters.SortBy?.ToLower() switch
             {
                 "id" => parameters.IsDescending ? query.OrderByDescending(u => u.Id) : query.OrderBy(u => u.Id),

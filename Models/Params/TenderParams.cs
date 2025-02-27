@@ -12,8 +12,7 @@ namespace MedicineStorage.Models.Params
 
         [DataType(DataType.Date)]
         public DateTime? DeadlineDateTo { get; set; }
-
-        public TenderStatus? Status { get; set; }
+        public List<TenderStatus>? Statuses { get; set; }
 
         [Range(0, int.MaxValue)]
         public int? CreatedByUserId { get; set; }
@@ -24,8 +23,7 @@ namespace MedicineStorage.Models.Params
         [Range(0, int.MaxValue)]
         public int? ClosedByUserId { get; set; }
 
-        [Range(0, int.MaxValue)]
-        public int? MedicineId { get; set; }
+        public List<int>? MedicineIds { get; set; }
 
         [Range(0, int.MaxValue)]
         public int? WinnerSelectedByUserId { get; set; }

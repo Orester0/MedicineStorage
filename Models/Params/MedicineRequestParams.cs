@@ -10,8 +10,7 @@ namespace MedicineStorage.Models.Params
 
         [DataType(DataType.Date)]
         public DateTime? ToDate { get; set; }
-
-        public RequestStatus? Status { get; set; }
+        public List<RequestStatus>? Statuses { get; set; } 
 
         [Range(1, int.MaxValue)]
         public int? RequestedByUserId { get; set; }

@@ -52,8 +52,11 @@ namespace MedicineStorage.Data.Implementations
             if (tenderParams.DeadlineDateTo.HasValue)
                 query = query.Where(t => t.DeadlineDate <= tenderParams.DeadlineDateTo);
 
-            if (tenderParams.Status.HasValue)
-                query = query.Where(t => t.Status == tenderParams.Status);
+            if (tenderParams.Statuses != null && tenderParams.Statuses.Any())
+            {
+                query = query.Where(t => tenderParams.Statuses.Contains(t.Status));
+            }
+
 
             if (tenderParams.CreatedByUserId.HasValue)
                 query = query.Where(t => t.CreatedByUserId == tenderParams.CreatedByUserId);
@@ -67,8 +70,11 @@ namespace MedicineStorage.Data.Implementations
             if (tenderParams.WinnerSelectedByUserId.HasValue)
                 query = query.Where(t => t.WinnerSelectedByUserId == tenderParams.WinnerSelectedByUserId);
 
-            if (tenderParams.MedicineId.HasValue)
-                query = query.Where(t => t.TenderItems.Any(ti => ti.MedicineId == tenderParams.MedicineId));
+            if (tenderParams.MedicineIds != null && tenderParams.MedicineIds.Any())
+            {
+                query = query.Where(t => t.TenderItems.Any(ti => tenderParams.MedicineIds.Contains(ti.MedicineId)));
+            }
+
 
             // Сортування
             query = tenderParams.SortBy?.ToLower() switch

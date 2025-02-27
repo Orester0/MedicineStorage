@@ -44,8 +44,10 @@ namespace MedicineStorage.Data.Implementations
             if (auditParams.ToPlannedDate.HasValue)
                 query = query.Where(x => x.PlannedDate <= auditParams.ToPlannedDate);
 
-            if (auditParams.Status.HasValue)
-                query = query.Where(x => x.Status == auditParams.Status);
+            if (auditParams.Statuses != null && auditParams.Statuses.Any())
+            {
+                query = query.Where(x => auditParams.Statuses.Contains(x.Status));
+            }
 
             if (auditParams.PlannedByUserId.HasValue)
                 query = query.Where(x => x.PlannedByUserId == auditParams.PlannedByUserId);

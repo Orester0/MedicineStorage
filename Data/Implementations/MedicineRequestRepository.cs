@@ -33,8 +33,9 @@ namespace MedicineStorage.Data.Implementations
             if (parameters.ToDate.HasValue)
                 query = query.Where(r => r.RequiredByDate <= parameters.ToDate);
 
-            if (parameters.Status.HasValue)
-                query = query.Where(r => r.Status == parameters.Status);
+            if (parameters.Statuses != null && parameters.Statuses.Any())
+                query = query.Where(r => parameters.Statuses.Contains(r.Status));
+
 
             if (parameters.RequestedByUserId.HasValue)
                 query = query.Where(r => r.RequestedByUserId == parameters.RequestedByUserId);
