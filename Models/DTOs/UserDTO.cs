@@ -7,9 +7,9 @@ namespace MedicineStorage.Models.DTOs
     {
         public ReturnUserTokenDTO returnUserTokenDTO { get; set; }
 
-        public ReturnUserDTO returnUserDTO { get; set; }
+        public ReturnUserPersonalDTO returnUserDTO { get; set; }
     }
-    public class ReturnUserDTO
+    public class ReturnUserPersonalDTO
     {
         public int Id { get; set; }
         public string FirstName { get; set; } = string.Empty;
@@ -22,6 +22,16 @@ namespace MedicineStorage.Models.DTOs
 
         public string? PhotoBase64 { get; set; }
     }
+    public class ReturnUserGeneralDTO
+    {
+        public int Id { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+        public string LastName { get; set; } = string.Empty;
+        public string? Position { get; set; }
+        public string? Company { get; set; }
+        public string? PhotoBase64 { get; set; }
+    }
+
 
     public class ReturnUserTokenDTO
     {
@@ -52,6 +62,11 @@ namespace MedicineStorage.Models.DTOs
         [Required]
         public string Password { get; set; } = string.Empty;
 
+        [StringLength(100, MinimumLength = 3)]
+        public string? Position { get; set; }
+
+        [StringLength(100, MinimumLength = 3)]
+        public string? Company { get; set; }
         [Required]
         public List<string> Roles { get; set; } = new List<string>();
 
@@ -82,9 +97,6 @@ namespace MedicineStorage.Models.DTOs
 
     public class ChangePasswordDTO
     {
-        [Required]
-        public int UserId { get; set; }
-
         [Required]
         [MinLength(6)]
         public string CurrentPassword { get; set; }

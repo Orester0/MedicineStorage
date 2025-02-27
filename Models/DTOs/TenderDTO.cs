@@ -18,10 +18,10 @@ namespace MedicineStorage.Models.DTOs
         public DateTime? ClosingDate { get; set; }
         public DateTime DeadlineDate { get; set; }
         public TenderStatus Status { get; set; }
-        public virtual ReturnUserDTO CreatedByUser { get; set; }
-        public virtual ReturnUserDTO? OpenedByUser { get; set; }
-        public virtual ReturnUserDTO? ClosedByUser { get; set; }
-        public virtual ReturnUserDTO? WinnerSelectedByUser { get; set; }
+        public virtual ReturnUserGeneralDTO CreatedByUser { get; set; }
+        public virtual ReturnUserGeneralDTO? OpenedByUser { get; set; }
+        public virtual ReturnUserGeneralDTO? ClosedByUser { get; set; }
+        public virtual ReturnUserGeneralDTO? WinnerSelectedByUser { get; set; }
 
         public virtual ICollection<ReturnTenderItemDTO> Items { get; set; }
         public virtual ICollection<ReturnTenderProposalDTO> Proposals { get; set; }

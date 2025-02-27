@@ -28,7 +28,7 @@ namespace MedicineStorage.Models.DTOs
         public decimal TotalPrice { get; set; }
         public DateTime SubmissionDate { get; set; }
         public ProposalStatus Status { get; set; }
-        public virtual ReturnUserDTO CreatedByUser { get; set; }
+        public virtual ReturnUserGeneralDTO CreatedByUser { get; set; }
         public virtual ICollection<ReturnTenderProposalItemDTO> Items { get; set; }
     }
 

@@ -149,11 +149,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new KeyNotFoundException($"Tender with ID {tenderId} not found.");
             }
 
-            if (tender.CreatedByUserId != userId)
-            {
-                throw new BadHttpRequestException($"Cannot publish not yours tender.");
-            }
-
             if (tender.Status != TenderStatus.Created)
             {
                 throw new BadHttpRequestException($"Only draft tenders can be published.");
@@ -227,13 +222,12 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
                 if (matchingProposalItem.Quantity != tenderItem.RequiredQuantity)
                 {
-                    throw new BadHttpRequestException($"Not same quantity needed.");
+                    throw new BadHttpRequestException($"Invalid medicine quantity.");
                 }
 
                 if (matchingProposalItem.UnitPrice <= 0)
                 {
-
-                    throw new BadHttpRequestException($"Invalid unit price for medicine ID {tenderItem.MedicineId}.");
+                    throw new BadHttpRequestException($"Invalid unit price.");
                 }
 
                 calculatedTotalPrice += matchingProposalItem.Quantity * matchingProposalItem.UnitPrice;

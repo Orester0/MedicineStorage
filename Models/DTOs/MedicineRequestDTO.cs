@@ -18,8 +18,8 @@ namespace MedicineStorage.Models.DTOs
         public string? Justification { get; set; }
         public DateTime? ApprovalDate { get; set; }
         public ReturnMedicineDTO Medicine { get; set; }
-        public virtual ReturnUserDTO RequestedByUser { get; set; }
-        public virtual ReturnUserDTO? ApprovedByUser { get; set; }
+        public virtual ReturnUserGeneralDTO RequestedByUser { get; set; }
+        public virtual ReturnUserGeneralDTO? ApprovedByUser { get; set; }
     }
 
     public class CreateMedicineRequestDTO

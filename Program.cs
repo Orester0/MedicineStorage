@@ -1,12 +1,7 @@
-using MedicineStorage.Data;
 using MedicineStorage.Extensions;
 using MedicineStorage.Helpers;
 using MedicineStorage.Middleware;
-using MedicineStorage.Models.MedicineModels;
-using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.ApplicationServices.Implementations;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.DependencyInjection;
 
 var builder = WebApplication.CreateBuilder(args);
 

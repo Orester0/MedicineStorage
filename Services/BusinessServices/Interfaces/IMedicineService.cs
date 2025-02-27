@@ -13,6 +13,6 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
         public Task<ServiceResult<ReturnMedicineDTO>> GetMedicineByIdAsync(int id);
         public Task<ServiceResult<ReturnMedicineDTO>> CreateMedicineAsync(CreateMedicineDTO createMedicineDTO);
         public Task<ServiceResult<bool>> UpdateMedicineAsync(int id, UpdateMedicineDTO medicineDTO);
-        public Task<ServiceResult<bool>> DeleteMedicineAsync(int id);
+        public Task<ServiceResult<bool>> DeleteMedicineAsync(int id, List<string> userRoles);
     }
 }

@@ -25,9 +25,9 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetPaginatedMedicines(MedicineParams parameters)
         {
             var result = new ServiceResult<PagedList<ReturnMedicineDTO>>();
-                var (medicines, totalCount) = await _unitOfWork.MedicineRepository.GetByParams(parameters);
-                var dtos = _mapper.Map<IEnumerable<ReturnMedicineDTO>>(medicines);
-                result.Data = new PagedList<ReturnMedicineDTO>(dtos.ToList(), totalCount, parameters.PageNumber, parameters.PageSize);
+            var (medicines, totalCount) = await _unitOfWork.MedicineRepository.GetByParams(parameters);
+            var dtos = _mapper.Map<IEnumerable<ReturnMedicineDTO>>(medicines);
+            result.Data = new PagedList<ReturnMedicineDTO>(dtos.ToList(), totalCount, parameters.PageNumber, parameters.PageSize);
 
             return result;
         }
@@ -46,6 +46,8 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             return result;
         }
+
+        // // // // // // // // // // / / // / // / ///////////////////////////////////////////////////////////
 
         public async Task<ServiceResult<ReturnMedicineDTO>> CreateMedicineAsync(CreateMedicineDTO createMedicineDTO)
         {
@@ -82,7 +84,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<bool>> DeleteMedicineAsync(int medicineId)
+        public async Task<ServiceResult<bool>> DeleteMedicineAsync(int medicineId, List<string> userRoles)
         {
             var result = new ServiceResult<bool>();
                 var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(medicineId);

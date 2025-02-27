@@ -1,8 +1,4 @@
-﻿using MedicineStorage.Helpers;
-using MedicineStorage.Models.MedicineModels;
-using MedicineStorage.Models.UserModels;
-using Microsoft.EntityFrameworkCore;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.DTOs
@@ -13,7 +9,7 @@ namespace MedicineStorage.Models.DTOs
         public decimal Quantity { get; set; }
         public DateTime UsageDate { get; set; }
         public ReturnMedicineDTO Medicine { get; set; }
-        public virtual ReturnUserDTO UsedByUser { get; set; }
+        public virtual ReturnUserGeneralDTO UsedByUser { get; set; }
     }
 
 

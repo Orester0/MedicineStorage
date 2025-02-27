@@ -1,6 +1,9 @@
 ﻿using MedicineStorage.Controllers.Interface;
+using MedicineStorage.Extensions;
+using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.Params;
+using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -80,7 +83,14 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpDelete("{medicineId:int}")]
         public async Task<IActionResult> DeleteMedicine(int medicineId)
         {
-            var result = await _medicineService.DeleteMedicineAsync(medicineId);
+            var userRoles = User.GetUserRolesFromClaims();
+
+            if (!userRoles.Contains("Admin"))
+            {
+                throw new UnauthorizedAccessException("Unauthorized");
+            }
+
+            var result = await _medicineService.DeleteMedicineAsync(medicineId, userRoles);
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });

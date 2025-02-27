@@ -1,11 +1,4 @@
-﻿using MedicineStorage.Models.MedicineModels;
-using MedicineStorage.Models.TenderModels;
-using MedicineStorage.Validators;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.ComponentModel.DataAnnotations;
-using MedicineStorage.Models.UserModels;
-
-namespace MedicineStorage.Models.DTOs
+﻿namespace MedicineStorage.Models.DTOs
 {
     public class ReturnMedicineSupplyDTO
     {
@@ -13,7 +6,7 @@ namespace MedicineStorage.Models.DTOs
         public decimal Quantity { get; set; }
         public DateTime TransactionDate { get; set; }
         public ReturnMedicineDTO Medicine { get; set; }
-        public ReturnUserDTO? CreatedByUser { get; set; }
+        public ReturnUserGeneralDTO? CreatedByUser { get; set; }
         public ReturnTenderDTO? Tender { get; set; }
     }
 

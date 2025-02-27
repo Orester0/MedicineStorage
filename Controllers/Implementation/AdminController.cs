@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
 using MedicineStorage.Controllers.Interface;
 using MedicineStorage.Models.DTOs;
+using MedicineStorage.Models.Params;
+using MedicineStorage.Services.BusinessServices.Implementations;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,7 +14,20 @@ namespace MedicineStorage.Controllers.Implementation
     //[Authorize(Roles = "Admin")]
     public class AdminController(IUserService _userService, IMapper _mapper) : BaseApiController
     {
+
+
         [HttpGet("users")]
+        public async Task<IActionResult> GetUsers([FromQuery] UserParams parameters)
+        {
+            var result = await _userService.GetPaginatedUsers(parameters);
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(result.Data);
+        }
+
+        [HttpGet("users/all")]
         public async Task<IActionResult> GetAllUsers()
         {
             var result = await _userService.GetAllAsync();
@@ -21,7 +36,8 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            return Ok(result.Data);
+            var users = _mapper.Map<List<ReturnUserPersonalDTO>>(result.Data);
+            return Ok(users);
         }
 
         [HttpGet("users/{id:int}")]
@@ -32,7 +48,7 @@ namespace MedicineStorage.Controllers.Implementation
             {
                 return BadRequest(new { result.Errors });
             }
-            var userDto = _mapper.Map<ReturnUserDTO>(result.Data);
+            var userDto = _mapper.Map<ReturnUserPersonalDTO>(result.Data);
             return Ok(userDto);
         }
 
@@ -66,7 +82,7 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            var userDto = _mapper.Map<ReturnUserDTO>(result.Data);
+            var userDto = _mapper.Map<ReturnUserPersonalDTO>(result.Data);
             return CreatedAtAction(nameof(GetUserById), new { id = result.Data!.Id }, userDto);
         }
 

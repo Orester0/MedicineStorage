@@ -54,14 +54,12 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpGet("awarded-by/{userId:int}")]
         public async Task<IActionResult> GetTendersAwardedByUser(int userId)
         {
-            
-                var result = await _tenderService.GetTendersAwardedByUserId(userId);
-                if (!result.Success)
-                {
-                    return BadRequest(new { result.Errors });
-                }
-                return Ok(result.Data);
-            
+            var result = await _tenderService.GetTendersAwardedByUserId(userId);
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(result.Data);
         }
 
         [HttpGet("{tenderId:int}")]
@@ -96,15 +94,15 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(ModelState);
             }
             
-                var userId = User.GetUserIdFromClaims();
-                var result = await _tenderService.CreateTenderAsync(tenderDto, userId);
+            var userId = User.GetUserIdFromClaims();
+            var result = await _tenderService.CreateTenderAsync(tenderDto, userId);
 
 
-                if (!result.Success)
-                {
-                    return BadRequest(new { result.Errors });
-                }
-                return Ok(result.Data);
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(result.Data);
             
         }
 

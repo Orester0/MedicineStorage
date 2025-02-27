@@ -11,13 +11,15 @@ namespace MedicineStorage.Mappers
             CreateMap<UserRegistrationDTO, User>()
                .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
 
-            CreateMap<User, ReturnUserDTO>()
+            CreateMap<User, ReturnUserPersonalDTO>()
                .ForMember(dest => dest.Roles, opt => opt.MapFrom(src => src.UserRoles.Select(ur => ur.Role.Name)))
                .ForMember(dest => dest.PhotoBase64, opt => opt.MapFrom(src =>
                    src.Photo != null ? $"data:image/jpeg;base64,{Convert.ToBase64String(src.Photo)}" : null));
 
-            CreateMap<ReturnUserDTO, User>()
-                .ForMember(dest => dest.UserRoles, opt => opt.Ignore());
+
+            CreateMap<User, ReturnUserGeneralDTO>()
+               .ForMember(dest => dest.PhotoBase64, opt => opt.MapFrom(src =>
+                   src.Photo != null ? $"data:image/jpeg;base64,{Convert.ToBase64String(src.Photo)}" : null));
 
             CreateMap<UserUpdateDTO, User>()
                 .ForMember(dest => dest.UserName, opt => opt.Ignore())

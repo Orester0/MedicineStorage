@@ -77,8 +77,7 @@ namespace MedicineStorage.Controllers.Implementation
             
                 var userId = User.GetUserIdFromClaims();
                 var userRoles = User.GetUserRolesFromClaims();
-                bool isAdmin = userRoles.Contains("Admin") || userRoles.Contains("SupremeAdmin");
-                var result = await _operationsService.ApproveRequestAsync(requestId, userId, isAdmin);
+                var result = await _operationsService.ApproveRequestAsync(requestId, userId, userRoles);
                 if (!result.Success)
                 {
                     return BadRequest(new { result.Errors });
@@ -94,7 +93,7 @@ namespace MedicineStorage.Controllers.Implementation
                 var userId = User.GetUserIdFromClaims();
                 var userRoles = User.GetUserRolesFromClaims();
                 bool isAdmin = userRoles.Contains("Admin");
-                var result = await _operationsService.RejectRequestAsync(requestId, userId, isAdmin);
+                var result = await _operationsService.RejectRequestAsync(requestId, userId, userRoles);
                 if (!result.Success)
                 {
                     return BadRequest(new { result.Errors });

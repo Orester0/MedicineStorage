@@ -15,8 +15,8 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
 
 
         public Task<ServiceResult<ReturnMedicineRequestDTO>> CreateRequestAsync(CreateMedicineRequestDTO createRequestDTO, int userId);
-        public Task<ServiceResult<ReturnMedicineRequestDTO>> ApproveRequestAsync(int requestId, int userId, bool isSpecialApproval = false);
-        public Task<ServiceResult<ReturnMedicineRequestDTO>> RejectRequestAsync(int requestId, int userId, bool isSpecialApproval = false);
+        public Task<ServiceResult<ReturnMedicineRequestDTO>> ApproveRequestAsync(int requestId, int userId, List<string> userRoles);
+        public Task<ServiceResult<ReturnMedicineRequestDTO>> RejectRequestAsync(int requestId, int userId, List<string> userRoles);
         public Task<ServiceResult<bool>> DeleteRequestAsync(int requestId, int userId, List<string> userRoles);
     }
 }

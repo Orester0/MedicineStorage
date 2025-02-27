@@ -24,7 +24,10 @@ namespace MedicineStorage.Mappers
 
             CreateMap<CreateAuditNoteDTO, AuditNote>();
 
-            CreateMap<CreateAuditDTO, Audit>();
+            CreateMap<CreateAuditDTO, Audit>()
+                .ForMember(dest => dest.Notes, opt => opt.MapFrom(_ => new List<AuditNote>()));
+
+
 
             CreateMap<UpdateAuditItemsRequest, AuditItem>()
                 .ForMember(dest => dest.ActualQuantity, opt => opt.MapFrom(src => src.ActualQuantities));

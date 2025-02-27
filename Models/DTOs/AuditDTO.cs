@@ -17,8 +17,8 @@ namespace MedicineStorage.Models.DTOs
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
         public AuditStatus Status { get; set; }
-        public virtual ReturnUserDTO PlannedByUser { get; set; }
-        public virtual ReturnUserDTO? ClosedByUser { get; set; }
+        public virtual ReturnUserGeneralDTO PlannedByUser { get; set; }
+        public virtual ReturnUserGeneralDTO? ClosedByUser { get; set; }
         public virtual ICollection<ReturnAuditItemDTO> AuditItems { get; set; }
         public virtual ICollection<ReturnAuditNoteDTO> Notes { get; set; } = new List<ReturnAuditNoteDTO>();
     }
@@ -33,7 +33,7 @@ namespace MedicineStorage.Models.DTOs
         public decimal ActualQuantity { get; set; }
 
         public virtual ReturnMedicineDTO Medicine { get; set; }
-        public virtual User? CheckedByUser { get; set; }
+        public virtual ReturnUserGeneralDTO? CheckedByUser { get; set; }
     }
 
     public class CreateAuditDTO

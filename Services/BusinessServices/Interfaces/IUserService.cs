@@ -1,5 +1,7 @@
-﻿using MedicineStorage.Models;
+﻿using MedicineStorage.Helpers;
+using MedicineStorage.Models;
 using MedicineStorage.Models.DTOs;
+using MedicineStorage.Models.Params;
 using MedicineStorage.Models.UserModels;
 
 namespace MedicineStorage.Services.BusinessServices.Interfaces
@@ -10,8 +12,9 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
         Task UploadPhotoAsync(IFormFile file, int userId);
         Task<ServiceResult<User>> GetUserByIdAsync(int id);
         Task<ServiceResult<User>> GetByUserNameAsync(string username);
-        Task<ServiceResult<List<ReturnUserDTO>>> GetAllAsync();
-        Task<ServiceResult<List<ReturnUserDTO>>> GetUsersByRoleAsync(string roleName);
+        Task<ServiceResult<List<User>>> GetAllAsync();
+        Task<ServiceResult<PagedList<ReturnUserPersonalDTO>>> GetPaginatedUsers(UserParams parameters);
+        Task<ServiceResult<List<User>>> GetUsersByRoleAsync(string roleName);
         Task<ServiceResult<User>> CreateUserAsync(UserRegistrationDTO registerDto);
         Task<ServiceResult<bool>> UpdateUserAsync(User user);
         Task<ServiceResult<bool>> DeleteUserAsync(int id);

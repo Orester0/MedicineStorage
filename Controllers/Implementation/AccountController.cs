@@ -37,7 +37,7 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            var userDTO = _mapper.Map<ReturnUserDTO>(result.Data);
+            var userDTO = _mapper.Map<ReturnUserPersonalDTO>(result.Data);
 
             return Ok(userDTO);
         }
@@ -235,7 +235,7 @@ namespace MedicineStorage.Controllers.Implementation
             var accessToken = await _tokenService.CreateAccessToken(user);
             var refreshToken = await _tokenService.CreateRefreshToken(user);
 
-            var returnUserDTO = _mapper.Map<ReturnUserDTO>(user);
+            var returnUserDTO = _mapper.Map<ReturnUserPersonalDTO>(user);
 
             var returnUserLoginDTO = new ReturnUserLoginDTO
             {
@@ -279,7 +279,7 @@ namespace MedicineStorage.Controllers.Implementation
             var accessToken = await _tokenService.CreateAccessToken(user);
             var refreshToken = await _tokenService.CreateRefreshToken(user);
 
-            var returnUserDTO = _mapper.Map<ReturnUserDTO>(user);
+            var returnUserDTO = _mapper.Map<ReturnUserPersonalDTO>(user);
 
             var returnUserLoginDTO = new ReturnUserLoginDTO
             {
@@ -299,15 +299,14 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO request)
         {
-
-            _logger.LogInformation($"Incoming change-password request: \n{request.ToJson()}");
-
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var result = await _userService.ChangePasswordAsync(request.UserId, request.CurrentPassword, request.NewPassword);
+            var userId = User.GetUserIdFromClaims();
+
+            var result = await _userService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });

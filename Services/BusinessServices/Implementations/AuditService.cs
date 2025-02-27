@@ -12,7 +12,7 @@ using MedicineStorage.Models.TenderModels;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
-    public class AuditService(IUnitOfWork _unitOfWork, IUserService _userService, IMapper _mapper) : IAuditService
+    public class AuditService(IUnitOfWork _unitOfWork, IMapper _mapper) : IAuditService
     {
         public async Task<ServiceResult<PagedList<ReturnAuditDTO>>> GetPaginatedAudits(AuditParams auditParams)
         {
@@ -75,17 +75,17 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
+        // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // 
+
         public async Task<ServiceResult<Audit>> CreateAuditAsync(int userId, CreateAuditDTO request)
         {
             var result = new ServiceResult<Audit>();
-            var audit = new Audit
-            {
-                Title = request.Title,
-                PlannedByUserId = userId,
-                PlannedDate = request.PlannedDate,
-                Status = AuditStatus.Planned,
-                Notes = new List<AuditNote>()
-            };
+
+            var audit = _mapper.Map<Audit>(request);
+
+            audit.PlannedByUserId = userId;
+            audit.Status = AuditStatus.Planned;
+            audit.Notes = new List<AuditNote>();
 
             if (!string.IsNullOrEmpty(request.Notes))
             {
@@ -136,7 +136,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new KeyNotFoundException($"Audit with ID {auditId} not found");
             }
 
-            var userRolesResult = await _userService.GetUserRolesAsync(userId);
             if (audit.Status != AuditStatus.Planned)
             {
                 throw new BadHttpRequestException($"Audit can only be started from Planned status");
@@ -176,7 +175,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             if (audit.Status != AuditStatus.InProgress)
             {
-                throw new BadHttpRequestException($"Audit can only be updated from 'In Progress' status");
+                throw new BadHttpRequestException($"Audit should be in progress.");
             }
 
             var auditItems = await _unitOfWork.AuditRepository.GetAuditItemsByAuditIdAsync(auditId);
@@ -193,7 +192,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
                 if (auditItem.CheckedByUserId != null)
                 {
-                    throw new BadHttpRequestException($"Medicine ID {medicineId} has already been checked and cannot be updated.");
+                    throw new BadHttpRequestException($"Medicine with ID {medicineId} has already been checked.");
                 }
 
                 auditItem.ActualQuantity = actualQuantity;
@@ -210,7 +209,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             bool hasSignificantDiscrepancies = auditItems.Any(item =>
                 item.ExpectedQuantity > item.ActualQuantity);
-
 
             audit.Status = hasSignificantDiscrepancies
                 ? AuditStatus.RequiresFollowUp
@@ -285,7 +283,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             var audit = await _unitOfWork.AuditRepository.GetByIdAsync(auditId);
             if (audit == null)
             {
-                throw new KeyNotFoundException($"Audit not found");
+                throw new KeyNotFoundException($"Audit with ID {auditId} not found");
             }
 
 

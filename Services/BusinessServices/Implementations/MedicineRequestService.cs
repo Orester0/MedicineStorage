@@ -13,10 +13,14 @@ using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.Params;
 using MedicineStorage.Models.TenderModels;
 using MedicineStorage.Models.UserModels;
+using MedicineStorage.Models.AuditModels;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
-    public class MedicineRequestService(IUnitOfWork _unitOfWork, IMapper _mapper, INotificationTextFactory _notificationTextFactory, INotificationService _notificationService) : IMedicineRequestService
+    public class MedicineRequestService(IUnitOfWork _unitOfWork, 
+                                        IMapper _mapper, 
+                                        INotificationTextFactory _notificationTextFactory, 
+                                        INotificationService _notificationService) : IMedicineRequestService
     {
         public async Task<ServiceResult<PagedList<ReturnMedicineRequestDTO>>> GetPaginatedAudits(MedicineRequestParams parameters)
         {
@@ -40,7 +44,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             {
                 throw new KeyNotFoundException($"Request with ID {id} not found.");
             }
-
             result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
             return result;
         }
@@ -62,18 +65,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
+        // //  // //  // //  // //  // //  // //  // //  // //  // //  // //  // //  // //  // //  // //  // //  // //  // //  // //  // //  // // 
 
 
         public async Task<ServiceResult<ReturnMedicineRequestDTO>> CreateRequestAsync(
@@ -84,7 +76,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(createRequestDTO.MedicineId);
             if (medicine == null)
             {
-                throw new KeyNotFoundException($"Medicine not found for ID {createRequestDTO.MedicineId}");
+                throw new KeyNotFoundException($"Medicine with ID {createRequestDTO.MedicineId} not found");
             }
 
             var request = _mapper.Map<MedicineRequest>(createRequestDTO);
@@ -107,13 +99,13 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<ReturnMedicineRequestDTO>> ApproveRequestAsync(
             int requestId,
             int userId,
-            bool isSpecialApproval = false)
+            List<string> userRoles)
         {
             var result = new ServiceResult<ReturnMedicineRequestDTO>();
             var request = await _unitOfWork.MedicineRequestRepository.GetByIdAsync(requestId);
             if (request == null)
             {
-                throw new KeyNotFoundException($"Request not found for ID {requestId}");
+                throw new KeyNotFoundException($"Request with ID {requestId} not found");
             }
 
             var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(request.MedicineId);
@@ -122,10 +114,9 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new KeyNotFoundException($"Medicine not found for ID {request.MedicineId}");
             }
 
-            if (medicine.RequiresSpecialApproval && !isSpecialApproval)
+            if (medicine.RequiresSpecialApproval && !userRoles.Contains("Admin"))
             {
-
-                throw new BadHttpRequestException("Medicine in the request requires special approval");
+                throw new BadHttpRequestException("Medicine in the request requires admin approval");
             }
 
             if (request.Status != RequestStatus.Pending &&
@@ -174,7 +165,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         public async Task<ServiceResult<ReturnMedicineRequestDTO>> RejectRequestAsync(
             int requestId,
             int userId,
-            bool isSpecialApproval = false)
+            List<string> userRoles)
         {
             var result = new ServiceResult<ReturnMedicineRequestDTO>();
             var request = await _unitOfWork.MedicineRequestRepository.GetByIdAsync(requestId);
@@ -188,9 +179,10 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             {
                 throw new KeyNotFoundException($"Medicine not found for ID {request.MedicineId}");
             }
-            if (medicine.RequiresSpecialApproval && !isSpecialApproval)
+
+            if (medicine.RequiresSpecialApproval && !userRoles.Contains("Admin"))
             {
-                throw new BadHttpRequestException("Medicine in the request requires special approval");
+                throw new BadHttpRequestException("Medicine in the request requires admin approval");
             }
 
             if (request.Status != RequestStatus.Pending &&
@@ -208,7 +200,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
 
             var (title, message) = _notificationTextFactory.GetNotificationText(NotificationType.MedicineRequestRejected, medicine.Name);
-
             var notification = new Notification
             {
                 UserId = request.RequestedByUserId,
@@ -220,9 +211,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             await _notificationService.SendNotificationAsync(notification);
 
             await _unitOfWork.CompleteAsync();
-
             result.Data = _mapper.Map<ReturnMedicineRequestDTO>(request);
-
             return result;
         }
 
@@ -232,7 +221,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             var request = await _unitOfWork.MedicineRequestRepository.GetByIdAsync(requestId);
             if (request == null)
             {
-                throw new KeyNotFoundException($"Request not");
+                throw new KeyNotFoundException($"Request not found for ID {requestId}");
             }
 
             if (request.RequestedByUserId != userId && !userRoles.Contains("Admin"))

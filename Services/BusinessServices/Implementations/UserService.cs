@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
 using MedicineStorage.Data;
+using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.DTOs;
+using MedicineStorage.Models.Params;
 using MedicineStorage.Models.TenderModels;
 using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.BusinessServices.Interfaces;
@@ -25,6 +27,76 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         private readonly string defaultImagePath =
             configuration["ProfileSettings:DefaultImagePath"]
             ?? throw new Exception("Default image path cannot be null.");
+
+        public async Task<ServiceResult<List<User>>> GetAllAsync()
+        {
+            var result = new ServiceResult<List<User>>();
+            var users = await _userManager.Users
+                    .Include(u => u.UserRoles)
+                    .ThenInclude(ur => ur.Role)
+                    .ToListAsync();
+
+            result.Data = users;
+            return result;
+        }
+
+        public async Task<ServiceResult<PagedList<ReturnUserPersonalDTO>>> GetPaginatedUsers(UserParams parameters)
+        {
+            var result = new ServiceResult<PagedList<ReturnUserPersonalDTO>>();
+
+            var query = _userManager.Users
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(parameters.FirstName))
+                query = query.Where(u => u.FirstName.Contains(parameters.FirstName));
+
+            if (!string.IsNullOrWhiteSpace(parameters.LastName))
+                query = query.Where(u => u.LastName.Contains(parameters.LastName));
+
+            if (!string.IsNullOrWhiteSpace(parameters.UserName))
+                query = query.Where(u => u.UserName.Contains(parameters.UserName));
+
+            if (!string.IsNullOrWhiteSpace(parameters.Email))
+                query = query.Where(u => u.Email.Contains(parameters.Email));
+
+            if (!string.IsNullOrWhiteSpace(parameters.Position))
+                query = query.Where(u => u.Position == parameters.Position);
+
+            if (!string.IsNullOrWhiteSpace(parameters.Company))
+                query = query.Where(u => u.Company.Contains(parameters.Company));
+
+
+            if (parameters.Roles?.Any() == true)
+            {
+                query = query.Where(u => u.UserRoles.Any(ur => parameters.Roles.Contains(ur.Role.Name)));
+            }
+
+            query = parameters.SortBy?.ToLower() switch
+            {
+                "id" => parameters.IsDescending ? query.OrderByDescending(u => u.Id) : query.OrderBy(u => u.Id),
+                "firstname" => parameters.IsDescending ? query.OrderByDescending(u => u.FirstName) : query.OrderBy(u => u.FirstName),
+                "lastname" => parameters.IsDescending ? query.OrderByDescending(u => u.LastName) : query.OrderBy(u => u.LastName),
+                "username" => parameters.IsDescending ? query.OrderByDescending(u => u.UserName) : query.OrderBy(u => u.UserName),
+                _ => query.OrderBy(u => u.Id) 
+            };
+
+            var totalCount = await query.CountAsync();
+            var users = await query
+                .Skip((parameters.PageNumber - 1) * parameters.PageSize)
+                .Take(parameters.PageSize)
+                .ToListAsync();
+
+            var dtos = _mapper.Map<List<ReturnUserPersonalDTO>>(users);
+
+            result.Data = new PagedList<ReturnUserPersonalDTO>(dtos, totalCount, parameters.PageNumber, parameters.PageSize);
+
+            return result;
+        }
+
+
+
 
         public async Task UploadPhotoAsync(IFormFile file, int userId)
         {
@@ -91,23 +163,11 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<List<ReturnUserDTO>>> GetAllAsync()
+        
+
+        public async Task<ServiceResult<List<User>>> GetUsersByRoleAsync(string roleName)
         {
-            var result = new ServiceResult<List<ReturnUserDTO>>();
-            var users = await _userManager.Users
-                    .Include(u => u.UserRoles)
-                    .ThenInclude(ur => ur.Role)
-                    .ToListAsync();
-
-            var usersDTO = _mapper.Map<List<ReturnUserDTO>>(users);
-            result.Data = usersDTO;
-
-            return result;
-        }
-
-        public async Task<ServiceResult<List<ReturnUserDTO>>> GetUsersByRoleAsync(string roleName)
-        {
-            var result = new ServiceResult<List<ReturnUserDTO>>();
+            var result = new ServiceResult<List<User>>();
             var role = await _roleManager.FindByNameAsync(roleName);
             if (role == null)
             {
@@ -120,8 +180,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 .Where(u => u.UserRoles.Any(ur => ur.Role.Name == roleName))
                 .ToListAsync();
 
-            _mapper.Map(users, result.Data);
-
+            result.Data = users;
             return result;
         }
 
@@ -158,10 +217,10 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 result.Data = user;
                 return result;
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 await transaction.RollbackAsync();
-                result.Errors.Add($"Couldnt create user");
+                throw ex;
                 return result;
             }
         }
@@ -360,6 +419,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return await CreateUserAsync(registerDto);
         }
 
+        
     }
 
 }
