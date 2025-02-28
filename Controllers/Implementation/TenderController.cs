@@ -3,7 +3,6 @@ using MedicineStorage.Extensions;
 using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.Params;
 using MedicineStorage.Models.TenderModels;
-using MedicineStorage.Services.BusinessServices.Implementations;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -11,7 +10,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace MedicineStorage.Controllers.Implementation
 {
-
     [Authorize]
     public class TenderController(ITenderService _tenderService) : BaseApiController
     {
@@ -41,13 +39,12 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpGet("created-by/{userId:int}")]
         public async Task<IActionResult> GetTendersCreatedByUser(int userId)
         {
-            
-                var result = await _tenderService.GetTendersCreatedByUserId(userId);
-                if (!result.Success)
-                {
-                    return BadRequest(new { result.Errors });
-                }
-                return Ok(result.Data);
+            var result = await _tenderService.GetTendersCreatedByUserId(userId);
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(result.Data);
             
         }
 

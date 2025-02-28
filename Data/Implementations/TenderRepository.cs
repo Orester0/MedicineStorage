@@ -135,5 +135,12 @@ namespace MedicineStorage.Data.Implementations
 
         }
 
+        public async Task<IEnumerable<Tender>> GetPublishedTendersAsync()
+        {
+            return await _context.Tenders
+                .Where(t => t.Status == TenderStatus.Published)
+                .ToListAsync();
+        }
+
     }
 }

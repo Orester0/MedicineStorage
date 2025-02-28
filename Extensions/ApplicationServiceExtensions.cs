@@ -59,6 +59,7 @@ namespace MedicineStorage.Extensions
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IMedicineSupplyService, MedicineSupplyService>();
             services.AddScoped<ITemplateCheckService, TemplateCheckService>();
+            services.AddScoped<IDeadlineDateCheckService, DeadlineDateCheckService>();
 
 
 
