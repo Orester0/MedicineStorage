@@ -1,6 +1,4 @@
-﻿
-
-using MedicineStorage.Models.TemplateModels;
+﻿using MedicineStorage.Models.TemplateModels;
 
 namespace MedicineStorage.Data.Interfaces
 {
@@ -12,26 +10,21 @@ namespace MedicineStorage.Data.Interfaces
         IMedicineUsageRepository MedicineUsageRepository { get; }
         ITenderRepository TenderRepository { get; }
         ITenderProposalRepository TenderProposalRepository { get; }
-
+        IUserRepository UserRepository { get; }
 
         ITenderProposalItemRepository TenderProposalItemRepository { get; }
         ITenderItemRepository TenderItemRepository { get; }
 
-
         IMedicineSupplyRepository MedicineSupplyRepository { get; }
         INotificationRepository NotificationRepository { get; }
-
 
         ITemplateRepository<MedicineRequestTemplate> MedicineRequestTemplateRepository { get; }
         ITemplateRepository<AuditTemplate> AuditTemplateRepository { get; }
         ITemplateRepository<TenderTemplate> TenderTemplateRepository { get; }
 
-
         Task<bool> CompleteAsync();
-
         bool HasChanges();
         void BeginTransaction();
         Task Rollback();
-
     }
 }

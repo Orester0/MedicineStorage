@@ -15,6 +15,7 @@ namespace MedicineStorage.Data.Implementations
         ITenderProposalItemRepository _tenderProposalItemRepository,
         IMedicineSupplyRepository _medicineSupplyRepository,
         INotificationRepository _notificationRepository,
+        IUserRepository _userRepository,
         ITemplateRepository<MedicineRequestTemplate> _medicineRequestTemplateRepository,
         ITemplateRepository<AuditTemplate> _auditTemplateRepository,
         ITemplateRepository<TenderTemplate> _tenderTemplateRepository
@@ -30,6 +31,7 @@ namespace MedicineStorage.Data.Implementations
         public ITenderItemRepository TenderItemRepository => _tenderItemRepository;
         public ITenderProposalItemRepository TenderProposalItemRepository => _tenderProposalItemRepository;
         public IMedicineSupplyRepository MedicineSupplyRepository => _medicineSupplyRepository;
+        public IUserRepository UserRepository => _userRepository;
         public ITemplateRepository<MedicineRequestTemplate> MedicineRequestTemplateRepository => _medicineRequestTemplateRepository;
         public ITemplateRepository<AuditTemplate> AuditTemplateRepository => _auditTemplateRepository;
         public ITemplateRepository<TenderTemplate> TenderTemplateRepository => _tenderTemplateRepository;
@@ -37,7 +39,7 @@ namespace MedicineStorage.Data.Implementations
 
         public void BeginTransaction()
         {
-            throw new NotImplementedException();
+            _context.Database.BeginTransaction();
         }
 
         public async Task<bool> CompleteAsync()
@@ -50,9 +52,9 @@ namespace MedicineStorage.Data.Implementations
             return _context.ChangeTracker.HasChanges();
         }
 
-        public Task Rollback()
+        public async Task Rollback()
         {
-            throw new NotImplementedException();
+            await _context.Database.RollbackTransactionAsync();
         }
     }
 }

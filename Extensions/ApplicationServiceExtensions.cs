@@ -66,10 +66,10 @@ namespace MedicineStorage.Extensions
 
             // APPLICATION SERVICES
             services.AddScoped<INotificationTextFactory, NotificationTextFactory>();
-            services.AddHostedService<TimeCheckerBackgroundService>();
             services.AddScoped<ITokenService, TokenService>();
             services.AddScoped<IEmailService, EmailService>();
             services.AddSignalR();
+            services.AddHostedService<TimeCheckerBackgroundService>();
 
             // REPOSITORIES
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -86,6 +86,7 @@ namespace MedicineStorage.Extensions
             services.AddScoped<ITemplateRepository<AuditTemplate>, AuditTemplateRepository>();
             services.AddScoped<ITemplateRepository<TenderTemplate>, TenderTemplateRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
+            services.AddScoped<IUserRepository, UserRepository>();
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 

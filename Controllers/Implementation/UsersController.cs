@@ -21,8 +21,7 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            var users = _mapper.Map<List<ReturnUserGeneralDTO>>(result.Data);
-            return Ok(users);
+            return Ok(result.Data);
         }
 
 

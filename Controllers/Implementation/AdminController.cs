@@ -11,11 +11,9 @@ using NuGet.Protocol;
 namespace MedicineStorage.Controllers.Implementation
 {
 
-    //[Authorize(Roles = "Admin")]
+    [Authorize(Roles = "Admin")]
     public class AdminController(IUserService _userService, IMapper _mapper) : BaseApiController
     {
-
-
         [HttpGet("users")]
         public async Task<IActionResult> GetUsers([FromQuery] UserParams parameters)
         {
@@ -27,43 +25,18 @@ namespace MedicineStorage.Controllers.Implementation
             return Ok(result.Data);
         }
 
-        [HttpGet("users/all")]
-        public async Task<IActionResult> GetAllUsers()
-        {
-            var result = await _userService.GetAllAsync();
-            if (!result.Success)
-            {
-                return BadRequest(new { result.Errors });
-            }
-
-            var users = _mapper.Map<List<ReturnUserPersonalDTO>>(result.Data);
-            return Ok(users);
-        }
-
+      
         [HttpGet("users/{id:int}")]
         public async Task<IActionResult> GetUserById(int id)
         {
-            var result = await _userService.GetUserByIdAsync(id);
+            var result = await _userService.GetPersonalUserByIdAsync(id);
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });
             }
-            var userDto = _mapper.Map<ReturnUserPersonalDTO>(result.Data);
-            return Ok(userDto);
-        }
-
-        [HttpGet("users/{userId:int}/roles")]
-        public async Task<IActionResult> GetUserRoles(int userId)
-        {
-            var result = await _userService.GetUserRolesAsync(userId);
-
-            if (!result.Success)
-            {
-                return BadRequest(new { result.Errors });
-            }
-
             return Ok(result.Data);
         }
+
 
         //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 

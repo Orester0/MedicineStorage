@@ -27,21 +27,21 @@ namespace MedicineStorage.Controllers.Implementation
         ) : BaseApiController
     {
 
+        [Authorize]
         [HttpGet("info")]
         public async Task<IActionResult> GetInformationAboutCurrentUser()
         {
             var userId = User.GetUserIdFromClaims();
-            var result = await _userService.GetUserByIdAsync(userId);
+            var result = await _userService.GetPersonalUserByIdAsync(userId);
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });
             }
 
-            var userDTO = _mapper.Map<ReturnUserPersonalDTO>(result.Data);
-
-            return Ok(userDTO);
+            return Ok(result.Data);
         }
 
+        [Authorize]
         [HttpGet("audits/planned")]
         public async Task<IActionResult> GetAuditsPlannedByCurrentUser()
         {
@@ -56,6 +56,7 @@ namespace MedicineStorage.Controllers.Implementation
 
         }
 
+        [Authorize]
         [HttpGet("audits/executed")]
         public async Task<IActionResult> GetAuditsExecutedByCurrentUser()
         {
@@ -70,6 +71,7 @@ namespace MedicineStorage.Controllers.Implementation
 
         }
 
+        [Authorize]
         [HttpGet("requests/requested")]
         public async Task<IActionResult> GetRequestsRequestedByCurrentUser()
         {
@@ -84,6 +86,7 @@ namespace MedicineStorage.Controllers.Implementation
         }
 
 
+        [Authorize]
         [HttpGet("usages/created")]
         public async Task<IActionResult> GetUsagesByCurrentUser()
         {
@@ -97,6 +100,7 @@ namespace MedicineStorage.Controllers.Implementation
             return Ok(result.Data);
         }
 
+        [Authorize]
         [HttpGet("requests/approved")]
         public async Task<IActionResult> GetRequestsApprovedByCurrentUser()
         {
@@ -110,6 +114,7 @@ namespace MedicineStorage.Controllers.Implementation
 
         }
 
+        [Authorize]
         [HttpGet("tenders/awarded")]
         public async Task<IActionResult> GetTendersAwardedByCurrentUser()
         {
@@ -121,6 +126,7 @@ namespace MedicineStorage.Controllers.Implementation
 
         }
 
+        [Authorize]
         [HttpGet("proposals/created")]
         public async Task<IActionResult> GetProposalsCreatedByCurrentUser()
         {
@@ -164,8 +170,9 @@ namespace MedicineStorage.Controllers.Implementation
         }
 
 
+        ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-
+        [Authorize]
         [Consumes("multipart/form-data")]
         [HttpPost("upload-photo")]
         public async Task<IActionResult> UploadPhoto([FromForm] UploadFileDTO file)
@@ -182,6 +189,7 @@ namespace MedicineStorage.Controllers.Implementation
         }
 
 
+        [Authorize]
         [HttpPut("update")]
         public async Task<IActionResult> UpdateUser([FromBody] UserUpdateDTO updateDto)
         {
@@ -191,18 +199,7 @@ namespace MedicineStorage.Controllers.Implementation
             }
 
             var userId = User.GetUserIdFromClaims();
-
-
-            var userResult = await _userService.GetUserByIdAsync(userId);
-            if (!userResult.Success)
-            {
-                return BadRequest(new { userResult.Errors });
-            }
-
-            var user = userResult.Data;
-
-            _mapper.Map(updateDto, user);
-            var result = await _userService.UpdateUserAsync(user);
+            var result = await _userService.UpdateUserAsync(updateDto, userId);
 
             if (!result.Success)
             {
@@ -231,11 +228,10 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(new { result.Errors });
             }
 
-            var user = result.Data;
-            var accessToken = await _tokenService.CreateAccessToken(user);
-            var refreshToken = await _tokenService.CreateRefreshToken(user);
+            var accessToken = await _tokenService.CreateAccessToken(result.Data);
+            var refreshToken = await _tokenService.CreateRefreshToken(result.Data);
 
-            var returnUserDTO = _mapper.Map<ReturnUserPersonalDTO>(user);
+            var user = _mapper.Map<ReturnUserPersonalDTO>(result.Data);
 
             var returnUserLoginDTO = new ReturnUserLoginDTO
             {
@@ -244,7 +240,7 @@ namespace MedicineStorage.Controllers.Implementation
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 },
-                returnUserDTO = returnUserDTO,
+                returnUserDTO = user
             };
 
             return Ok(returnUserLoginDTO);
@@ -268,18 +264,14 @@ namespace MedicineStorage.Controllers.Implementation
                 return Unauthorized(new { Errors = new[] { "Invalid username" } });
             }
 
-            var verifyResult = await _userService.VerifyPasswordAsync(userResult.Data, request.Password);
-
-            if (!verifyResult)
+            if (!await _userService.VerifyPasswordAsync(userResult.Data, request.Password))
             {
-                return Unauthorized(new { Errors = new[] { "Invalid username" } });
+                return Unauthorized(new { Errors = new[] { "Invalid username or password" } });
             }
 
-            var user = userResult.Data;
-            var accessToken = await _tokenService.CreateAccessToken(user);
-            var refreshToken = await _tokenService.CreateRefreshToken(user);
-
-            var returnUserDTO = _mapper.Map<ReturnUserPersonalDTO>(user);
+            var accessToken = await _tokenService.CreateAccessToken(userResult.Data);
+            var refreshToken = await _tokenService.CreateRefreshToken(userResult.Data);
+            var userPersonal = _mapper.Map<ReturnUserPersonalDTO>(userResult.Data);
 
             var returnUserLoginDTO = new ReturnUserLoginDTO
             {
@@ -288,7 +280,7 @@ namespace MedicineStorage.Controllers.Implementation
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 },
-                returnUserDTO = returnUserDTO
+                returnUserDTO = userPersonal
             };
 
             return Ok(returnUserLoginDTO);
@@ -296,6 +288,7 @@ namespace MedicineStorage.Controllers.Implementation
 
 
 
+        [Authorize]
         [HttpPost("change-password")]
         public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordDTO request)
         {
@@ -305,8 +298,8 @@ namespace MedicineStorage.Controllers.Implementation
             }
 
             var userId = User.GetUserIdFromClaims();
-
             var result = await _userService.ChangePasswordAsync(userId, request.CurrentPassword, request.NewPassword);
+            
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });
