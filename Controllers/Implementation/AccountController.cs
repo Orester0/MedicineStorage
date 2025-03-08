@@ -232,7 +232,11 @@ namespace MedicineStorage.Controllers.Implementation
             var accessToken = await _tokenService.CreateAccessToken(result.Data);
             var refreshToken = await _tokenService.CreateRefreshToken(result.Data);
 
-            var user = _mapper.Map<ReturnUserPersonalDTO>(result.Data);
+            var userPersonalResult = await _userService.GetPersonalUserByIdAsync(result.Data.Id);
+            if (!userPersonalResult.Success)
+            {
+                return BadRequest(new { userPersonalResult.Errors });
+            }
 
             var returnUserLoginDTO = new ReturnUserLoginDTO
             {
@@ -241,7 +245,7 @@ namespace MedicineStorage.Controllers.Implementation
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 },
-                returnUserDTO = user
+                returnUserDTO = userPersonalResult.Data
             };
 
             return Ok(returnUserLoginDTO);
@@ -272,7 +276,12 @@ namespace MedicineStorage.Controllers.Implementation
 
             var accessToken = await _tokenService.CreateAccessToken(userResult.Data);
             var refreshToken = await _tokenService.CreateRefreshToken(userResult.Data);
-            var userPersonal = _mapper.Map<ReturnUserPersonalDTO>(userResult.Data);
+            
+            var userPersonalResult = await _userService.GetPersonalUserByIdAsync(userResult.Data.Id);
+            if (!userPersonalResult.Success)
+            {
+                return BadRequest(new { userPersonalResult.Errors });
+            }
 
             var returnUserLoginDTO = new ReturnUserLoginDTO
             {
@@ -281,7 +290,7 @@ namespace MedicineStorage.Controllers.Implementation
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 },
-                returnUserDTO = userPersonal
+                returnUserDTO = userPersonalResult.Data
             };
 
             return Ok(returnUserLoginDTO);
