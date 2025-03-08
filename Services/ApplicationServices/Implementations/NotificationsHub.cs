@@ -14,6 +14,7 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
             }
             await base.OnConnectedAsync();
         }
+
         public async Task SendNotification(string userId, string message, string title)
         {
             await Clients.User(userId).SendAsync("ReceiveNotification", title, message);

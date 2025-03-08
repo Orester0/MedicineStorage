@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NuGet.Protocol;
 
 namespace MedicineStorage.Controllers.Implementation
@@ -31,6 +32,7 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpGet("info")]
         public async Task<IActionResult> GetInformationAboutCurrentUser()
         {
+            
             var userId = User.GetUserIdFromClaims();
             var result = await _userService.GetPersonalUserByIdAsync(userId);
             if (!result.Success)
@@ -214,7 +216,6 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPost("register")]
         public async Task<ActionResult<ReturnUserLoginDTO>> Register([FromBody] UserRegistrationDTO request)
         {
-            _logger.LogInformation($"Incoming registration request: \n{request.ToJson()}");
 
             if (!ModelState.IsValid)
             {

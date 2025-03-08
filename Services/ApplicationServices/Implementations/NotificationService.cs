@@ -8,7 +8,6 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
 {
     public class NotificationService(IUnitOfWork _unitOfWork, IHubContext<NotificationHub> _hubContext) : INotificationService
     {
-
         public async Task<IEnumerable<Notification>> GetUserNotificationsAsync(int userId)
         {
             return await _unitOfWork.NotificationRepository.GetUserNotificationsAsync(userId);
@@ -27,14 +26,16 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
 
             var addedNotification = await _unitOfWork.NotificationRepository.AddAsync(notification);
             await _unitOfWork.CompleteAsync();
-            await _hubContext.Clients.Group(notification.UserId.ToString()).SendAsync("ReceiveNotification", addedNotification);
+            await _hubContext.Clients.Group(notification.UserId.ToString())
+                .SendAsync("ReceiveNotification", addedNotification);
         }
 
         public async Task SendNotificationAsync(Notification notification)
         {
             var addedNotification = await _unitOfWork.NotificationRepository.AddAsync(notification);
             await _unitOfWork.CompleteAsync();
-            await _hubContext.Clients.Group(notification.UserId.ToString()).SendAsync("ReceiveNotification", addedNotification);
+            await _hubContext.Clients.Group(notification.UserId.ToString())
+                .SendAsync("ReceiveNotification", addedNotification);
         }
 
         public async Task MarkAsReadAsync(int id)
@@ -43,5 +44,4 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
             await _unitOfWork.CompleteAsync();
         }
     }
-
 }

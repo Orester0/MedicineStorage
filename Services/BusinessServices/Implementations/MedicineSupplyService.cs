@@ -1,18 +1,20 @@
-﻿using MedicineStorage.Models.DTOs;
+﻿using AutoMapper;
+using Humanizer;
+using MedicineStorage.Data.Interfaces;
+using MedicineStorage.Helpers;
+using MedicineStorage.Models;
+using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.Params;
 using MedicineStorage.Models.TenderModels;
-using MedicineStorage.Models;
 using MedicineStorage.Services.BusinessServices.Interfaces;
-using MedicineStorage.Helpers;
-using AutoMapper;
-using MedicineStorage.Data.Interfaces;
 using MimeKit;
-using Humanizer;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
-    public class MedicineSupplyService(IMapper _mapper, IUnitOfWork _unitOfWork) : IMedicineSupplyService
+    public class MedicineSupplyService(
+        IMapper _mapper, 
+        IUnitOfWork _unitOfWork) : IMedicineSupplyService
     {
         public async Task<ServiceResult<PagedList<ReturnMedicineSupplyDTO>>> GetPaginatedSupplies(MedicineSupplyParams parameters)
         {
@@ -82,6 +84,5 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             result.Data = createdSupply;
             return result;
         }
-
     }
 }

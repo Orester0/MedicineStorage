@@ -11,7 +11,10 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
             try
             {
                 using var smtpClient = new MailKit.Net.Smtp.SmtpClient();
-                await smtpClient.ConnectAsync(_configuration["EmailSettings:SmtpHost"], int.Parse(_configuration["EmailSettings:SmtpPort"]), SecureSocketOptions.StartTls);
+                await smtpClient.ConnectAsync(
+                    _configuration["EmailSettings:SmtpHost"], 
+                    int.Parse(_configuration["EmailSettings:SmtpPort"]), 
+                    SecureSocketOptions.StartTls);
                 await smtpClient.DisconnectAsync(true);
                 return true;
             }
@@ -34,12 +37,13 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
                 }
 
                 var emailMessage = new MimeMessage();
-                emailMessage.From.Add(new MailboxAddress(_configuration["EmailSettings:FromName"], _configuration["EmailSettings:FromEmail"]));
+                emailMessage.From.Add(new MailboxAddress(
+                    _configuration["EmailSettings:FromName"], 
+                    _configuration["EmailSettings:FromEmail"]));
                 emailMessage.To.Add(MailboxAddress.Parse(toEmail));
                 emailMessage.Subject = subject;
 
                 var bodyBuilder = new BodyBuilder();
-
                 if (isHtml)
                 {
                     bodyBuilder.HtmlBody = message;
@@ -52,8 +56,13 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
                 emailMessage.Body = bodyBuilder.ToMessageBody();
 
                 using var smtpClient = new MailKit.Net.Smtp.SmtpClient();
-                await smtpClient.ConnectAsync(_configuration["EmailSettings:SmtpHost"], int.Parse(_configuration["EmailSettings:SmtpPort"]), SecureSocketOptions.StartTls);
-                await smtpClient.AuthenticateAsync(_configuration["EmailSettings:SmtpUser"], _configuration["EmailSettings:SmtpPass"]);
+                await smtpClient.ConnectAsync(
+                    _configuration["EmailSettings:SmtpHost"], 
+                    int.Parse(_configuration["EmailSettings:SmtpPort"]), 
+                    SecureSocketOptions.StartTls);
+                await smtpClient.AuthenticateAsync(
+                    _configuration["EmailSettings:SmtpUser"], 
+                    _configuration["EmailSettings:SmtpPass"]);
                 await smtpClient.SendAsync(emailMessage);
                 await smtpClient.DisconnectAsync(true);
             }
@@ -63,6 +72,7 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
                 throw;
             }
         }
+
         public async Task SendEmailWithAttachmentAsync(string toEmail, string subject, string message, string attachmentPath)
         {
             try
@@ -74,7 +84,9 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
                 }
 
                 var emailMessage = new MimeMessage();
-                emailMessage.From.Add(new MailboxAddress(_configuration["EmailSettings:FromName"], _configuration["EmailSettings:FromEmail"]));
+                emailMessage.From.Add(new MailboxAddress(
+                    _configuration["EmailSettings:FromName"], 
+                    _configuration["EmailSettings:FromEmail"]));
                 emailMessage.To.Add(MailboxAddress.Parse(toEmail));
                 emailMessage.Subject = subject;
 
@@ -91,8 +103,13 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
                 emailMessage.Body = bodyBuilder.ToMessageBody();
 
                 using var smtpClient = new MailKit.Net.Smtp.SmtpClient();
-                await smtpClient.ConnectAsync(_configuration["EmailSettings:SmtpHost"], int.Parse(_configuration["EmailSettings:SmtpPort"]), SecureSocketOptions.StartTls);
-                await smtpClient.AuthenticateAsync(_configuration["EmailSettings:SmtpUser"], _configuration["EmailSettings:SmtpPass"]);
+                await smtpClient.ConnectAsync(
+                    _configuration["EmailSettings:SmtpHost"], 
+                    int.Parse(_configuration["EmailSettings:SmtpPort"]), 
+                    SecureSocketOptions.StartTls);
+                await smtpClient.AuthenticateAsync(
+                    _configuration["EmailSettings:SmtpUser"], 
+                    _configuration["EmailSettings:SmtpPass"]);
                 await smtpClient.SendAsync(emailMessage);
                 await smtpClient.DisconnectAsync(true);
             }
@@ -102,6 +119,7 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
                 throw;
             }
         }
+
         public async Task SendEmailWithRetryAsync(string toEmail, string subject, string message, int maxRetries = 3)
         {
             int retryCount = 0;
@@ -131,6 +149,7 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
             var message = $"Please confirm your email <a href='{confirmationLink}'>Confirm Email</a>.";
             await SendEmailAsync(toEmail, subject, message);
         }
+
         public async Task SendBulkEmailAsync(List<string> toEmails, string subject, string message, bool isHtml = true)
         {
             foreach (var email in toEmails)
@@ -138,7 +157,5 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
                 await SendEmailAsync(email, subject, message, isHtml);
             }
         }
-
-
     }
 }

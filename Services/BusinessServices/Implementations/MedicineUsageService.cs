@@ -9,14 +9,15 @@ using MedicineStorage.Services.BusinessServices.Interfaces;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
-    public class MedicineUsageService(IUnitOfWork _unitOfWork, IMapper _mapper) : IMedicineUsageService
+    public class MedicineUsageService(
+        IUnitOfWork _unitOfWork, 
+        IMapper _mapper) : IMedicineUsageService
     {
         public async Task<ServiceResult<ReturnMedicineUsageDTO>> CreateUsageAsync(
             CreateMedicineUsageDTO createUsageDTO,
             int userId)
         {
             var result = new ServiceResult<ReturnMedicineUsageDTO>();
-
 
             var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(createUsageDTO.MedicineId);
             if (medicine == null)
@@ -75,6 +76,5 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             );
             return result;
         }
-
     }
 }

@@ -36,7 +36,7 @@ namespace MedicineStorage.Migrations
                     LastName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Position = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
                     Company = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
-                    Photo = table.Column<byte[]>(type: "varbinary(MAX)", nullable: true),
+                    PhotoBlobName = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),

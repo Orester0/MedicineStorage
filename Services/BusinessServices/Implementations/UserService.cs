@@ -15,13 +15,28 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
     public class UserService(
         IUnitOfWork _unitOfWork,
         IMapper _mapper,
+        IBlobStorageService _blobStorageService,
         IConfiguration configuration) : IUserService
     {
-        private readonly string defaultImagePath =
-            configuration["ProfileSettings:DefaultImagePath"]
+        private readonly string DEFAULT_PHOTO_BLOB_NAME =
+            configuration["AzureStorage:DefaultImagePath"]
             ?? throw new Exception("Default image path cannot be null.");
 
+        private async Task<string?> GetBase64PhotoAsync(string? blobName)
+        {
+            if (string.IsNullOrEmpty(blobName))
+                return null;
 
+            try
+            {
+                var photoBytes = await _blobStorageService.DownloadPhotoAsync(blobName);
+                return $"data:image/jpeg;base64,{Convert.ToBase64String(photoBytes)}";
+            }
+            catch
+            {
+                return null;
+            }
+        }
 
         public async Task<ServiceResult<User>> RegisterUser(UserRegistrationDTO registerDto)
         {
@@ -63,10 +78,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             var result = new ServiceResult<User>();
             var user = _mapper.Map<User>(registerDto);
 
-            if (File.Exists(defaultImagePath))
-            {
-                user.Photo = await File.ReadAllBytesAsync(defaultImagePath);
-            }
+            user.PhotoBlobName = DEFAULT_PHOTO_BLOB_NAME;
 
             var (createResult, createdUser) = await _unitOfWork.UserRepository.CreateUserAsync(user, registerDto.Password);
             if (!createResult.Succeeded)
@@ -91,7 +103,16 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         {
             var result = new ServiceResult<List<ReturnUserGeneralDTO>>();
             var users = await _unitOfWork.UserRepository.GetUsersWithRolesAsync();
-            result.Data = _mapper.Map<List<ReturnUserGeneralDTO>>(users);
+            
+            var dtos = new List<ReturnUserGeneralDTO>();
+            foreach (var user in users)
+            {
+                var dto = _mapper.Map<ReturnUserGeneralDTO>(user);
+                dto.PhotoBase64 = await GetBase64PhotoAsync(user.PhotoBlobName);
+                dtos.Add(dto);
+            }
+            
+            result.Data = dtos;
             return result;
         }
 
@@ -99,7 +120,15 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         {
             var result = new ServiceResult<PagedList<ReturnUserPersonalDTO>>();
             var (users, totalCount) = await _unitOfWork.UserRepository.GetPaginatedUsersAsync(parameters);
-            var dtos = _mapper.Map<List<ReturnUserPersonalDTO>>(users);
+            
+            var dtos = new List<ReturnUserPersonalDTO>();
+            foreach (var user in users)
+            {
+                var dto = _mapper.Map<ReturnUserPersonalDTO>(user);
+                dto.PhotoBase64 = await GetBase64PhotoAsync(user.PhotoBlobName);
+                dtos.Add(dto);
+            }
+            
             result.Data = new PagedList<ReturnUserPersonalDTO>(dtos, totalCount, parameters.PageNumber, parameters.PageSize);
             return result;
         }
@@ -112,8 +141,14 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new UnauthorizedAccessException("Unauthorized");
             }
 
+            // Delete old photo if exists and it's not the default photo
+            if (!string.IsNullOrEmpty(user.PhotoBlobName) && user.PhotoBlobName != DEFAULT_PHOTO_BLOB_NAME)
+            {
+                await _blobStorageService.DeletePhotoAsync(user.PhotoBlobName);
+            }
+
             byte[] compressedImage = await CompressImageAsync(file);
-            user.Photo = compressedImage;
+            user.PhotoBlobName = await _blobStorageService.UploadPhotoAsync(compressedImage, file.FileName);
 
             await _unitOfWork.UserRepository.UpdateAsync(user);
             await _unitOfWork.CompleteAsync();
@@ -147,6 +182,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             result.Data = user;
             return result;
         }
+
         public async Task<ServiceResult<User>> GetByUserNameAsync(string username)
         {
             var result = new ServiceResult<User>();
@@ -162,7 +198,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-
         public async Task<ServiceResult<ReturnUserPersonalDTO>> GetPersonalUserByIdAsync(int id)
         {
             var result = new ServiceResult<ReturnUserPersonalDTO>();
@@ -173,7 +208,10 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new KeyNotFoundException("User not found");
             }
 
-            result.Data = _mapper.Map<ReturnUserPersonalDTO>(user);
+            var dto = _mapper.Map<ReturnUserPersonalDTO>(user);
+            dto.PhotoBase64 = await GetBase64PhotoAsync(user.PhotoBlobName);
+
+            result.Data = dto;
             return result;
         }
 
@@ -318,8 +356,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         {
             return await _unitOfWork.UserRepository.EmailTakenAsync(email);
         }
-
-        
     }
 }
 

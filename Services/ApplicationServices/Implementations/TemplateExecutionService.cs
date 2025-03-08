@@ -6,71 +6,84 @@ using MedicineStorage.Patterns;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 
-public class TemplateCheckService(IUnitOfWork _unitOfWork, INotificationTextFactory _notificationTextFactory, INotificationService _notificationService) : ITemplateCheckService
+namespace MedicineStorage.Services.ApplicationServices.Implementations
 {
-    public async Task CheckAndNotifyAsync()
+    public class TemplateCheckService(
+        IUnitOfWork _unitOfWork, 
+        INotificationTextFactory _notificationTextFactory, 
+        INotificationService _notificationService) : ITemplateCheckService
     {
-        await CheckAndNotifyForTenderTemplates();
-        await CheckAndNotifyForMedicineRequestTemplates();
-        await CheckAndNotifyForAuditTemplates();
-    }
-
-    private async Task CheckAndNotifyForTenderTemplates()
-    {
-        var templates = await _unitOfWork.TenderTemplateRepository.GetAllActiveAndDueAsync();
-        foreach (var template in templates)
+        public async Task CheckAndNotifyAsync()
         {
-            var (title, message) = _notificationTextFactory.GetNotificationText(NotificationType.TemplateExecutionReminder, template.Name);
-            var notification = new Notification
-            {
-                UserId = template.UserId,
-                Title = title,
-                Message = message,
-                IsRead = false,
-                CreatedAt = DateTime.UtcNow
-            };
+            await CheckAndNotifyForTenderTemplates();
+            await CheckAndNotifyForMedicineRequestTemplates();
+            await CheckAndNotifyForAuditTemplates();
+        }
 
-            await _notificationService.SendNotificationAsync(notification);
+        private async Task CheckAndNotifyForTenderTemplates()
+        {
+            var templates = await _unitOfWork.TenderTemplateRepository.GetAllActiveAndDueAsync();
+            foreach (var template in templates)
+            {
+                var (title, message) = _notificationTextFactory.GetNotificationText(
+                    NotificationType.TemplateExecutionReminder, 
+                    template.Name);
+                
+                var notification = new Notification
+                {
+                    UserId = template.UserId,
+                    Title = title,
+                    Message = message,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _notificationService.SendNotificationAsync(notification);
+            }
+        }
+
+        private async Task CheckAndNotifyForMedicineRequestTemplates()
+        {
+            var templates = await _unitOfWork.MedicineRequestTemplateRepository.GetAllActiveAndDueAsync();
+            foreach (var template in templates)
+            {
+                var (title, message) = _notificationTextFactory.GetNotificationText(
+                    NotificationType.TemplateExecutionReminder, 
+                    template.Name);
+                
+                var notification = new Notification
+                {
+                    UserId = template.UserId,
+                    Title = title,
+                    Message = message,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _notificationService.SendNotificationAsync(notification);
+            }
+        }
+
+        private async Task CheckAndNotifyForAuditTemplates()
+        {
+            var templates = await _unitOfWork.AuditTemplateRepository.GetAllActiveAndDueAsync();
+            foreach (var template in templates)
+            {
+                var (title, message) = _notificationTextFactory.GetNotificationText(
+                    NotificationType.TemplateExecutionReminder, 
+                    template.Name);
+                
+                var notification = new Notification
+                {
+                    UserId = template.UserId,
+                    Title = title,
+                    Message = message,
+                    IsRead = false,
+                    CreatedAt = DateTime.UtcNow
+                };
+
+                await _notificationService.SendNotificationAsync(notification);
+            }
         }
     }
-
-    private async Task CheckAndNotifyForMedicineRequestTemplates()
-    {
-        var templates = await _unitOfWork.MedicineRequestTemplateRepository.GetAllActiveAndDueAsync();
-        foreach (var template in templates)
-        {
-            var (title, message) = _notificationTextFactory.GetNotificationText(NotificationType.TemplateExecutionReminder, template.Name);
-            var notification = new Notification
-            {
-                UserId = template.UserId,
-                Title = title,
-                Message = message,
-                IsRead = false,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _notificationService.SendNotificationAsync(notification);
-        }
-    }
-
-    private async Task CheckAndNotifyForAuditTemplates()
-    {
-        var templates = await _unitOfWork.AuditTemplateRepository.GetAllActiveAndDueAsync();
-        foreach (var template in templates)
-        {
-            var (title, message) = _notificationTextFactory.GetNotificationText(NotificationType.TemplateExecutionReminder, template.Name);
-            var notification = new Notification
-            {
-                UserId = template.UserId,
-                Title = title,
-                Message = message,
-                IsRead = false,
-                CreatedAt = DateTime.UtcNow
-            };
-
-            await _notificationService.SendNotificationAsync(notification);
-        }
-    }
-
-
 }

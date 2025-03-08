@@ -25,12 +25,15 @@ namespace MedicineStorage.Extensions
             // CORS
             services.AddCors(options =>
             {
-                options.AddPolicy("AllowLocalhost", policy =>
+                options.AddPolicy("AllowAzureClient", policy =>
                 {
-                    policy.WithOrigins("http://localhost:4200")
-                          .AllowAnyHeader()
-                          .AllowAnyMethod()
-                          .AllowCredentials();
+                    policy.WithOrigins(
+                        "http://localhost:4200", // localhost for local development
+                        "https://gray-smoke-0544b2203.6.azurestaticapps.net" // Azure
+                    )
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
                 });
             });
 
@@ -94,6 +97,8 @@ namespace MedicineStorage.Extensions
             services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
+            services.AddScoped<IBlobStorageService, BlobStorageService>();
 
             return services;
         }

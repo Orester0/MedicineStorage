@@ -676,8 +676,9 @@ namespace MedicineStorage.Migrations
                     b.Property<bool>("PhoneNumberConfirmed")
                         .HasColumnType("bit");
 
-                    b.Property<byte[]>("Photo")
-                        .HasColumnType("varbinary(MAX)");
+                    b.Property<string>("PhotoBlobName")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Position")
                         .HasMaxLength(100)

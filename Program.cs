@@ -13,7 +13,7 @@ var app = builder.Build();
 
 await RoleSeeder.SeedRoles(app.Services, builder.Configuration);
 
-app.UseCors("AllowLocalhost");
+app.UseCors("AllowAzureClient");
 
 app.UseMiddleware<ExceptionMiddleware>();
 

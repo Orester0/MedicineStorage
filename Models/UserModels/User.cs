@@ -23,8 +23,8 @@ namespace MedicineStorage.Models.UserModels
         [StringLength(100, MinimumLength = 3)]
         public string? Company { get; set; }
 
-        [Column(TypeName = "varbinary(MAX)")]
-        public byte[]? Photo { get; set; }
+        [StringLength(500)]
+        public string? PhotoBlobName { get; set; }
 
         public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 

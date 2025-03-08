@@ -13,7 +13,10 @@ using System.Text;
 
 namespace MedicineStorage.Services.ApplicationServices.Implementations
 {
-    public class TokenService(IConfiguration _config, UserManager<User> _userManager, AppDbContext _context) : ITokenService
+    public class TokenService(
+        IConfiguration _config, 
+        UserManager<User> _userManager, 
+        AppDbContext _context) : ITokenService
     {
         public async Task<string> CreateAccessToken(User user)
         {
