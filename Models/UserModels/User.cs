@@ -1,11 +1,13 @@
 ﻿using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.UserModels
 {
+    [Index(nameof(FirstName), nameof(LastName))]
     public class User : IdentityUser<int>
     {
 

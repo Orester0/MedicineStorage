@@ -1,7 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.EntityFrameworkCore;
+using System.ComponentModel.DataAnnotations;
 
 namespace MedicineStorage.Models.NotificationModels
 {
+    [Index(nameof(Title))]
     public class Notification
     {
         [Key]

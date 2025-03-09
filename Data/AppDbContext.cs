@@ -17,19 +17,6 @@ namespace MedicineStorage.Data
     public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, AppRole, int, IdentityUserClaim<int>,
         UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>(options)
     {
-
-            //public class CustomNameValueGenerator : ValueGenerator<string>
-            //{
-            //    public override bool GeneratesTemporaryValues => false;
-
-            //    public override string Next(EntityEntry entry)
-            //    {
-            //        var isDeleted = (bool)entry.Property("IsDeleted").CurrentValue!;
-            //        var name = (string)entry.Property("Name").CurrentValue!;
-
-            //        return isDeleted ? $"{name} [DELETED]" : name;
-            //    }
-            //}
         public DbSet<Medicine> Medicines { get; set; }
         public DbSet<Tender> Tenders { get; set; }
         public DbSet<TenderItem> TenderItems { get; set; }
@@ -45,7 +32,6 @@ namespace MedicineStorage.Data
         public DbSet<AuditTemplate> AuditTemplates { get; set; }
         public DbSet<TenderTemplate> TenderTemplates { get; set; }
         public DbSet<MedicineRequestTemplate> MedicineRequestTemplates { get; set; }
-
 
         public override int SaveChanges()
         {
@@ -65,56 +51,23 @@ namespace MedicineStorage.Data
             base.OnModelCreating(modelBuilder);
             //modelBuilder.Entity<Medicine>().HasQueryFilter(p => !p.IsDeleted);
 
-
-           // var nameConverter = new ValueConverter<string, string>(
-           //    v => v,
-           //    v => v 
-           //);
-
-           // modelBuilder.Entity<Medicine>()
-           //     .Property(m => m.Name)
-           //     .HasConversion(nameConverter);
-
-           // modelBuilder.Entity<Medicine>()
-           //     .HasQueryFilter(m => !m.IsDeleted) 
-           //     .Metadata
-           //     .FindProperty(nameof(Medicine.Name))
-           //     ?.SetValueGeneratorFactory((_, __) => new CustomNameValueGenerator());
-
-
             modelBuilder.Entity<AuditTemplate>(entity =>
             {
                 entity.ToTable("AuditTemplates");
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Name).IsRequired();
-                entity.Property(e => e.UserId).IsRequired();
-                entity.Property(e => e.RecurrenceInterval).IsRequired();
-                entity.Property(e => e.IsActive).IsRequired();
             });
 
             modelBuilder.Entity<TenderTemplate>(entity =>
             {
                 entity.ToTable("TenderTemplates");
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Name).IsRequired();
-                entity.Property(e => e.UserId).IsRequired();
-                entity.Property(e => e.RecurrenceInterval).IsRequired();
-                entity.Property(e => e.IsActive).IsRequired();
             });
 
             modelBuilder.Entity<MedicineRequestTemplate>(entity =>
             {
                 entity.ToTable("MedicineRequestTemplates");
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Name).IsRequired();
-                entity.Property(e => e.UserId).IsRequired();
-                entity.Property(e => e.RecurrenceInterval).IsRequired();
-                entity.Property(e => e.IsActive).IsRequired();
             });
 
             modelBuilder.Entity<User>(entity =>
             {
-                
                 entity.HasMany(u => u.UserRoles)
                     .WithOne(ur => ur.User)
                     .HasForeignKey(ur => ur.UserId)
@@ -127,50 +80,6 @@ namespace MedicineStorage.Data
                     .WithOne(ur => ur.Role)
                     .HasForeignKey(ur => ur.RoleId)
                     .IsRequired();
-            });
-
-            modelBuilder.Entity<Medicine>()
-                .Property(m => m.Stock)
-                .HasColumnType("decimal(18,2)");
-
-            modelBuilder.Entity<Medicine>()
-                .Property(m => m.MinimumStock)
-                .HasColumnType("decimal(18,2)");
-
-            modelBuilder.Entity<MedicineRequest>()
-                .Property(m => m.Quantity)
-                .HasColumnType("decimal(18,2)");
-
-            modelBuilder.Entity<MedicineUsage>()
-                .Property(m => m.Quantity)
-                .HasColumnType("decimal(18,2)");
-
-            modelBuilder.Entity<MedicineSupply>()
-                .Property(m => m.Quantity)
-                .HasColumnType("decimal(18,2)");
-
-            modelBuilder.Entity<AuditItem>(entity =>
-            {
-                entity.Property(a => a.ExpectedQuantity)
-                    .HasColumnType("decimal(18,2)");
-                entity.Property(a => a.ActualQuantity)
-                    .HasColumnType("decimal(18,2)");
-            });
-
-            modelBuilder.Entity<TenderItem>()
-                .Property(t => t.RequiredQuantity)
-                .HasColumnType("decimal(18,2)");
-
-            modelBuilder.Entity<TenderProposal>()
-                .Property(t => t.TotalPrice)
-                .HasColumnType("decimal(18,2)");
-
-            modelBuilder.Entity<TenderProposalItem>(entity =>
-            {
-                entity.Property(t => t.Quantity)
-                    .HasColumnType("decimal(18,2)");
-                entity.Property(t => t.UnitPrice)
-                    .HasColumnType("decimal(18,2)");
             });
 
             modelBuilder.Entity<Tender>(entity =>
@@ -248,7 +157,6 @@ namespace MedicineStorage.Data
                     .WithMany()
                     .HasForeignKey(mu => mu.MedicineId)
                     .OnDelete(DeleteBehavior.Restrict);
-
             });
 
             modelBuilder.Entity<Audit>(entity =>
@@ -282,10 +190,10 @@ namespace MedicineStorage.Data
                 entity.HasOne(ms => ms.Medicine)
                     .WithMany()
                     .HasForeignKey(ms => ms.MedicineId)
-                    .OnDelete(DeleteBehavior.NoAction); 
-
+                    .OnDelete(DeleteBehavior.NoAction);
             });
         }
+    
     }
 }
 
