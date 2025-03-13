@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using CloudinaryDotNet.Actions;
 using MedicineStorage.Controllers.Interface;
 using MedicineStorage.Extensions;
 using MedicineStorage.Models.DTOs;
@@ -255,32 +254,21 @@ namespace MedicineStorage.Controllers.Implementation
         [HttpPost("login")]
         public async Task<ActionResult<ReturnUserLoginDTO>> Login(UserLoginDTO request)
         {
-            _logger.LogInformation($"Incoming login request: \n{request.ToJson()}");
 
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            var userResult = await _userService.GetByUserNameAsync(request.UserName);
+            var user = await _userService.LoginUser(request);
 
-            if (!userResult.Success || userResult.Data == null)
-            {
-                return Unauthorized(new { Errors = new[] { "Invalid username" } });
-            }
-
-            if (!await _userService.VerifyPasswordAsync(userResult.Data, request.Password))
-            {
-                return Unauthorized(new { Errors = new[] { "Invalid username or password" } });
-            }
-
-            var accessToken = await _tokenService.CreateAccessToken(userResult.Data);
-            var refreshToken = await _tokenService.CreateRefreshToken(userResult.Data);
+            var accessToken = await _tokenService.CreateAccessToken(user);
+            var refreshToken = await _tokenService.CreateRefreshToken(user);
             
-            var userPersonalResult = await _userService.GetPersonalUserByIdAsync(userResult.Data.Id);
-            if (!userPersonalResult.Success)
+            var userInfo = await _userService.GetPersonalUserByIdAsync(user.Id);
+            if (!userInfo.Success)
             {
-                return BadRequest(new { userPersonalResult.Errors });
+                return BadRequest(new { userInfo.Errors });
             }
 
             var returnUserLoginDTO = new ReturnUserLoginDTO
@@ -290,7 +278,7 @@ namespace MedicineStorage.Controllers.Implementation
                     AccessToken = accessToken,
                     RefreshToken = refreshToken
                 },
-                returnUserDTO = userPersonalResult.Data
+                returnUserDTO = userInfo.Data
             };
 
             return Ok(returnUserLoginDTO);

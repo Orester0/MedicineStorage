@@ -12,7 +12,9 @@ using MedicineStorage.Services.BusinessServices.Implementations;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.OpenApi.Models;
 using System.Text.Json;
 
@@ -50,6 +52,21 @@ namespace MedicineStorage.Extensions
             services.AddDbContext<AppDbContext>(
                     options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 
+
+            // COSMOS DB
+            string endpoint = config["CosmosDb:Endpoint"];
+            string key = config["CosmosDb:Key"];
+            string databaseName = config["CosmosDb:DatabaseName"];
+            string containerName = config["CosmosDb:UserConnectionsContainerName"];
+
+            var cosmosClient = new CosmosClient(endpoint, key);
+            services.AddSingleton(cosmosClient);
+
+            var databaseResponse = cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName).GetAwaiter().GetResult();
+            var database = databaseResponse.Database;
+
+            var containerProperties = new ContainerProperties(id: containerName, partitionKeyPath: "/userId");
+            database.CreateContainerIfNotExistsAsync(containerProperties).GetAwaiter().GetResult();
 
             // BUSINESS SERVICES
             services.AddScoped<IUserService, UserService>();

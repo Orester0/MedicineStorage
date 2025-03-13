@@ -12,6 +12,7 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
         Task<ServiceResult<User>> GetByUserNameAsync(string username);
 
 
+        Task<User> LoginUser(UserLoginDTO loginRequest);
         Task<ServiceResult<bool>> UpdateRolesAsync(int userId, List<string> roleNames);
         Task UploadPhotoAsync(IFormFile file, int userId);
         Task<ServiceResult<ReturnUserPersonalDTO>> GetPersonalUserByIdAsync(int id);

@@ -6,9 +6,13 @@ using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.Params;
 using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.BusinessServices.Interfaces;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Azure.Cosmos;
+using Newtonsoft.Json.Linq;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
+using User = MedicineStorage.Models.UserModels.User;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
@@ -16,11 +20,92 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         IUnitOfWork _unitOfWork,
         IMapper _mapper,
         IBlobStorageService _blobStorageService,
-        IConfiguration configuration) : IUserService
+        IConfiguration _configuration,
+        CosmosClient _cosmosClient) : IUserService
     {
+
         private readonly string DEFAULT_PHOTO_BLOB_NAME =
-            configuration["AzureStorage:DefaultImagePath"]
+            _configuration["AzureStorage:DefaultImagePath"]
             ?? throw new Exception("Default image path cannot be null.");
+
+        private readonly string COSMOS_DATABASE_NAME =
+            _configuration["CosmosDb:DatabaseName"]
+            ?? throw new Exception("Default image path cannot be null.");
+
+        private readonly string COSMOS_USER_CONNECTIONS_CONTAINER_NAME =
+            _configuration["CosmosDb:UserConnectionsContainerName"]
+            ?? throw new Exception("Default image path cannot be null.");
+
+
+
+
+        public async Task<User> LoginUser(UserLoginDTO loginRequest)
+        {
+            var user = await GetByUserNameAsync(loginRequest.UserName);
+
+            if (!user.Success || user.Data == null)
+            {
+                throw new UnauthorizedAccessException("Invalid Username");
+            }
+            if (!await VerifyPasswordAsync(user.Data, loginRequest.Password))
+            {
+                throw new UnauthorizedAccessException("Invalid Password");
+            }
+
+            await AddUserToCosmosDB(user.Data);
+            return user.Data;
+        }
+        
+
+        private async Task AddUserToCosmosDB(User user)
+        {
+            var connectionTimestamp = DateTime.UtcNow.ToString("o");
+            var container = _cosmosClient.GetContainer(COSMOS_DATABASE_NAME, COSMOS_USER_CONNECTIONS_CONTAINER_NAME);
+            try
+            {
+                var response = await container.ReadItemAsync<dynamic>(
+                    user.Id.ToString(),
+                    new PartitionKey(user.Id));
+
+
+                var existingDocument = response.Resource;
+
+                var connections = (existingDocument.connections as JArray)?.ToObject<List<dynamic>>() ?? new List<dynamic>();
+
+                connections.Add(new { timestamp = connectionTimestamp });
+
+                existingDocument.connections = JArray.FromObject(connections);
+
+                await container.ReplaceItemAsync(existingDocument, user.Id.ToString(), new PartitionKey(user.Id));
+
+            }
+            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                var userDto = new
+                {
+                    id = user.Id.ToString(),
+                    userId = user.Id,
+                    firstName = user.FirstName,
+                    lastName = user.LastName,
+                    position = user.Position,
+                    company = user.Company,
+                    connections = new[]
+                        {
+                        new { timestamp = connectionTimestamp 
+                        }
+                    }
+                };
+
+                await container.CreateItemAsync(userDto, new PartitionKey(user.Id));
+
+            }
+            catch (CosmosException ex)
+            {
+                throw new Exception($"Error accessing Cosmos DB: {ex.Message}", ex);
+            }
+
+        }
+
 
         private async Task<string?> GetBase64PhotoAsync(string? blobName)
         {
@@ -70,7 +155,9 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 return result;
             }
 
-            return await CreateUserAsync(registerDto);
+            var user =  await CreateUserAsync(registerDto);
+            await AddUserToCosmosDB(user.Data);
+            return user;
         }
 
         public async Task<ServiceResult<User>> CreateUserAsync(UserRegistrationDTO registerDto)
