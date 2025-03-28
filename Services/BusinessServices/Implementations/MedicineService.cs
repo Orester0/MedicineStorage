@@ -22,6 +22,58 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
+        public async Task<ServiceResult<List<MedicineStockForecastDTO>>> GetMedicineStockForecast(
+            bool considerRequests = false,
+            bool considerTenders = false)
+        {
+            var result = new ServiceResult<List<MedicineStockForecastDTO>>();
+            var forecastList = new List<MedicineStockForecastDTO>();
+
+            var medicines = await _unitOfWork.MedicineRepository.GetAllAsync();
+
+            foreach (var medicine in medicines)
+            {
+                int totalStock = (int)medicine.Stock;
+                int totalTenderStock = 0;
+                int totalRequested = 0;
+
+                if (considerTenders)
+                {
+                    var relevantTenders = await _unitOfWork.TenderRepository.GetRelevantTendersAsync();
+
+                    var tenderItems = relevantTenders
+                        .SelectMany(t => t.TenderItems)
+                        .Where(ti => ti.MedicineId == medicine.Id);
+
+                    totalTenderStock = (int)tenderItems.Sum(ti => ti.RequiredQuantity);
+                }
+
+
+                if (considerRequests)
+                {
+                    var medicineRequests = await _unitOfWork.MedicineRequestRepository.GetByMedicineIdAsync(medicine.Id);
+                    totalRequested = (int)medicineRequests.Sum(r => r.Quantity);
+                }
+
+                int projectedStock = totalStock + totalTenderStock - totalRequested;
+                bool needsRestock = projectedStock < medicine.MinimumStock;
+
+                forecastList.Add(new MedicineStockForecastDTO
+                {
+                    Medicine = _mapper.Map<ReturnMedicineDTO>(medicine),
+                    CurrentStock = totalStock,
+                    TenderStock = totalTenderStock,
+                    RequestedAmount = totalRequested,
+                    ProjectedStock = projectedStock,
+                    NeedsRestock = needsRestock
+                });
+            }
+
+            result.Data = forecastList;
+            return result;
+        }
+
+
         public async Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetPaginatedMedicines(MedicineParams parameters)
         {
             var result = new ServiceResult<PagedList<ReturnMedicineDTO>>();

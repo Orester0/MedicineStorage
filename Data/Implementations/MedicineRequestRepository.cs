@@ -74,6 +74,16 @@ namespace MedicineStorage.Data.Implementations
             return (items, totalCount);
         }
 
+        public async Task<List<MedicineRequest>> GetByMedicineIdAsync(int medicineId)
+        {
+            return await _context.MedicineRequests
+                .Where(r => r.MedicineId == medicineId)
+                .Include(r => r.RequestedByUser)
+                .Include(r => r.ApprovedByUser)
+                .Include(r => r.Medicine)
+                .ToListAsync();
+        }
+
 
         public async Task<List<MedicineRequest>> GetRequestsRequestedByUserIdAsync(int userId)
         {
@@ -84,8 +94,6 @@ namespace MedicineStorage.Data.Implementations
                 .Include(r => r.Medicine)
                 .ToListAsync();
         }
-
-
         public async Task<List<MedicineRequest>> GetRequestsApprovedByUserIdAsync(int userId)
         {
             return await _context.MedicineRequests

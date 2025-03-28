@@ -25,6 +25,18 @@ namespace MedicineStorage.Controllers.Implementation
             return Ok(result.Data);
         }
 
+        [HttpGet("stock-forecast")]
+        public async Task<IActionResult> GetMedicineStockForecast([FromQuery] bool considerRequests = false,
+           [FromQuery] bool considerTenders = false)
+        {
+            var result = await _medicineService.GetMedicineStockForecast(considerRequests, considerTenders);
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(result.Data);
+        }
+
         [HttpGet]
         public async Task<IActionResult> GetMedicines([FromQuery] MedicineParams parameters)
         {

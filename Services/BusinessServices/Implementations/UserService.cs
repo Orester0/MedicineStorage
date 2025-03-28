@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Azure.Messaging.ServiceBus;
 using MedicineStorage.Data.Interfaces;
 using MedicineStorage.Helpers;
 using MedicineStorage.Models;
@@ -12,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
+using System.Text.Json;
 using User = MedicineStorage.Models.UserModels.User;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
@@ -37,25 +39,38 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             ?? throw new Exception("Default image path cannot be null.");
 
 
+        private readonly string SERVICE_BUS_CONNECTION_STRING =
+            _configuration["ServiceBus:ConnectionString"]
+            ?? throw new Exception("Default image path cannot be null.");
 
 
-        public async Task<User> LoginUser(UserLoginDTO loginRequest)
+        private readonly string SERVICE_BUS_USERS_QUEUE_NAME =
+            _configuration["ServiceBus:UsersQueueName"]
+            ?? throw new Exception("Default image path cannot be null.");
+
+
+        private async Task SendMessageToServiceBus(User user)
         {
-            var user = await GetByUserNameAsync(loginRequest.UserName);
 
-            if (!user.Success || user.Data == null)
-            {
-                throw new UnauthorizedAccessException("Invalid Username");
-            }
-            if (!await VerifyPasswordAsync(user.Data, loginRequest.Password))
-            {
-                throw new UnauthorizedAccessException("Invalid Password");
-            }
+            await using var client = new ServiceBusClient(SERVICE_BUS_CONNECTION_STRING);
+            ServiceBusSender sender = client.CreateSender(SERVICE_BUS_USERS_QUEUE_NAME);
 
-            await AddUserToCosmosDB(user.Data);
-            return user.Data;
+            var messageBody = new
+            {
+                userId = user.Id,
+                firstName = user.FirstName,
+                lastName = user.LastName,
+                position = user.Position,
+                company = user.Company,
+                timestamp = DateTime.UtcNow.ToString("o")
+            };
+
+            string messageJson = JsonSerializer.Serialize(messageBody);
+            ServiceBusMessage message = new ServiceBusMessage(messageJson);
+
+            await sender.SendMessageAsync(message);
         }
-        
+
 
         private async Task AddUserToCosmosDB(User user)
         {
@@ -91,7 +106,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                     company = user.Company,
                     connections = new[]
                         {
-                        new { timestamp = connectionTimestamp 
+                        new { timestamp = connectionTimestamp
                         }
                     }
                 };
@@ -105,6 +120,26 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             }
 
         }
+
+        public async Task<User> LoginUser(UserLoginDTO loginRequest)
+        {
+            var user = await GetByUserNameAsync(loginRequest.UserName);
+
+            if (!user.Success || user.Data == null)
+            {
+                throw new UnauthorizedAccessException("Invalid Username");
+            }
+            if (!await VerifyPasswordAsync(user.Data, loginRequest.Password))
+            {
+                throw new UnauthorizedAccessException("Invalid Password");
+            }
+
+            await SendMessageToServiceBus(user.Data);
+            return user.Data;
+        }
+       
+
+
 
 
         private async Task<string?> GetBase64PhotoAsync(string? blobName)
@@ -156,7 +191,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             }
 
             var user =  await CreateUserAsync(registerDto);
-            await AddUserToCosmosDB(user.Data);
+            await SendMessageToServiceBus(user.Data);
             return user;
         }
 

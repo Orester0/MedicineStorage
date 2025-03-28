@@ -11,5 +11,6 @@ namespace MedicineStorage.Data.Interfaces
         Task<IEnumerable<Tender>> GetTendersAwardedByUserIdAsync(int userId);
         Task<Tender> GetTenderByProposalIdAsync(int proposalId);
         Task<IEnumerable<Tender>> GetPublishedTendersAsync();
+        Task<IEnumerable<Tender>> GetRelevantTendersAsync();
     }
 }

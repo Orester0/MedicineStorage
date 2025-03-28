@@ -142,5 +142,21 @@ namespace MedicineStorage.Data.Implementations
                 .ToListAsync();
         }
 
+        public async Task<IEnumerable<Tender>> GetRelevantTendersAsync()
+        {
+            var validStatuses = new List<TenderStatus>
+            {
+                TenderStatus.Created,
+                TenderStatus.Published,
+                TenderStatus.Closed,
+                TenderStatus.Awarded
+            };
+
+            return await _context.Tenders
+                .Where(t => validStatuses.Contains(t.Status))
+                .Include(t => t.TenderItems)
+                .ToListAsync();
+        }
+
     }
 }

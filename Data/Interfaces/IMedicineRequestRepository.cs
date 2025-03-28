@@ -9,8 +9,8 @@ namespace MedicineStorage.Data.Interfaces
     {
 
         public Task<(IEnumerable<MedicineRequest>, int)> GetByParams(MedicineRequestParams parameters);
+        public Task<List<MedicineRequest>> GetByMedicineIdAsync(int medicineId);
         public Task<List<MedicineRequest>> GetRequestsRequestedByUserIdAsync(int userId);
-
 
         public Task<List<MedicineRequest>> GetRequestsApprovedByUserIdAsync(int userId);
         
