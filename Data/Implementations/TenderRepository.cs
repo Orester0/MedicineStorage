@@ -12,6 +12,18 @@ namespace MedicineStorage.Data.Implementations
     : GenericRepository<Tender>(_context), ITenderRepository
     {
 
+
+        public async Task<IEnumerable<Tender>> GetByMedicineIdAndDateRangeAsync(int medicineId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.Tenders
+                .Include(t => t.TenderItems)
+                .Where(t => t.TenderItems.Any(ti => ti.MedicineId == medicineId))
+                .Where(t => (t.DeadlineDate >= startDate && t.DeadlineDate <= endDate) ||
+                    (t.PublishDate >= startDate && t.PublishDate <= endDate) ||
+                    (t.ClosingDate.HasValue && t.ClosingDate.Value >= startDate && t.ClosingDate.Value <= endDate))
+                .ToListAsync();
+        }
+
         public override async Task<List<Tender>> GetAllAsync()
         {
             return await _context.Tenders.OrderBy(m => m.Title).ToListAsync();

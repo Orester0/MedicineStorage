@@ -13,6 +13,61 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         IUnitOfWork _unitOfWork,
         IMapper _mapper) : IMedicineService
     {
+
+        public async Task<ServiceResult<object>> GetMedicineReportAsync(int medicineId, DateTime startDate, DateTime endDate)
+        {
+            var result = new ServiceResult<object>();
+
+            var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(medicineId);
+            if (medicine == null)
+            {
+                throw new KeyNotFoundException($"Medicine with ID {medicineId} not found.");
+            }
+
+            var medicineDto = _mapper.Map<ReturnMedicineDTO>(medicine);
+
+            var audits = await _unitOfWork.AuditRepository.GetByMedicineIdAndDateRangeAsync(
+                medicineId, startDate, endDate);
+            var auditDtos = audits.Select(a => new
+            {
+                Audit = _mapper.Map<ReturnAuditDTO>(a),
+                Items = a.AuditItems.Where(ai => ai.MedicineId == medicineId)
+                    .Select(ai => _mapper.Map<ReturnAuditItemDTO>(ai)).ToList()
+            }).ToList();
+
+            var tenders = await _unitOfWork.TenderRepository.GetByMedicineIdAndDateRangeAsync(medicineId, startDate, endDate);
+            var tenderDtos = tenders.Select(t => new
+            {
+                Tender = _mapper.Map<ReturnTenderDTO>(t),
+                Items = t.TenderItems.Where(ti => ti.MedicineId == medicineId)
+                    .Select(ti => _mapper.Map<ReturnTenderItemDTO>(ti)).ToList()
+            }).ToList();
+
+            var requests = await _unitOfWork.MedicineRequestRepository.GetByMedicineIdAndDateRangeAsync(
+                medicineId, startDate, endDate);
+            var requestDtos = _mapper.Map<List<ReturnMedicineRequestDTO>>(requests);
+
+            var report = new
+            {
+                Medicine = medicineDto,
+                DateRange = new { StartDate = startDate, EndDate = endDate },
+                Audits = auditDtos,
+                Tenders = tenderDtos,
+                Requests = requestDtos
+            };
+
+            result.Data = report;
+            return result;
+        }
+
+        public async Task<ServiceResult<List<string>>> GetAllCategoriesAsync()
+        {
+            var result = new ServiceResult<List<string>>();
+            var categories = await _unitOfWork.MedicineRepository.GetAllCategoriesAsync();
+            result.Data = categories.Select(c => c.Name).ToList();
+            return result;
+        }
+
         public async Task<ServiceResult<List<ReturnMedicineDTO>>> GetAllMedicinesAsync()
         {
             var result = new ServiceResult<List<ReturnMedicineDTO>>();
@@ -103,33 +158,50 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
         /////////////////////////////////////////////////////////////////////////////////////
 
+
         public async Task<ServiceResult<ReturnMedicineDTO>> CreateMedicineAsync(CreateMedicineDTO createMedicineDTO)
         {
             var result = new ServiceResult<ReturnMedicineDTO>();
             var medicine = _mapper.Map<Medicine>(createMedicineDTO);
             medicine.LastAuditDate = null;
-            var createdMedicine = await _unitOfWork.MedicineRepository.AddAsync(medicine);
 
+            var category = await _unitOfWork.MedicineRepository.GetOrCreateCategoryAsync(createMedicineDTO.Category);
+            medicine.CategoryId = category.Id;
+
+            var created = await _unitOfWork.MedicineRepository.AddAsync(medicine);
             await _unitOfWork.CompleteAsync();
-            result.Data = _mapper.Map<ReturnMedicineDTO>(createdMedicine);
+
+            result.Data = _mapper.Map<ReturnMedicineDTO>(created);
             return result;
         }
 
-        public async Task<ServiceResult<bool>> UpdateMedicineAsync(int medicineId, UpdateMedicineDTO medicineDTO)
+
+        public async Task<ServiceResult<bool>> UpdateMedicineAsync(int medicineId, UpdateMedicineDTO dto)
         {
             var result = new ServiceResult<bool>();
-            var existingMedicine = await _unitOfWork.MedicineRepository.GetByIdAsync(medicineId);
-            if (existingMedicine == null)
+            var existing = await _unitOfWork.MedicineRepository.GetByIdAsync(medicineId);
+            if (existing == null) throw new KeyNotFoundException();
+
+            var previousCategoryId = existing.CategoryId;
+
+            _mapper.Map(dto, existing);
+
+            var newCategory = await _unitOfWork.MedicineRepository.GetOrCreateCategoryAsync(dto.Category);
+            existing.CategoryId = newCategory.Id;
+
+            _unitOfWork.MedicineRepository.Update(existing);
+            await _unitOfWork.CompleteAsync();
+
+            if (previousCategoryId != newCategory.Id &&
+                await _unitOfWork.MedicineRepository.IsCategoryUnusedAsync(previousCategoryId))
             {
-                throw new KeyNotFoundException($"Medicine with ID {medicineId} not found.");
+                await _unitOfWork.MedicineRepository.DeleteCategoryAsync(previousCategoryId);
             }
 
-            _mapper.Map(medicineDTO, existingMedicine);
-            _unitOfWork.MedicineRepository.Update(existingMedicine);
-            await _unitOfWork.CompleteAsync();
             result.Data = true;
             return result;
         }
+
 
         public async Task<ServiceResult<bool>> DeleteMedicineAsync(int medicineId, List<string> userRoles)
         {
@@ -140,11 +212,20 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new KeyNotFoundException($"Medicine with ID {medicineId} not found.");
             }
 
+            var categoryId = medicine.CategoryId;
+
             await _unitOfWork.MedicineRepository.DeleteAsync(medicine.Id);
             await _unitOfWork.CompleteAsync();
+
+            if (await _unitOfWork.MedicineRepository.IsCategoryUnusedAsync(categoryId))
+            {
+                await _unitOfWork.MedicineRepository.DeleteCategoryAsync(categoryId);
+            }
+
             result.Data = true;
             return result;
         }
+
     }
 }
 

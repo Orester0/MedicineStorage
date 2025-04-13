@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MedicineStorage.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250308110707_Initial")]
+    [Migration("20250413131827_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -20,7 +20,7 @@ namespace MedicineStorage.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.10")
+                .HasAnnotation("ProductVersion", "9.0.3")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -61,6 +61,10 @@ namespace MedicineStorage.Migrations
                     b.HasIndex("ClosedByUserId");
 
                     b.HasIndex("PlannedByUserId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Title");
 
                     b.ToTable("Audits");
                 });
@@ -136,10 +140,8 @@ namespace MedicineStorage.Migrations
                     b.Property<int>("AuditFrequencyDays")
                         .HasColumnType("int");
 
-                    b.Property<string>("Category")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                    b.Property<int>("CategoryId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Description")
                         .IsRequired()
@@ -168,10 +170,33 @@ namespace MedicineStorage.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CategoryId");
+
                     b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("Medicines");
+                });
+
+            modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineCategory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
+
+                    b.ToTable("MedicineCategories");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineRequest", b =>
@@ -218,6 +243,8 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("RequestedByUserId");
 
+                    b.HasIndex("RequiredByDate");
+
                     b.ToTable("MedicineRequests");
                 });
 
@@ -252,6 +279,8 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("TenderId");
 
+                    b.HasIndex("TransactionDate");
+
                     b.ToTable("MedicineSupplies");
                 });
 
@@ -278,6 +307,8 @@ namespace MedicineStorage.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MedicineId");
+
+                    b.HasIndex("UsageDate");
 
                     b.HasIndex("UsedByUserId");
 
@@ -311,6 +342,8 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Title");
 
                     b.ToTable("Notifications");
                 });
@@ -465,7 +498,13 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
+                    b.HasIndex("DeadlineDate");
+
                     b.HasIndex("OpenedByUserId");
+
+                    b.HasIndex("Status");
+
+                    b.HasIndex("Title");
 
                     b.HasIndex("WinnerSelectedByUserId");
 
@@ -527,6 +566,8 @@ namespace MedicineStorage.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("Status");
 
                     b.HasIndex("TenderId");
 
@@ -699,6 +740,8 @@ namespace MedicineStorage.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Company");
+
                     b.HasIndex("NormalizedEmail")
                         .HasDatabaseName("EmailIndex");
 
@@ -706,6 +749,12 @@ namespace MedicineStorage.Migrations
                         .IsUnique()
                         .HasDatabaseName("UserNameIndex")
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
+
+                    b.HasIndex("UserName")
+                        .IsUnique()
+                        .HasFilter("[UserName] IS NOT NULL");
+
+                    b.HasIndex("FirstName", "LastName");
 
                     b.ToTable("AspNetUsers", (string)null);
                 });
@@ -861,6 +910,17 @@ namespace MedicineStorage.Migrations
                         .HasForeignKey("AuditId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("MedicineStorage.Models.MedicineModels.Medicine", b =>
+                {
+                    b.HasOne("MedicineStorage.Models.MedicineModels.MedicineCategory", "Category")
+                        .WithMany("Medicines")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineRequest", b =>
@@ -1085,6 +1145,11 @@ namespace MedicineStorage.Migrations
                     b.Navigation("AuditItems");
 
                     b.Navigation("Notes");
+                });
+
+            modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineCategory", b =>
+                {
+                    b.Navigation("Medicines");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.Tender", b =>

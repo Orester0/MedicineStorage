@@ -1,19 +1,14 @@
 ﻿using AutoMapper;
-using Azure.Messaging.ServiceBus;
 using MedicineStorage.Data.Interfaces;
 using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.Params;
-using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.BusinessServices.Interfaces;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Azure.Cosmos;
-using Newtonsoft.Json.Linq;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats.Jpeg;
 using SixLabors.ImageSharp.Processing;
-using System.Text.Json;
 using User = MedicineStorage.Models.UserModels.User;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
@@ -22,104 +17,12 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         IUnitOfWork _unitOfWork,
         IMapper _mapper,
         IBlobStorageService _blobStorageService,
-        IConfiguration _configuration,
-        CosmosClient _cosmosClient) : IUserService
+        IConfiguration _configuration) : IUserService
     {
 
         private readonly string DEFAULT_PHOTO_BLOB_NAME =
             _configuration["AzureStorage:DefaultImagePath"]
             ?? throw new Exception("Default image path cannot be null.");
-
-        private readonly string COSMOS_DATABASE_NAME =
-            _configuration["CosmosDb:DatabaseName"]
-            ?? throw new Exception("Default image path cannot be null.");
-
-        private readonly string COSMOS_USER_CONNECTIONS_CONTAINER_NAME =
-            _configuration["CosmosDb:UserConnectionsContainerName"]
-            ?? throw new Exception("Default image path cannot be null.");
-
-
-        private readonly string SERVICE_BUS_CONNECTION_STRING =
-            _configuration["ServiceBus:ConnectionString"]
-            ?? throw new Exception("Default image path cannot be null.");
-
-
-        private readonly string SERVICE_BUS_USERS_QUEUE_NAME =
-            _configuration["ServiceBus:UsersQueueName"]
-            ?? throw new Exception("Default image path cannot be null.");
-
-
-        private async Task SendMessageToServiceBus(User user)
-        {
-
-            await using var client = new ServiceBusClient(SERVICE_BUS_CONNECTION_STRING);
-            ServiceBusSender sender = client.CreateSender(SERVICE_BUS_USERS_QUEUE_NAME);
-
-            var messageBody = new
-            {
-                userId = user.Id,
-                firstName = user.FirstName,
-                lastName = user.LastName,
-                position = user.Position,
-                company = user.Company,
-                timestamp = DateTime.UtcNow.ToString("o")
-            };
-
-            string messageJson = JsonSerializer.Serialize(messageBody);
-            ServiceBusMessage message = new ServiceBusMessage(messageJson);
-
-            await sender.SendMessageAsync(message);
-        }
-
-
-        private async Task AddUserToCosmosDB(User user)
-        {
-            var connectionTimestamp = DateTime.UtcNow.ToString("o");
-            var container = _cosmosClient.GetContainer(COSMOS_DATABASE_NAME, COSMOS_USER_CONNECTIONS_CONTAINER_NAME);
-            try
-            {
-                var response = await container.ReadItemAsync<dynamic>(
-                    user.Id.ToString(),
-                    new PartitionKey(user.Id));
-
-
-                var existingDocument = response.Resource;
-
-                var connections = (existingDocument.connections as JArray)?.ToObject<List<dynamic>>() ?? new List<dynamic>();
-
-                connections.Add(new { timestamp = connectionTimestamp });
-
-                existingDocument.connections = JArray.FromObject(connections);
-
-                await container.ReplaceItemAsync(existingDocument, user.Id.ToString(), new PartitionKey(user.Id));
-
-            }
-            catch (CosmosException ex) when (ex.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                var userDto = new
-                {
-                    id = user.Id.ToString(),
-                    userId = user.Id,
-                    firstName = user.FirstName,
-                    lastName = user.LastName,
-                    position = user.Position,
-                    company = user.Company,
-                    connections = new[]
-                        {
-                        new { timestamp = connectionTimestamp
-                        }
-                    }
-                };
-
-                await container.CreateItemAsync(userDto, new PartitionKey(user.Id));
-
-            }
-            catch (CosmosException ex)
-            {
-                throw new Exception($"Error accessing Cosmos DB: {ex.Message}", ex);
-            }
-
-        }
 
         public async Task<User> LoginUser(UserLoginDTO loginRequest)
         {
@@ -134,14 +37,9 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new UnauthorizedAccessException("Invalid Password");
             }
 
-            await SendMessageToServiceBus(user.Data);
             return user.Data;
         }
        
-
-
-
-
         private async Task<string?> GetBase64PhotoAsync(string? blobName)
         {
             if (string.IsNullOrEmpty(blobName))
@@ -162,12 +60,12 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
         {
             var result = new ServiceResult<User>();
 
-            if (await UserExists(registerDto.UserName))
+            if (await UserExistsAsync(registerDto.UserName))
             {
                 result.Errors.Add($"Username '{registerDto.UserName}' is taken");
             }
 
-            if (await EmailTaken(registerDto.Email))
+            if (await EmailTakenAsync(registerDto.Email))
             {
                 result.Errors.Add($"Email '{registerDto.Email}' is taken");
             }
@@ -191,7 +89,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             }
 
             var user =  await CreateUserAsync(registerDto);
-            await SendMessageToServiceBus(user.Data);
             return user;
         }
 
@@ -263,7 +160,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new UnauthorizedAccessException("Unauthorized");
             }
 
-            // Delete old photo if exists and it's not the default photo
             if (!string.IsNullOrEmpty(user.PhotoBlobName) && user.PhotoBlobName != DEFAULT_PHOTO_BLOB_NAME)
             {
                 await _blobStorageService.DeletePhotoAsync(user.PhotoBlobName);
@@ -469,15 +365,17 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return await _unitOfWork.UserRepository.RoleExistsAsync(roleName);
         }
 
-        public async Task<bool> UserExists(string login)
+        public async Task<bool> UserExistsAsync(string login)
         {
             return await _unitOfWork.UserRepository.UserExistsAsync(login);
         }
 
-        public async Task<bool> EmailTaken(string email)
+        public async Task<bool> EmailTakenAsync(string email)
         {
             return await _unitOfWork.UserRepository.EmailTakenAsync(email);
         }
+
     }
+
 }
 

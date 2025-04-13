@@ -7,7 +7,10 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.UserModels
 {
+
+    [Index(nameof(UserName), IsUnique = true)]
     [Index(nameof(FirstName), nameof(LastName))]
+    [Index(nameof(Company))]
     public class User : IdentityUser<int>
     {
 

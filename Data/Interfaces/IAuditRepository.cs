@@ -8,13 +8,14 @@ namespace MedicineStorage.Data.Interfaces
     public interface IAuditRepository : IGenericRepository<Audit>
     {
         Task<(IEnumerable<Audit>, int)> GetByParams(AuditParams auditParams);
-        public Task<IEnumerable<AuditItem>> GetAuditItemsByAuditIdAsync(int auditId);
-        public Task<IEnumerable<Audit>> GetAuditsByPlannedUserIdAsync(int userId);
-        public Task<IEnumerable<Audit>> GetAuditsByExecutedUserIdAsync(int userId);
+        Task<IEnumerable<AuditItem>> GetAuditItemsByAuditIdAsync(int auditId);
+        Task<IEnumerable<Audit>> GetAuditsByPlannedUserIdAsync(int userId);
+        Task<IEnumerable<Audit>> GetAuditsByExecutedUserIdAsync(int userId);
 
 
-       
-        public Task<IEnumerable<AuditItem>> CreateAuditItemsAsync(IEnumerable<AuditItem> auditItems);
-        public void UpdateAuditItem(AuditItem auditItem);
+
+        Task<IEnumerable<Audit>> GetByMedicineIdAndDateRangeAsync(int medicineId, DateTime startDate, DateTime endDate);
+        Task<IEnumerable<AuditItem>> CreateAuditItemsAsync(IEnumerable<AuditItem> auditItems);
+        void UpdateAuditItem(AuditItem auditItem);
     }
 }

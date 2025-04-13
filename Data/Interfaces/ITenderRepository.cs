@@ -6,7 +6,9 @@ namespace MedicineStorage.Data.Interfaces
 {
     public interface ITenderRepository : IGenericRepository<Tender>
     {
-        public Task<(IEnumerable<Tender>, int)> GetByParams(TenderParams tenderParams);
+
+        Task<IEnumerable<Tender>> GetByMedicineIdAndDateRangeAsync(int medicineId, DateTime startDate, DateTime endDate);
+        Task<(IEnumerable<Tender>, int)> GetByParams(TenderParams tenderParams);
         Task<IEnumerable<Tender>> GetTendersCreatedByUserIdAsync(int userId);
         Task<IEnumerable<Tender>> GetTendersAwardedByUserIdAsync(int userId);
         Task<Tender> GetTenderByProposalIdAsync(int proposalId);

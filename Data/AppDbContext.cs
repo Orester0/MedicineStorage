@@ -18,6 +18,7 @@ namespace MedicineStorage.Data
         UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>(options)
     {
         public DbSet<Medicine> Medicines { get; set; }
+        public DbSet<MedicineCategory> MedicineCategories { get; set; }
         public DbSet<Tender> Tenders { get; set; }
         public DbSet<TenderItem> TenderItems { get; set; }
         public DbSet<TenderProposal> TenderProposals { get; set; }
@@ -50,6 +51,10 @@ namespace MedicineStorage.Data
         {
             base.OnModelCreating(modelBuilder);
             //modelBuilder.Entity<Medicine>().HasQueryFilter(p => !p.IsDeleted);
+            modelBuilder.Entity<Medicine>()
+                .Navigation(m => m.Category)
+                .AutoInclude();
+
 
             modelBuilder.Entity<AuditTemplate>(entity =>
             {

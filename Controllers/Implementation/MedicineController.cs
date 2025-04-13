@@ -14,6 +14,38 @@ namespace MedicineStorage.Controllers.Implementation
     [Authorize]
     public class MedicineController(IMedicineService _medicineService) : BaseApiController
     {
+
+        [HttpGet("{medicineId:int}/report/download")]
+        public async Task<IActionResult> DownloadMedicineReport(int medicineId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
+        {
+            var result = await _medicineService.GetMedicineReportAsync(medicineId, startDate, endDate);
+
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+
+            var json = System.Text.Json.JsonSerializer.Serialize(result.Data, new System.Text.Json.JsonSerializerOptions
+            {
+                WriteIndented = true
+            });
+
+            var fileName = $"medicine-report-{medicineId}-{startDate:yyyyMMdd}-{endDate:yyyyMMdd}.json";
+            var content = System.Text.Encoding.UTF8.GetBytes(json);
+            return File(content, "application/json", fileName);
+        }
+
+        [HttpGet("categories")]
+        public async Task<IActionResult> GetAllCategories()
+        {
+            var result = await _medicineService.GetAllCategoriesAsync();
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(result.Data);
+        }
+
         [HttpGet("all")]
         public async Task<IActionResult> GetAllMedicines()
         {

@@ -1,10 +1,12 @@
 ﻿using MedicineStorage.Helpers;
 using MedicineStorage.Models.UserModels;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.TenderModels
 {
+    [Index(nameof(Status))]
     public class TenderProposal
     {
         [Key]

@@ -8,9 +8,13 @@ namespace MedicineStorage.Mappers
     {
         public AutoMapperMedicines()
         {
-            CreateMap<Medicine, ReturnMedicineDTO>();
-            CreateMap<CreateMedicineDTO, Medicine>();
-            CreateMap<UpdateMedicineDTO, Medicine>();
+            CreateMap<Medicine, ReturnMedicineDTO>()
+                .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name));
+            CreateMap<CreateMedicineDTO, Medicine>()
+                .ForMember(dest => dest.Category, opt => opt.Ignore()); 
+            CreateMap<UpdateMedicineDTO, Medicine>()
+                .ForMember(dest => dest.Category, opt => opt.Ignore());
+
             CreateMap<MedicineSupply, ReturnMedicineSupplyDTO>();
             CreateMap<CreateMedicineSupplyDTO, MedicineSupply>();
         }

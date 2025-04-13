@@ -1,10 +1,12 @@
 ﻿
 using MedicineStorage.Models.UserModels;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.MedicineModels
 {
+    [Index(nameof(UsageDate))]
     public class MedicineUsage
     {
         [Required]

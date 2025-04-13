@@ -10,6 +10,42 @@ namespace MedicineStorage.Data.Implementations
     : GenericRepository<Medicine>(_context), IMedicineRepository
 
     {
+        public async Task<bool> IsCategoryUnusedAsync(int categoryId)
+        {
+            return !await _context.Medicines.AnyAsync(m => m.CategoryId == categoryId);
+        }
+
+        public async Task DeleteCategoryAsync(int categoryId)
+        {
+            var category = await _context.Set<MedicineCategory>().FindAsync(categoryId);
+            if (category != null)
+            {
+                _context.Set<MedicineCategory>().Remove(category);
+                await _context.SaveChangesAsync();
+            }
+        }
+        public async Task<MedicineCategory?> GetCategoryByNameAsync(string name)
+        {
+            return await _context.Set<MedicineCategory>()
+                .FirstOrDefaultAsync(c => c.Name.ToLower() == name.ToLower());
+        }
+
+        public async Task<MedicineCategory> GetOrCreateCategoryAsync(string name)
+        {
+            var existing = await GetCategoryByNameAsync(name);
+            if (existing != null) return existing;
+
+            var newCategory = new MedicineCategory { Name = name };
+            _context.Add(newCategory);
+            await _context.SaveChangesAsync();
+            return newCategory;
+        }
+
+        public async Task<List<MedicineCategory>> GetAllCategoriesAsync()
+        {
+            return await _context.Set<MedicineCategory>().OrderBy(c => c.Name).ToListAsync();
+        }
+
 
         public override async Task<List<Medicine>> GetAllAsync()
         {
@@ -42,7 +78,7 @@ namespace MedicineStorage.Data.Implementations
 
 
             if (parameters.Category != null && parameters.Category.Any())
-                query = query.Where(m => parameters.Category.Contains(m.Category));
+                query = query.Where(m => parameters.Category.Contains(m.Category.Name));
 
 
             if (parameters.RequiresSpecialApproval.HasValue)

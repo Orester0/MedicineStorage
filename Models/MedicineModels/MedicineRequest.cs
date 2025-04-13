@@ -2,11 +2,13 @@
 using MedicineStorage.Helpers;
 using MedicineStorage.Models.UserModels;
 using MedicineStorage.Validators;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.MedicineModels
 {
+    [Index(nameof(RequiredByDate))]
     public class MedicineRequest
     {
         [Required]

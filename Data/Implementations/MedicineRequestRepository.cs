@@ -2,6 +2,7 @@
 using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.Params;
+using MedicineStorage.Models.TenderModels;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Implementations
@@ -9,6 +10,16 @@ namespace MedicineStorage.Data.Implementations
     public class MedicineRequestRepository(AppDbContext _context)
     : GenericRepository<MedicineRequest>(_context), IMedicineRequestRepository
     {
+
+        public async Task<IEnumerable<MedicineRequest>> GetByMedicineIdAndDateRangeAsync(int medicineId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.MedicineRequests
+                .Where(r => r.MedicineId == medicineId)
+                .Where(r => (r.RequestDate >= startDate && r.RequestDate <= endDate) ||
+                    (r.RequiredByDate >= startDate && r.RequiredByDate <= endDate) ||
+                    (r.ApprovalDate.HasValue && r.ApprovalDate.Value >= startDate && r.ApprovalDate.Value <= endDate))
+                .ToListAsync();
+        }
         public override async Task<MedicineRequest?> GetByIdAsync(int id)
         {
             return await _context.MedicineRequests

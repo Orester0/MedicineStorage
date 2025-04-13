@@ -7,12 +7,15 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
 {
     public interface IMedicineService
     {
-        public Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetPaginatedMedicines(MedicineParams parameters);
-        public Task<ServiceResult<List<ReturnMedicineDTO>>> GetAllMedicinesAsync();
-        public Task<ServiceResult<List<MedicineStockForecastDTO>>> GetMedicineStockForecast(bool considerRequests = false, bool considerTenders = false);
-        public Task<ServiceResult<ReturnMedicineDTO>> GetMedicineByIdAsync(int id);
-        public Task<ServiceResult<ReturnMedicineDTO>> CreateMedicineAsync(CreateMedicineDTO createMedicineDTO);
-        public Task<ServiceResult<bool>> UpdateMedicineAsync(int id, UpdateMedicineDTO medicineDTO);
-        public Task<ServiceResult<bool>> DeleteMedicineAsync(int id, List<string> userRoles);
+
+        Task<ServiceResult<object>> GetMedicineReportAsync(int medicineId, DateTime startDate, DateTime endDate);
+        Task<ServiceResult<List<string>>> GetAllCategoriesAsync();
+        Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetPaginatedMedicines(MedicineParams parameters);
+        Task<ServiceResult<List<ReturnMedicineDTO>>> GetAllMedicinesAsync();
+        Task<ServiceResult<List<MedicineStockForecastDTO>>> GetMedicineStockForecast(bool considerRequests = false, bool considerTenders = false);
+        Task<ServiceResult<ReturnMedicineDTO>> GetMedicineByIdAsync(int id);
+        Task<ServiceResult<ReturnMedicineDTO>> CreateMedicineAsync(CreateMedicineDTO createMedicineDTO);
+        Task<ServiceResult<bool>> UpdateMedicineAsync(int id, UpdateMedicineDTO medicineDTO);
+        Task<ServiceResult<bool>> DeleteMedicineAsync(int id, List<string> userRoles);
     }
 }

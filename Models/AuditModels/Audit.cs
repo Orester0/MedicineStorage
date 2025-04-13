@@ -51,8 +51,8 @@ namespace MedicineStorage.Models.AuditModels
     {
         Planned = 1,
         InProgress = 2,
-        Completed = 3,
-        RequiresFollowUp = 4,
+        SuccesfullyCompleted = 3,
+        CompletedWithProblems = 4,
         Cancelled = 5
     }
 

@@ -5,12 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.TenderModels
 {
-    public enum TenderItemStatus
-    {
-        Pending = 1,
-        Executed = 2
-    }
-
+    
     public class TenderItem
     {
         [Required]
@@ -29,5 +24,10 @@ namespace MedicineStorage.Models.TenderModels
         [Required]
         public TenderItemStatus Status { get; set; } = TenderItemStatus.Pending;
         public virtual Medicine Medicine { get; set; }
+    }
+    public enum TenderItemStatus
+    {
+        Pending = 1,
+        Executed = 2
     }
 }

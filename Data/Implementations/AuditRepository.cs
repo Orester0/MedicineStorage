@@ -120,7 +120,18 @@ namespace MedicineStorage.Data.Implementations
                 .ToListAsync();
         }
 
-   
+        public async Task<IEnumerable<Audit>> GetByMedicineIdAndDateRangeAsync(int medicineId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.Audits
+                .Include(a => a.AuditItems)
+                .Where(a => a.AuditItems.Any(ai => ai.MedicineId == medicineId))
+                .Where(a => (a.PlannedDate >= startDate && a.PlannedDate <= endDate) ||
+                    (a.StartDate.HasValue && a.StartDate.Value >= startDate && a.StartDate.Value <= endDate) ||
+                    (a.EndDate.HasValue && a.EndDate.Value >= startDate && a.EndDate.Value <= endDate))
+                .ToListAsync();
+        }
+
+
         public async Task<IEnumerable<AuditItem>> CreateAuditItemsAsync(IEnumerable<AuditItem> auditItems)
         {
             await _context.AuditItems.AddRangeAsync(auditItems);

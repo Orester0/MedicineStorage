@@ -7,6 +7,7 @@ namespace MedicineStorage.Models.TenderModels
 {
     [Index(nameof(Title))]
     [Index(nameof(Status))]
+    [Index(nameof(DeadlineDate))]
     public class Tender
     {
         [Required]

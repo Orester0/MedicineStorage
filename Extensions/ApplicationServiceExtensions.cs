@@ -30,8 +30,7 @@ namespace MedicineStorage.Extensions
                 options.AddPolicy("AllowAzureClient", policy =>
                 {
                     policy.WithOrigins(
-                        "http://localhost:4200", // localhost for local development
-                        "https://gray-smoke-0544b2203.6.azurestaticapps.net" // Azure
+                        "http://localhost:4200"
                     )
                     .AllowAnyHeader()
                     .AllowAnyMethod()
@@ -53,20 +52,6 @@ namespace MedicineStorage.Extensions
                     options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 
 
-            // COSMOS DB
-            string endpoint = config["CosmosDb:Endpoint"];
-            string key = config["CosmosDb:Key"];
-            string databaseName = config["CosmosDb:DatabaseName"];
-            string containerName = config["CosmosDb:UserConnectionsContainerName"];
-
-            var cosmosClient = new CosmosClient(endpoint, key);
-            services.AddSingleton(cosmosClient);
-
-            var databaseResponse = cosmosClient.CreateDatabaseIfNotExistsAsync(databaseName).GetAwaiter().GetResult();
-            var database = databaseResponse.Database;
-
-            var containerProperties = new ContainerProperties(id: containerName, partitionKeyPath: "/userId");
-            database.CreateContainerIfNotExistsAsync(containerProperties).GetAwaiter().GetResult();
 
             // BUSINESS SERVICES
             services.AddScoped<IUserService, UserService>();
@@ -91,6 +76,7 @@ namespace MedicineStorage.Extensions
             services.AddScoped<IEmailService, EmailService>();
             services.AddSignalR();
             services.AddHostedService<TimeCheckerBackgroundService>();
+            services.AddScoped<IBlobStorageService, BlobStorageService>();
 
             // REPOSITORIES
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
@@ -111,11 +97,8 @@ namespace MedicineStorage.Extensions
 
             services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-            services.Configure<CloudinarySettings>(config.GetSection("CloudinarySettings"));
 
             services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-
-            services.AddScoped<IBlobStorageService, BlobStorageService>();
 
             return services;
         }

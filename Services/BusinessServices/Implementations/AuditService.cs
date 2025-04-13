@@ -164,7 +164,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
         public async Task<ServiceResult<Audit>> UpdateAuditItemsAsync(int userId, int auditId, UpdateAuditItemsRequest request)
         {
-            
             var result = new ServiceResult<Audit>();
 
             var audit = await _unitOfWork.AuditRepository.GetByIdAsync(auditId);
@@ -179,7 +178,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             }
 
             var auditItems = await _unitOfWork.AuditRepository.GetAuditItemsByAuditIdAsync(auditId);
-
             bool anyUpdated = false;
 
             foreach (var (medicineId, actualQuantity) in request.ActualQuantities)
@@ -195,6 +193,14 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                     throw new BadHttpRequestException($"Medicine with ID {medicineId} has already been checked.");
                 }
 
+                var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(medicineId);
+                if (medicine == null)
+                {
+                    throw new KeyNotFoundException($"Medicine with ID {medicineId} not found.");
+                }
+
+                medicine.Stock = actualQuantity;
+
                 auditItem.ActualQuantity = actualQuantity;
                 auditItem.CheckedByUserId = userId;
                 _unitOfWork.AuditRepository.UpdateAuditItem(auditItem);
@@ -206,14 +212,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 result.Data = audit;
                 return result;
             }
-
-            bool hasSignificantDiscrepancies = auditItems.Any(item =>
-                item.ExpectedQuantity > item.ActualQuantity);
-
-            audit.Status = hasSignificantDiscrepancies
-                ? AuditStatus.RequiresFollowUp
-                : AuditStatus.InProgress;
-
 
             if (!string.IsNullOrEmpty(request.Notes))
             {
@@ -249,13 +247,25 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             audit.ClosedByUserId = userId;
             audit.EndDate ??= DateTime.UtcNow;
-            audit.Status = AuditStatus.Completed;
+
+            bool hasSignificantDiscrepancies = audit.AuditItems.Any(item => item.ExpectedQuantity > item.ActualQuantity);
+            audit.Status = hasSignificantDiscrepancies
+                ? AuditStatus.CompletedWithProblems
+                : AuditStatus.SuccesfullyCompleted;
 
             foreach (var auditItem in audit.AuditItems)
             {
-                if (auditItem.Medicine != null)
+                if (auditItem.MedicineId == null)
                 {
-                    auditItem.Medicine.LastAuditDate = DateTime.UtcNow;
+                    continue;
+                }
+
+                var medicine = await _unitOfWork.MedicineRepository.GetByIdAsync(auditItem.MedicineId);
+                if (medicine != null)
+                {
+                    medicine.Stock = auditItem.ActualQuantity;
+                    medicine.LastAuditDate = DateTime.UtcNow;
+                    _unitOfWork.MedicineRepository.Update(medicine);
                 }
             }
 
@@ -275,6 +285,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             result.Data = audit;
             return result;
         }
+
 
         public async Task<ServiceResult<bool>> DeleteAuditAsync(int auditId, int userId, List<string> userRoles)
         {

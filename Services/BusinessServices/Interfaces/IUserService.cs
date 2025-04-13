@@ -24,8 +24,8 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
         Task<User?> GetUserByEmailAsync(string email);
         Task<bool> VerifyPasswordAsync(User user, string password);
         Task<bool> RoleExistsAsync(string roleName);
-        Task<bool> UserExists(string login);
-        Task<bool> EmailTaken(string email);
+        Task<bool> UserExistsAsync(string login);
+        Task<bool> EmailTakenAsync(string email);
         Task<ServiceResult<User>> RegisterUser(UserRegistrationDTO registerDto);
         Task<ServiceResult<User>> CreateUserAsync(UserRegistrationDTO registerDto);
     }

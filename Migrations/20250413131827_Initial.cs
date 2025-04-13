@@ -76,6 +76,19 @@ namespace MedicineStorage.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MedicineCategories",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MedicineCategories", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MedicineRequestTemplates",
                 columns: table => new
                 {
@@ -91,27 +104,6 @@ namespace MedicineStorage.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MedicineRequestTemplates", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "Medicines",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    Category = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    RequiresSpecialApproval = table.Column<bool>(type: "bit", nullable: false),
-                    MinimumStock = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Stock = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    AuditFrequencyDays = table.Column<int>(type: "int", nullable: false),
-                    LastAuditDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Medicines", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -355,6 +347,117 @@ namespace MedicineStorage.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Medicines",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    CategoryId = table.Column<int>(type: "int", nullable: false),
+                    RequiresSpecialApproval = table.Column<bool>(type: "bit", nullable: false),
+                    MinimumStock = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Stock = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    AuditFrequencyDays = table.Column<int>(type: "int", nullable: false),
+                    LastAuditDate = table.Column<DateTime>(type: "datetime2", nullable: true),
+                    IsDeleted = table.Column<bool>(type: "bit", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Medicines", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Medicines_MedicineCategories_CategoryId",
+                        column: x => x.CategoryId,
+                        principalTable: "MedicineCategories",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AuditNote",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AuditId = table.Column<int>(type: "int", nullable: false),
+                    Note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuditNote", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AuditNote_Audits_AuditId",
+                        column: x => x.AuditId,
+                        principalTable: "Audits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "TenderProposals",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    TenderId = table.Column<int>(type: "int", nullable: false),
+                    CreatedByUserId = table.Column<int>(type: "int", nullable: false),
+                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    SubmissionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_TenderProposals", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_TenderProposals_AspNetUsers_CreatedByUserId",
+                        column: x => x.CreatedByUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_TenderProposals_Tenders_TenderId",
+                        column: x => x.TenderId,
+                        principalTable: "Tenders",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "AuditItems",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    AuditId = table.Column<int>(type: "int", nullable: false),
+                    MedicineId = table.Column<int>(type: "int", nullable: false),
+                    ExpectedQuantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    ActualQuantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    CheckedByUserId = table.Column<int>(type: "int", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_AuditItems", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_AuditItems_AspNetUsers_CheckedByUserId",
+                        column: x => x.CheckedByUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_AuditItems_Audits_AuditId",
+                        column: x => x.AuditId,
+                        principalTable: "Audits",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_AuditItems_Medicines_MedicineId",
+                        column: x => x.MedicineId,
+                        principalTable: "Medicines",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MedicineRequests",
                 columns: table => new
                 {
@@ -394,89 +497,6 @@ namespace MedicineStorage.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "MedicineUsages",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    MedicineId = table.Column<int>(type: "int", nullable: false),
-                    UsedByUserId = table.Column<int>(type: "int", nullable: false),
-                    Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    UsageDate = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MedicineUsages", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_MedicineUsages_AspNetUsers_UsedByUserId",
-                        column: x => x.UsedByUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_MedicineUsages_Medicines_MedicineId",
-                        column: x => x.MedicineId,
-                        principalTable: "Medicines",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AuditItems",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    AuditId = table.Column<int>(type: "int", nullable: false),
-                    MedicineId = table.Column<int>(type: "int", nullable: false),
-                    ExpectedQuantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    ActualQuantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CheckedByUserId = table.Column<int>(type: "int", nullable: true)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuditItems", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AuditItems_AspNetUsers_CheckedByUserId",
-                        column: x => x.CheckedByUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_AuditItems_Audits_AuditId",
-                        column: x => x.AuditId,
-                        principalTable: "Audits",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_AuditItems_Medicines_MedicineId",
-                        column: x => x.MedicineId,
-                        principalTable: "Medicines",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "AuditNote",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    AuditId = table.Column<int>(type: "int", nullable: false),
-                    Note = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuditNote", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_AuditNote_Audits_AuditId",
-                        column: x => x.AuditId,
-                        principalTable: "Audits",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MedicineSupplies",
                 columns: table => new
                 {
@@ -509,6 +529,34 @@ namespace MedicineStorage.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MedicineUsages",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    MedicineId = table.Column<int>(type: "int", nullable: false),
+                    UsedByUserId = table.Column<int>(type: "int", nullable: false),
+                    Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    UsageDate = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MedicineUsages", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MedicineUsages_AspNetUsers_UsedByUserId",
+                        column: x => x.UsedByUserId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_MedicineUsages_Medicines_MedicineId",
+                        column: x => x.MedicineId,
+                        principalTable: "Medicines",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "TenderItems",
                 columns: table => new
                 {
@@ -530,35 +578,6 @@ namespace MedicineStorage.Migrations
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_TenderItems_Tenders_TenderId",
-                        column: x => x.TenderId,
-                        principalTable: "Tenders",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TenderProposals",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    TenderId = table.Column<int>(type: "int", nullable: false),
-                    CreatedByUserId = table.Column<int>(type: "int", nullable: false),
-                    TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    SubmissionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TenderProposals", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_TenderProposals_AspNetUsers_CreatedByUserId",
-                        column: x => x.CreatedByUserId,
-                        principalTable: "AspNetUsers",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
-                        name: "FK_TenderProposals_Tenders_TenderId",
                         column: x => x.TenderId,
                         principalTable: "Tenders",
                         principalColumn: "Id",
@@ -626,6 +645,23 @@ namespace MedicineStorage.Migrations
                 column: "NormalizedEmail");
 
             migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_Company",
+                table: "AspNetUsers",
+                column: "Company");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_FirstName_LastName",
+                table: "AspNetUsers",
+                columns: new[] { "FirstName", "LastName" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_AspNetUsers_UserName",
+                table: "AspNetUsers",
+                column: "UserName",
+                unique: true,
+                filter: "[UserName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
                 name: "UserNameIndex",
                 table: "AspNetUsers",
                 column: "NormalizedUserName",
@@ -663,6 +699,22 @@ namespace MedicineStorage.Migrations
                 column: "PlannedByUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Audits_Status",
+                table: "Audits",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Audits_Title",
+                table: "Audits",
+                column: "Title");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MedicineCategories_Name",
+                table: "MedicineCategories",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MedicineRequests_ApprovedByUserId",
                 table: "MedicineRequests",
                 column: "ApprovedByUserId");
@@ -676,6 +728,16 @@ namespace MedicineStorage.Migrations
                 name: "IX_MedicineRequests_RequestedByUserId",
                 table: "MedicineRequests",
                 column: "RequestedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MedicineRequests_RequiredByDate",
+                table: "MedicineRequests",
+                column: "RequiredByDate");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Medicines_CategoryId",
+                table: "Medicines",
+                column: "CategoryId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Medicines_Name",
@@ -699,14 +761,29 @@ namespace MedicineStorage.Migrations
                 column: "TenderId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MedicineSupplies_TransactionDate",
+                table: "MedicineSupplies",
+                column: "TransactionDate");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MedicineUsages_MedicineId",
                 table: "MedicineUsages",
                 column: "MedicineId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MedicineUsages_UsageDate",
+                table: "MedicineUsages",
+                column: "UsageDate");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MedicineUsages_UsedByUserId",
                 table: "MedicineUsages",
                 column: "UsedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Notifications_Title",
+                table: "Notifications",
+                column: "Title");
 
             migrationBuilder.CreateIndex(
                 name: "IX_RefreshTokens_UserId",
@@ -739,6 +816,11 @@ namespace MedicineStorage.Migrations
                 column: "CreatedByUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_TenderProposals_Status",
+                table: "TenderProposals",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_TenderProposals_TenderId",
                 table: "TenderProposals",
                 column: "TenderId");
@@ -754,9 +836,24 @@ namespace MedicineStorage.Migrations
                 column: "CreatedByUserId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Tenders_DeadlineDate",
+                table: "Tenders",
+                column: "DeadlineDate");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Tenders_OpenedByUserId",
                 table: "Tenders",
                 column: "OpenedByUserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tenders_Status",
+                table: "Tenders",
+                column: "Status");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tenders_Title",
+                table: "Tenders",
+                column: "Title");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tenders_WinnerSelectedByUserId",
@@ -829,6 +926,9 @@ namespace MedicineStorage.Migrations
 
             migrationBuilder.DropTable(
                 name: "TenderProposals");
+
+            migrationBuilder.DropTable(
+                name: "MedicineCategories");
 
             migrationBuilder.DropTable(
                 name: "Tenders");

@@ -3,9 +3,11 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
 using MedicineStorage.Validators;
 using MedicineStorage.Models.UserModels;
+using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Models.MedicineModels
 {
+    [Index(nameof(TransactionDate))]
     public class MedicineSupply
     {
         [Key]

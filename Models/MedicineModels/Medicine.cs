@@ -6,7 +6,6 @@ using System.Diagnostics.CodeAnalysis;
 namespace MedicineStorage.Models.MedicineModels
 {
     [Index(nameof(Name), IsUnique = true)]
-    [Index(nameof(Category))]
     public class Medicine : ISoftDeletable
     {
         [Key]
@@ -22,8 +21,8 @@ namespace MedicineStorage.Models.MedicineModels
         public string Description { get; set; }
 
         [Required]
-        [StringLength(100, MinimumLength = 3)]
-        public string Category { get; set; }
+        [ForeignKey("Category")]
+        public int CategoryId { get; set; }
 
         [Required]
         public bool RequiresSpecialApproval { get; set; }
@@ -44,6 +43,10 @@ namespace MedicineStorage.Models.MedicineModels
 
         [AllowNull]
         public DateTime? LastAuditDate { get; set; }
+
+
+
+        public virtual MedicineCategory Category { get; set; }
 
         public bool IsDeleted { get; set; } = false;
 
