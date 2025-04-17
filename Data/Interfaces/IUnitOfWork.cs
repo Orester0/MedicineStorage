@@ -24,7 +24,8 @@ namespace MedicineStorage.Data.Interfaces
 
         Task<bool> CompleteAsync();
         bool HasChanges();
-        void BeginTransaction();
-        Task Rollback();
+        Task BeginTransactionAsync();
+        Task CommitTransactionAsync();
+        Task RollbackTransactionAsync();
     }
 }

@@ -77,9 +77,9 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
         // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // // 
 
-        public async Task<ServiceResult<Audit>> CreateAuditAsync(int userId, CreateAuditDTO request)
+        public async Task<ServiceResult<ReturnAuditDTO>> CreateAuditAsync(int userId, CreateAuditDTO request)
         {
-            var result = new ServiceResult<Audit>();
+            var result = new ServiceResult<ReturnAuditDTO>();
 
             var audit = _mapper.Map<Audit>(request);
 
@@ -121,7 +121,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             await _unitOfWork.AuditRepository.CreateAuditItemsAsync(auditItems);
             await _unitOfWork.CompleteAsync();
 
-            result.Data = audit;
+            result.Data = _mapper.Map<ReturnAuditDTO>(audit);
             return result;
 
 

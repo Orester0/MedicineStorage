@@ -31,7 +31,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<MedicineSupply>> CreateSupplyAsync(CreateMedicineSupplyDTO dto, int userId)
+        public async Task<ServiceResult<MedicineSupply>> CreateSupplyByUserAsync(CreateMedicineSupplyDTO dto, int userId)
         {
             var result = new ServiceResult<MedicineSupply>();
 

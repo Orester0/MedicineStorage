@@ -37,11 +37,6 @@ namespace MedicineStorage.Data.Implementations
         public ITemplateRepository<TenderTemplate> TenderTemplateRepository => _tenderTemplateRepository;
 
 
-        public void BeginTransaction()
-        {
-            _context.Database.BeginTransaction();
-        }
-
         public async Task<bool> CompleteAsync()
         {
             return await _context.SaveChangesAsync() > 0;
@@ -51,8 +46,17 @@ namespace MedicineStorage.Data.Implementations
         {
             return _context.ChangeTracker.HasChanges();
         }
+        public async Task BeginTransactionAsync()
+        {
+            await _context.Database.BeginTransactionAsync();
+        }
 
-        public async Task Rollback()
+        public async Task CommitTransactionAsync()
+        {
+            await _context.Database.CommitTransactionAsync();
+        }
+
+        public async Task RollbackTransactionAsync()
         {
             await _context.Database.RollbackTransactionAsync();
         }

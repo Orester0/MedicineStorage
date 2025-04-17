@@ -7,7 +7,7 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
 {
     public interface IMedicineService
     {
-
+        Task<ServiceResult<bool>> BulkCreateMedicinesAsync(List<BulkCreateMedicineDTO> bulkMedicines);
         Task<ServiceResult<object>> GetMedicineReportAsync(int medicineId, DateTime startDate, DateTime endDate);
         Task<ServiceResult<List<string>>> GetAllCategoriesAsync();
         Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetPaginatedMedicines(MedicineParams parameters);

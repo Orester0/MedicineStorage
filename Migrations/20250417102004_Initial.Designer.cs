@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MedicineStorage.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250413131827_Initial")]
+    [Migration("20250417102004_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -329,10 +329,16 @@ namespace MedicineStorage.Migrations
                     b.Property<bool>("IsRead")
                         .HasColumnType("bit");
 
+                    b.Property<int?>("MedicineRequestId")
+                        .HasColumnType("int");
+
                     b.Property<string>("Message")
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("nvarchar(200)");
+
+                    b.Property<int?>("TenderId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .HasMaxLength(200)
@@ -343,7 +349,13 @@ namespace MedicineStorage.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("MedicineRequestId");
+
+                    b.HasIndex("TenderId");
+
                     b.HasIndex("Title");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Notifications");
                 });
@@ -989,6 +1001,29 @@ namespace MedicineStorage.Migrations
                     b.Navigation("Medicine");
 
                     b.Navigation("UsedByUser");
+                });
+
+            modelBuilder.Entity("MedicineStorage.Models.NotificationModels.Notification", b =>
+                {
+                    b.HasOne("MedicineStorage.Models.MedicineModels.MedicineRequest", "MedicineRequest")
+                        .WithMany()
+                        .HasForeignKey("MedicineRequestId");
+
+                    b.HasOne("MedicineStorage.Models.TenderModels.Tender", "Tender")
+                        .WithMany()
+                        .HasForeignKey("TenderId");
+
+                    b.HasOne("MedicineStorage.Models.UserModels.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MedicineRequest");
+
+                    b.Navigation("Tender");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.Tender", b =>

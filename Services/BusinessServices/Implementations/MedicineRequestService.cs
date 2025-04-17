@@ -145,7 +145,8 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 Title = title,
                 Message = message,
                 IsRead = false,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                MedicineRequestId = request.Id
             };
             await _notificationService.SendNotificationAsync(notification);
 
@@ -201,7 +202,8 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 Title = title,
                 Message = message,
                 IsRead = false,
-                CreatedAt = DateTime.UtcNow
+                CreatedAt = DateTime.UtcNow,
+                MedicineRequestId = request.Id
             };
             await _notificationService.SendNotificationAsync(notification);
 

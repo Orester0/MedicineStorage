@@ -13,7 +13,7 @@ namespace MedicineStorage.Models.MedicineModels
         [StringLength(100, MinimumLength = 3)]
         public string Name { get; set; }
 
-        public ICollection<Medicine> Medicines { get; set; } = new List<Medicine>();
+        public virtual ICollection<Medicine> Medicines { get; set; } = new List<Medicine>();
     }
 
 }

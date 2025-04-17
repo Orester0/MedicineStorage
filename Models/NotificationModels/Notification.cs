@@ -1,5 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using MedicineStorage.Models.MedicineModels;
+using MedicineStorage.Models.TenderModels;
+using MedicineStorage.Models.UserModels;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.NotificationModels
 {
@@ -19,6 +23,19 @@ namespace MedicineStorage.Models.NotificationModels
         [Required]
         public DateTime CreatedAt { get; set; }
         [Required]
+        [ForeignKey("User")]
         public int UserId { get; set; }
+        public virtual User User { get; set; }
+
+
+        [ForeignKey("MedicineRequest")]
+        public int? MedicineRequestId { get; set; }
+        public virtual MedicineRequest MedicineRequest { get; set; }
+
+
+        [ForeignKey("Tender")]
+        public int? TenderId { get; set; }
+        public virtual Tender Tender { get; set; }
+
     }
 }

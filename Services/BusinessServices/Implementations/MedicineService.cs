@@ -11,8 +11,52 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 {
     public class MedicineService(
         IUnitOfWork _unitOfWork,
-        IMapper _mapper) : IMedicineService
+        IMapper _mapper,
+        IMedicineSupplyService _medicineSupplyService) : IMedicineService
     {
+        public async Task<ServiceResult<bool>> BulkCreateMedicinesAsync(List<BulkCreateMedicineDTO> bulkMedicines)
+        {
+            var result = new ServiceResult<bool>();
+
+            foreach (var item in bulkMedicines)
+            {
+                try
+                {
+                    await _unitOfWork.BeginTransactionAsync();
+
+                    var medicine = _mapper.Map<Medicine>(item.Medicine);
+                    medicine.LastAuditDate = null;
+                    var category = await _unitOfWork.MedicineRepository.GetOrCreateCategoryAsync(item.Medicine.Category);
+                    medicine.CategoryId = category.Id;
+                    medicine.Stock = item.InitialStock;
+
+                    // Add medicine and save first to get valid ID
+                    var createdMedicine = await _unitOfWork.MedicineRepository.AddAsync(medicine);
+                    await _unitOfWork.CompleteAsync();
+
+                    // Now create supply with valid MedicineId
+                    var supply = new MedicineSupply
+                    {
+                        MedicineId = createdMedicine.Id,
+                        Quantity = item.InitialStock,
+                        TransactionDate = DateTime.UtcNow
+                    };
+                    await _unitOfWork.MedicineSupplyRepository.AddAsync(supply);
+                    await _unitOfWork.CompleteAsync();
+
+                    await _unitOfWork.CommitTransactionAsync();
+                }
+                catch (Exception ex)
+                {
+                    await _unitOfWork.RollbackTransactionAsync();
+                    return result;
+                }
+            }
+
+            result.Data = true;
+            return result;
+        }
+
 
         public async Task<ServiceResult<object>> GetMedicineReportAsync(int medicineId, DateTime startDate, DateTime endDate)
         {
@@ -24,28 +68,43 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                 throw new KeyNotFoundException($"Medicine with ID {medicineId} not found.");
             }
 
-            var medicineDto = _mapper.Map<ReturnMedicineDTO>(medicine);
+            var medicineDto = _mapper.Map<ReturnMedicineReportDTO>(medicine);
 
-            var audits = await _unitOfWork.AuditRepository.GetByMedicineIdAndDateRangeAsync(
-                medicineId, startDate, endDate);
-            var auditDtos = audits.Select(a => new
-            {
-                Audit = _mapper.Map<ReturnAuditDTO>(a),
-                Items = a.AuditItems.Where(ai => ai.MedicineId == medicineId)
-                    .Select(ai => _mapper.Map<ReturnAuditItemDTO>(ai)).ToList()
-            }).ToList();
+            var audits = await _unitOfWork.AuditRepository.GetByMedicineIdAndDateRangeAsync(medicineId, startDate, endDate);
+            var auditDtos = audits
+                .Select(audit =>
+                {
+                    var item = audit.AuditItems.FirstOrDefault(ai => ai.MedicineId == medicineId);
+                    if (item == null) return null;
+
+                    var report = _mapper.Map<ReturnAuditReportDTO>(audit);
+                    report.ExpectedQuantity = item.ExpectedQuantity;
+                    report.ActualQuantity = item.ActualQuantity;
+                    report.CheckedByUser = _mapper.Map<ReturnUserGeneralDTO>(item.CheckedByUser);
+
+                    return report;
+                })
+                .Where(dto => dto != null)
+                .ToList();
 
             var tenders = await _unitOfWork.TenderRepository.GetByMedicineIdAndDateRangeAsync(medicineId, startDate, endDate);
-            var tenderDtos = tenders.Select(t => new
-            {
-                Tender = _mapper.Map<ReturnTenderDTO>(t),
-                Items = t.TenderItems.Where(ti => ti.MedicineId == medicineId)
-                    .Select(ti => _mapper.Map<ReturnTenderItemDTO>(ti)).ToList()
-            }).ToList();
+            var tenderDtos = tenders
+                .Select(tender =>
+                {
+                    var item = tender.TenderItems.FirstOrDefault(ti => ti.MedicineId == medicineId);
+                    if (item == null) return null;
+
+                    var report = _mapper.Map<ReturnTenderReportDTO>(tender);
+                    report.RequiredQuantity = item.RequiredQuantity;
+
+                    return report;
+                })
+                .Where(dto => dto != null)
+                .ToList();
 
             var requests = await _unitOfWork.MedicineRequestRepository.GetByMedicineIdAndDateRangeAsync(
                 medicineId, startDate, endDate);
-            var requestDtos = _mapper.Map<List<ReturnMedicineRequestDTO>>(requests);
+            var requestDtos = _mapper.Map<List<ReturnMedicineRequestReportDTO>>(requests);
 
             var report = new
             {

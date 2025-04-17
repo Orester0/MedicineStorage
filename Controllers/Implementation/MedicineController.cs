@@ -7,13 +7,32 @@ using MedicineStorage.Models.UserModels;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace MedicineStorage.Controllers.Implementation
 {
 
-    [Authorize]
+    //[Authorize]
     public class MedicineController(IMedicineService _medicineService) : BaseApiController
     {
+        [HttpPost("bulk-upload")]
+        [Consumes("application/json")]
+        public async Task<IActionResult> BulkCreateMedicinesFromJson([FromBody] List<BulkCreateMedicineDTO> dtoList)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _medicineService.BulkCreateMedicinesAsync(dtoList);
+
+            if (!result.Success)
+                return BadRequest(new { result.Errors });
+
+            return Ok(new { success = true });
+        }
+
+
+
 
         [HttpGet("{medicineId:int}/report/download")]
         public async Task<IActionResult> DownloadMedicineReport(int medicineId, [FromQuery] DateTime startDate, [FromQuery] DateTime endDate)
@@ -27,8 +46,10 @@ namespace MedicineStorage.Controllers.Implementation
 
             var json = System.Text.Json.JsonSerializer.Serialize(result.Data, new System.Text.Json.JsonSerializerOptions
             {
-                WriteIndented = true
+                WriteIndented = true,
+                Converters = { new JsonStringEnumConverter() }
             });
+
 
             var fileName = $"medicine-report-{medicineId}-{startDate:yyyyMMdd}-{endDate:yyyyMMdd}.json";
             var content = System.Text.Encoding.UTF8.GetBytes(json);

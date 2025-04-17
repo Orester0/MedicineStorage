@@ -9,7 +9,7 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
     public interface IMedicineSupplyService
     {
         Task<ServiceResult<PagedList<ReturnMedicineSupplyDTO>>> GetPaginatedSupplies(MedicineSupplyParams parameters);
-        Task<ServiceResult<MedicineSupply>> CreateSupplyAsync(CreateMedicineSupplyDTO dto, int userId);
+        Task<ServiceResult<MedicineSupply>> CreateSupplyByUserAsync(CreateMedicineSupplyDTO dto, int userId);
         Task<ServiceResult<MedicineSupply>> CreateSupplyForTenderAsync(int medicineId, int quantity, int tenderId);
     }
 }

@@ -36,7 +36,7 @@ namespace MedicineStorage.Controllers.Implementation
                 return BadRequest(ModelState);
             }
             var userId = User.GetUserIdFromClaims();
-            var result = await _medicineSupplyService.CreateSupplyAsync(createSupplyDTO, userId);
+            var result = await _medicineSupplyService.CreateSupplyByUserAsync(createSupplyDTO, userId);
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });
