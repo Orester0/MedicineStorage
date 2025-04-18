@@ -7,7 +7,7 @@ namespace MedicineStorage.Models.AuditModels
 {
 
     [Index(nameof(Title))]
-    [Index(nameof(Status))]
+    [Index(nameof(Status), nameof(PlannedDate))]
     public class Audit
     {
         [Key]

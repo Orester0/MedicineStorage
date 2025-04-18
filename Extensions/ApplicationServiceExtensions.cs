@@ -1,22 +1,13 @@
 ﻿using MedicineStorage.Data;
 using MedicineStorage.Data.Implementations;
 using MedicineStorage.Data.Interfaces;
-
-using MedicineStorage.Helpers;
 using MedicineStorage.Models.TemplateModels;
-using MedicineStorage.Models.UserModels;
 using MedicineStorage.Patterns;
 using MedicineStorage.Services.ApplicationServices.Implementations;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
 using MedicineStorage.Services.BusinessServices.Implementations;
 using MedicineStorage.Services.BusinessServices.Interfaces;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Azure.Cosmos;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using Microsoft.OpenApi.Models;
-using System.Text.Json;
 
 namespace MedicineStorage.Extensions
 {
@@ -51,7 +42,8 @@ namespace MedicineStorage.Extensions
             services.AddDbContext<AppDbContext>(
                     options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 
-
+            //services.AddDbContext<GuestDbContext>(
+            //        options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
 
 
             // BUSINESS SERVICES

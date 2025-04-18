@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MedicineStorage.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250417102004_Initial")]
+    [Migration("20250417121657_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -62,9 +62,9 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("PlannedByUserId");
 
-                    b.HasIndex("Status");
-
                     b.HasIndex("Title");
+
+                    b.HasIndex("Status", "PlannedDate");
 
                     b.ToTable("Audits");
                 });
@@ -243,7 +243,7 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("RequestedByUserId");
 
-                    b.HasIndex("RequiredByDate");
+                    b.HasIndex("Status", "RequiredByDate");
 
                     b.ToTable("MedicineRequests");
                 });
@@ -510,15 +510,13 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("CreatedByUserId");
 
-                    b.HasIndex("DeadlineDate");
-
                     b.HasIndex("OpenedByUserId");
-
-                    b.HasIndex("Status");
 
                     b.HasIndex("Title");
 
                     b.HasIndex("WinnerSelectedByUserId");
+
+                    b.HasIndex("Status", "DeadlineDate");
 
                     b.ToTable("Tenders");
                 });

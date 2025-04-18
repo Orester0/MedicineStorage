@@ -13,7 +13,7 @@ using System.Text.Json.Serialization;
 namespace MedicineStorage.Controllers.Implementation
 {
 
-    //[Authorize]
+    [Authorize]
     public class MedicineController(IMedicineService _medicineService) : BaseApiController
     {
         [HttpPost("bulk-upload")]

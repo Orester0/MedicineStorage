@@ -8,7 +8,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.MedicineModels
 {
-    [Index(nameof(RequiredByDate))]
+    [Index(nameof(Status), nameof(RequiredByDate))]
     public class MedicineRequest
     {
         [Required]

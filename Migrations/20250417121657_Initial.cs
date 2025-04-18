@@ -717,9 +717,9 @@ namespace MedicineStorage.Migrations
                 column: "PlannedByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Audits_Status",
+                name: "IX_Audits_Status_PlannedDate",
                 table: "Audits",
-                column: "Status");
+                columns: new[] { "Status", "PlannedDate" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Audits_Title",
@@ -748,9 +748,9 @@ namespace MedicineStorage.Migrations
                 column: "RequestedByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MedicineRequests_RequiredByDate",
+                name: "IX_MedicineRequests_Status_RequiredByDate",
                 table: "MedicineRequests",
-                column: "RequiredByDate");
+                columns: new[] { "Status", "RequiredByDate" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Medicines_CategoryId",
@@ -869,19 +869,14 @@ namespace MedicineStorage.Migrations
                 column: "CreatedByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tenders_DeadlineDate",
-                table: "Tenders",
-                column: "DeadlineDate");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_Tenders_OpenedByUserId",
                 table: "Tenders",
                 column: "OpenedByUserId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tenders_Status",
+                name: "IX_Tenders_Status_DeadlineDate",
                 table: "Tenders",
-                column: "Status");
+                columns: new[] { "Status", "DeadlineDate" });
 
             migrationBuilder.CreateIndex(
                 name: "IX_Tenders_Title",
