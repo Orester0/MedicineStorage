@@ -17,6 +17,25 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
                                         INotificationTextFactory _notificationTextFactory, 
                                         INotificationService _notificationService) : IMedicineRequestService
     {
+        public async Task<ServiceResult<PagedList<MedicineRequestAnalysisDto>>> GetRequestAnalysisByMedicineAsync(MedicineRequestAnalysisParams parameters)
+        {
+            var result = new ServiceResult<PagedList<MedicineRequestAnalysisDto>>();
+
+            var (analysisData, totalCount) = await _unitOfWork.MedicineRequestRepository.GetRequestAnalysisByParamsAsync(parameters);
+
+            result.Data = new PagedList<MedicineRequestAnalysisDto>(
+                analysisData.ToList(),
+                totalCount,
+                parameters.PageNumber,
+                parameters.PageSize
+            );
+
+            return result;
+        }
+
+
+
+
         public async Task<ServiceResult<PagedList<ReturnMedicineRequestDTO>>> GetPaginatedAudits(MedicineRequestParams parameters)
         {
             var result = new ServiceResult<PagedList<ReturnMedicineRequestDTO>>();
@@ -130,10 +149,12 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             request.Status = RequestStatus.Approved;
             request.ApprovedByUserId = userId;
             request.ApprovalDate = DateTime.UtcNow;
+            _unitOfWork.MedicineRequestRepository.Update(request);
+            //await _unitOfWork.CompleteAsync();
+
 
             medicine.Stock -= request.Quantity;
             _unitOfWork.MedicineRepository.Update(medicine);
-            _unitOfWork.MedicineRequestRepository.Update(request);
 
 
 

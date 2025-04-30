@@ -1,6 +1,6 @@
 ﻿using MedicineStorage.Data.Interfaces;
-
-using MedicineStorage.Models.TemplateModels;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 namespace MedicineStorage.Data.Implementations
 {
     public class UnitOfWork(
@@ -15,10 +15,7 @@ namespace MedicineStorage.Data.Implementations
         ITenderProposalItemRepository _tenderProposalItemRepository,
         IMedicineSupplyRepository _medicineSupplyRepository,
         INotificationRepository _notificationRepository,
-        IUserRepository _userRepository,
-        ITemplateRepository<MedicineRequestTemplate> _medicineRequestTemplateRepository,
-        ITemplateRepository<AuditTemplate> _auditTemplateRepository,
-        ITemplateRepository<TenderTemplate> _tenderTemplateRepository
+        IUserRepository _userRepository
         ) : IUnitOfWork
     {
         public IAuditRepository AuditRepository => _auditRepository;
@@ -32,10 +29,6 @@ namespace MedicineStorage.Data.Implementations
         public ITenderProposalItemRepository TenderProposalItemRepository => _tenderProposalItemRepository;
         public IMedicineSupplyRepository MedicineSupplyRepository => _medicineSupplyRepository;
         public IUserRepository UserRepository => _userRepository;
-        public ITemplateRepository<MedicineRequestTemplate> MedicineRequestTemplateRepository => _medicineRequestTemplateRepository;
-        public ITemplateRepository<AuditTemplate> AuditTemplateRepository => _auditTemplateRepository;
-        public ITemplateRepository<TenderTemplate> TenderTemplateRepository => _tenderTemplateRepository;
-
 
         public async Task<bool> CompleteAsync()
         {
@@ -59,6 +52,20 @@ namespace MedicineStorage.Data.Implementations
         public async Task RollbackTransactionAsync()
         {
             await _context.Database.RollbackTransactionAsync();
+        }
+
+        public async Task ExecuteSqlRawAsync(string sql)
+        {
+            await _context.Database.ExecuteSqlRawAsync(sql);
+        }
+
+        public async Task ExecuteStoredProcedureAsync(string procedureName, params SqlParameter[] parameters)
+        {
+            var parameterList = string.Join(", ", parameters.Select(p =>
+                p.ParameterName.StartsWith("@") ? p.ParameterName : "@" + p.ParameterName));
+
+            var command = $"EXEC {procedureName} {parameterList}";
+            await _context.Database.ExecuteSqlRawAsync(command, parameters);
         }
     }
 }

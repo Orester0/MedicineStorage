@@ -10,10 +10,24 @@ using MedicineStorage.Models.Params;
 namespace MedicineStorage.Controllers.Implementation
 {
 
-    [Authorize]
+    //[Authorize]
     [Route("api/medicine-request")]
     public class MedicineRequestController(IMedicineRequestService _operationsService) : BaseApiController
     {
+
+        [HttpGet("analysis-by-medicine")]
+        public async Task<IActionResult> GetRequestAnalysisByMedicine([FromQuery] MedicineRequestAnalysisParams parameters)
+        {
+            var result = await _operationsService.GetRequestAnalysisByMedicineAsync(parameters);
+
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+
+            return Ok(result.Data);
+        }
+
 
         [HttpGet]
         public async Task<ActionResult<PagedList<ReturnMedicineRequestDTO>>> GetRequests([FromQuery] MedicineRequestParams parameters)

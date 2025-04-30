@@ -8,6 +8,7 @@ namespace MedicineStorage.Services.BusinessServices.Interfaces
 {
     public interface IMedicineRequestService
     {
+        Task<ServiceResult<PagedList<MedicineRequestAnalysisDto>>> GetRequestAnalysisByMedicineAsync(MedicineRequestAnalysisParams parameters);
         public Task<ServiceResult<ReturnMedicineRequestDTO>> GetRequestByIdAsync(int id);
         public Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetRequestsRequestedByUserId(int userId);
         public Task<ServiceResult<IEnumerable<ReturnMedicineRequestDTO>>> GetRequestsApprovedByUserId(int userId);

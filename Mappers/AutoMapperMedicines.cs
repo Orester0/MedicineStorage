@@ -11,6 +11,9 @@ namespace MedicineStorage.Mappers
             CreateMap<Medicine, ReturnMedicineDTO>()
                 .ForMember(dest => dest.Category, opt => opt.MapFrom(src => src.Category.Name));
 
+
+            CreateMap<Medicine, ReturnMedicineShortDTO>();
+
             CreateMap<CreateMedicineDTO, Medicine>()
                 .ForMember(dest => dest.Category, opt => opt.Ignore()); 
             CreateMap<UpdateMedicineDTO, Medicine>()

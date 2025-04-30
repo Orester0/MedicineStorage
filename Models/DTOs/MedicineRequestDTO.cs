@@ -8,6 +8,18 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.DTOs
 {
+    public class MedicineRequestAnalysisDto
+    {
+        public string MedicineName { get; set; } = null!;
+        public int TotalRequests { get; set; }
+        public int TotalQuantity { get; set; }
+        public int UniqueRequesters { get; set; }
+        public int ApprovedCount { get; set; }
+        public int RejectedCount { get; set; }
+        public int PendingCount { get; set; }
+    }
+
+
     public class ReturnMedicineRequestDTO
     {
         public int Id { get; set; }

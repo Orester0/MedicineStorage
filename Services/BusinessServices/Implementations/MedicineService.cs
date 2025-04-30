@@ -6,57 +6,92 @@ using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.Params;
 using MedicineStorage.Services.BusinessServices.Interfaces;
+using System.Data;
 
 namespace MedicineStorage.Services.BusinessServices.Implementations
 {
     public class MedicineService(
         IUnitOfWork _unitOfWork,
         IMapper _mapper,
-        IMedicineSupplyService _medicineSupplyService) : IMedicineService
+        IUserService _userService,
+        IMedicineRequestService _medicineRequestService) : IMedicineService
     {
-        public async Task<ServiceResult<bool>> BulkCreateMedicinesAsync(List<BulkCreateMedicineDTO> bulkMedicines)
+        
+
+        
+        public async Task<ServiceResult<MedicineAuditAndTenderDto>> GetProblematicMedicinesAsync()
         {
-            var result = new ServiceResult<bool>();
 
-            foreach (var item in bulkMedicines)
+            var result = new ServiceResult<MedicineAuditAndTenderDto>();
+            var medicinesNeedingAudit = await _unitOfWork.MedicineRepository.GetMedicinesNeedingAuditAsync();
+            var medicinesNeedingTender = await _unitOfWork.MedicineRepository.GetMedicinesNeedingTenderAsync();
+
+            MedicineAuditAndTenderDto dto = new MedicineAuditAndTenderDto
             {
-                try
-                {
-                    await _unitOfWork.BeginTransactionAsync();
+                MedicinesNeedingAudit = _mapper.Map<List<ReturnMedicineShortDTO>>(medicinesNeedingAudit),
+                MedicinesNeedingTender = _mapper.Map<List<ReturnMedicineShortDTO>>(medicinesNeedingTender)
+            };
+            result.Data = dto;
 
-                    var medicine = _mapper.Map<Medicine>(item.Medicine);
-                    medicine.LastAuditDate = null;
-                    var category = await _unitOfWork.MedicineRepository.GetOrCreateCategoryAsync(item.Medicine.Category);
-                    medicine.CategoryId = category.Id;
-                    medicine.Stock = item.InitialStock;
-
-                    // Add medicine and save first to get valid ID
-                    var createdMedicine = await _unitOfWork.MedicineRepository.AddAsync(medicine);
-                    await _unitOfWork.CompleteAsync();
-
-                    // Now create supply with valid MedicineId
-                    var supply = new MedicineSupply
-                    {
-                        MedicineId = createdMedicine.Id,
-                        Quantity = item.InitialStock,
-                        TransactionDate = DateTime.UtcNow
-                    };
-                    await _unitOfWork.MedicineSupplyRepository.AddAsync(supply);
-                    await _unitOfWork.CompleteAsync();
-
-                    await _unitOfWork.CommitTransactionAsync();
-                }
-                catch (Exception ex)
-                {
-                    await _unitOfWork.RollbackTransactionAsync();
-                    return result;
-                }
-            }
-
-            result.Data = true;
             return result;
         }
 
+
+        public async Task<ServiceResult<bool>> UpdateMinimumStockForecastForAllMedicinesAsync(int forecastDays = 30)
+        {
+            var result = new ServiceResult<bool>();
+
+            try
+            {
+                var medicines = await _unitOfWork.MedicineRepository.GetAllAsync();
+                DateTime startDate = DateTime.UtcNow.AddMonths(-3); 
+                DateTime endDate = DateTime.UtcNow;
+
+                var allMedicineRequests = await _unitOfWork.MedicineRequestRepository.GetAllMedicineRequestsInDateRangeAsync(
+                    startDate, endDate);
+
+                var allSupplies = await _unitOfWork.MedicineSupplyRepository.GetAllMedicineSuppliesInDateRangeAsync(
+                    startDate, endDate);
+
+                foreach (var medicine in medicines)
+                {
+                    var requests = allMedicineRequests.ContainsKey(medicine.Id)
+                        ? allMedicineRequests[medicine.Id]
+                        : new List<MedicineRequest>();
+
+                    var requestsQuantity = requests
+                        .Where(r => r.Status == RequestStatus.Approved)
+                        .Sum(r => r.Quantity);
+
+                    var supplies = allSupplies.ContainsKey(medicine.Id)
+                        ? allSupplies[medicine.Id]
+                        : new List<MedicineSupply>();
+                    var suppliesQuantity = supplies.Sum(s => s.Quantity);
+
+                    double daysInPeriod = (endDate - startDate).TotalDays;
+                    double dailyConsumptionRate = daysInPeriod > 0 ? (double)requestsQuantity / daysInPeriod : 0;
+
+                    double forecastedConsumption = dailyConsumptionRate * forecastDays;
+
+                    double safetyBuffer = 1.5;
+                    int newMinimumStock = (int)Math.Ceiling(forecastedConsumption * safetyBuffer);
+
+                    newMinimumStock = Math.Max(1, newMinimumStock);
+
+                    medicine.MinimumStock = newMinimumStock;
+                    _unitOfWork.MedicineRepository.Update(medicine);
+                }
+
+                await _unitOfWork.CompleteAsync();
+                result.Data = true;
+            }
+            catch (Exception ex)
+            {
+                result.Data = false;
+            }
+
+            return result;
+        }
 
         public async Task<ServiceResult<object>> GetMedicineReportAsync(int medicineId, DateTime startDate, DateTime endDate)
         {
@@ -136,57 +171,6 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
-        public async Task<ServiceResult<List<MedicineStockForecastDTO>>> GetMedicineStockForecast(
-            bool considerRequests = false,
-            bool considerTenders = false)
-        {
-            var result = new ServiceResult<List<MedicineStockForecastDTO>>();
-            var forecastList = new List<MedicineStockForecastDTO>();
-
-            var medicines = await _unitOfWork.MedicineRepository.GetAllAsync();
-
-            foreach (var medicine in medicines)
-            {
-                int totalStock = (int)medicine.Stock;
-                int totalTenderStock = 0;
-                int totalRequested = 0;
-
-                if (considerTenders)
-                {
-                    var relevantTenders = await _unitOfWork.TenderRepository.GetRelevantTendersAsync();
-
-                    var tenderItems = relevantTenders
-                        .SelectMany(t => t.TenderItems)
-                        .Where(ti => ti.MedicineId == medicine.Id);
-
-                    totalTenderStock = (int)tenderItems.Sum(ti => ti.RequiredQuantity);
-                }
-
-
-                if (considerRequests)
-                {
-                    var medicineRequests = await _unitOfWork.MedicineRequestRepository.GetByMedicineIdAsync(medicine.Id);
-                    totalRequested = (int)medicineRequests.Sum(r => r.Quantity);
-                }
-
-                int projectedStock = totalStock + totalTenderStock - totalRequested;
-                bool needsRestock = projectedStock < medicine.MinimumStock;
-
-                forecastList.Add(new MedicineStockForecastDTO
-                {
-                    Medicine = _mapper.Map<ReturnMedicineDTO>(medicine),
-                    CurrentStock = totalStock,
-                    TenderStock = totalTenderStock,
-                    RequestedAmount = totalRequested,
-                    ProjectedStock = projectedStock,
-                    NeedsRestock = needsRestock
-                });
-            }
-
-            result.Data = forecastList;
-            return result;
-        }
-
 
         public async Task<ServiceResult<PagedList<ReturnMedicineDTO>>> GetPaginatedMedicines(MedicineParams parameters)
         {
@@ -226,6 +210,27 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
 
             var category = await _unitOfWork.MedicineRepository.GetOrCreateCategoryAsync(createMedicineDTO.Category);
             medicine.CategoryId = category.Id;
+            //var nameParam = new SqlParameter("@Name", SqlDbType.NVarChar, 255)
+            //{
+            //    Value = createMedicineDTO.Category
+            //};
+            //var categoryIdParam = new SqlParameter("@Id", SqlDbType.Int)
+            //{
+            //    Direction = ParameterDirection.Output
+            //};
+
+            //await _unitOfWork.ExecuteStoredProcedureAsync("sp_GetOrInsertCategory",
+            //    new[]
+            //    {
+            //        nameParam,
+            //        categoryIdParam
+            //    }
+            //);
+
+            //medicine.CategoryId =  categoryIdParam.Value != DBNull.Value
+            //    ? Convert.ToInt32(categoryIdParam.Value)
+            //    : throw new InvalidOperationException("Failed to get or create category ID");
+
 
             var created = await _unitOfWork.MedicineRepository.AddAsync(medicine);
             await _unitOfWork.CompleteAsync();
@@ -285,6 +290,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             return result;
         }
 
+        
     }
 }
 

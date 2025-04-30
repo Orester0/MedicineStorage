@@ -1,7 +1,7 @@
 ﻿using MedicineStorage.Data;
 using MedicineStorage.Data.Implementations;
 using MedicineStorage.Data.Interfaces;
-using MedicineStorage.Models.TemplateModels;
+using MedicineStorage.Helpers;
 using MedicineStorage.Patterns;
 using MedicineStorage.Services.ApplicationServices.Implementations;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
@@ -39,11 +39,12 @@ namespace MedicineStorage.Extensions
 
 
             // SQL SERVER 
-            services.AddDbContext<AppDbContext>(
-                    options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
+            services.AddScoped<IDbConnectionStringProvider, DbConnectionStringProvider>();
+            services.AddScoped<AppDbContext>();
 
-            //services.AddDbContext<GuestDbContext>(
-            //        options => options.UseSqlServer("name=ConnectionStrings:DefaultConnection"));
+
+            services.AddScoped<IStoredProceduresGenerator, StoredProceduresGenerator>();
+
 
 
             // BUSINESS SERVICES
@@ -53,11 +54,10 @@ namespace MedicineStorage.Extensions
             services.AddScoped<IMedicineUsageService, MedicineUsageService>();
             services.AddScoped<IAuditService, AuditService>();
             services.AddScoped<ITenderService, TenderService>();
-            services.AddScoped<ITemplateService, TemplateService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IMedicineSupplyService, MedicineSupplyService>();
-            services.AddScoped<ITemplateCheckService, TemplateCheckService>();
             services.AddScoped<IDeadlineDateCheckService, DeadlineDateCheckService>();
+            services.AddScoped<IDataSeederService, DataSeederService>();
 
 
 
@@ -82,9 +82,6 @@ namespace MedicineStorage.Extensions
             services.AddScoped<ITenderProposalItemRepository, TenderProposalItemRepository>();
             services.AddScoped<ITenderItemRepository, TenderItemRepository>();
             services.AddScoped<IMedicineSupplyRepository, MedicineSupplyRepository>();
-            services.AddScoped<ITemplateRepository<MedicineRequestTemplate>, MedicineRequestTemplateRepository>();
-            services.AddScoped<ITemplateRepository<AuditTemplate>, AuditTemplateRepository>();
-            services.AddScoped<ITemplateRepository<TenderTemplate>, TenderTemplateRepository>();
             services.AddScoped<INotificationRepository, NotificationRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
 

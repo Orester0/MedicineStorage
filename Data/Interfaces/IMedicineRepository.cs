@@ -7,15 +7,18 @@ namespace MedicineStorage.Data.Interfaces
 {
     public interface IMedicineRepository : IGenericRepository<Medicine>
     {
+
+
+        Task<IEnumerable<Medicine>> GetMedicinesNeedingAuditAsync();
+        Task<IEnumerable<Medicine>> GetMedicinesNeedingTenderAsync();
         Task<bool> IsCategoryUnusedAsync(int categoryId);
         Task DeleteCategoryAsync(int categoryId);
         Task<MedicineCategory?> GetCategoryByNameAsync(string name);
         Task<MedicineCategory> GetOrCreateCategoryAsync(string name);
-        Task<List<MedicineCategory>> GetAllCategoriesAsync();
-
+        Task<IEnumerable<MedicineCategory>> GetAllCategoriesAsync();
 
         Task<IEnumerable<Medicine>> GetAllRequiringAuditAsync();
-        Task<List<Medicine>> GetByIdsAsync(IEnumerable<int> medicineIds);
+        Task<IEnumerable<Medicine>> GetByIdsAsync(IEnumerable<int> medicineIds);
         Task<(IEnumerable<Medicine>, int)> GetByParams(MedicineParams parameters);
       
     }

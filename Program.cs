@@ -24,15 +24,29 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 
 app.UseAuthentication();
-app.UseAuthorization();
+app.UseAuthorization(); 
+app.UseMiddleware<RoleBasedConnectionMiddleware>();
 
 app.MapControllers();
 app.MapHub<NotificationHub>("/notificationHub");
 
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
 
+    await RoleSeeder.SeedRoles(services, builder.Configuration);
+    await ApplicationAdminUserGenerator.CreateUser(services, builder.Configuration);
+    await DbUsersGenerator.CreateDatabaseUsers(services, builder.Configuration);
 
-await RoleSeeder.SeedRoles(app.Services, builder.Configuration);
-await AdminUserGenerator.CreateUser(app.Services, builder.Configuration);
+    var storedProceduresGenerator = services.GetRequiredService<IStoredProceduresGenerator>();
+    await storedProceduresGenerator.CreateUpdateMinimumStockProcedureAsync();
+    await storedProceduresGenerator.CreateCheckMedicineRequestApprovalTriggerAsync();
+    await storedProceduresGenerator.CreateCleanupUnusedCategoryTriggerAsync();
+    await storedProceduresGenerator.CreateGetOrInsertCategoryProcedureAsync();
+    await storedProceduresGenerator.CreateDailyJobForExpiredUpdatesAsync();
+    await storedProceduresGenerator.CreateUpdateExpiredMedicineRequestsProcedureAsync();
+    await storedProceduresGenerator.CreateUpdateExpiredTendersProcedureAsync();
+}
 
 
 app.Run();

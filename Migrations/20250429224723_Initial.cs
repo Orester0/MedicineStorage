@@ -58,24 +58,6 @@ namespace MedicineStorage.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "AuditTemplates",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    RecurrenceInterval = table.Column<int>(type: "int", nullable: false),
-                    LastExecutedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreateDTOJson = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_AuditTemplates", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "MedicineCategories",
                 columns: table => new
                 {
@@ -86,42 +68,6 @@ namespace MedicineStorage.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MedicineCategories", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "MedicineRequestTemplates",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    RecurrenceInterval = table.Column<int>(type: "int", nullable: false),
-                    LastExecutedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreateDTOJson = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_MedicineRequestTemplates", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "TenderTemplates",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(200)", maxLength: 200, nullable: false),
-                    RecurrenceInterval = table.Column<int>(type: "int", nullable: false),
-                    LastExecutedDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    IsActive = table.Column<bool>(type: "bit", nullable: false),
-                    CreateDTOJson = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_TenderTemplates", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -914,12 +860,6 @@ namespace MedicineStorage.Migrations
                 name: "AuditNote");
 
             migrationBuilder.DropTable(
-                name: "AuditTemplates");
-
-            migrationBuilder.DropTable(
-                name: "MedicineRequestTemplates");
-
-            migrationBuilder.DropTable(
                 name: "MedicineSupplies");
 
             migrationBuilder.DropTable(
@@ -936,9 +876,6 @@ namespace MedicineStorage.Migrations
 
             migrationBuilder.DropTable(
                 name: "TenderProposalItems");
-
-            migrationBuilder.DropTable(
-                name: "TenderTemplates");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");

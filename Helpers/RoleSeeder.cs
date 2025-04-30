@@ -22,8 +22,9 @@ namespace MedicineStorage.Helpers
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
+                //throw ex;
                 throw new Exception("Couldnt seed roles");
             }
         }

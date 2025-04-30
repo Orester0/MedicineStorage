@@ -4,7 +4,7 @@ using MedicineStorage.Services.BusinessServices.Interfaces;
 
 namespace MedicineStorage.Helpers
 {
-    public static class AdminUserGenerator
+    public static class ApplicationAdminUserGenerator
     {
         public static async Task CreateUser(IServiceProvider serviceProvider, IConfiguration configuration)
         {

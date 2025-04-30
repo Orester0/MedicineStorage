@@ -8,6 +8,7 @@ namespace MedicineStorage.Data.Interfaces
 {
     public interface IUserRepository : IGenericRepository<User>
     {
+        Task<List<User>> GetUsersByRoleAsync(string rolename);
         Task<List<User>> GetUsersWithRolesAsync();
         Task<User?> GetUserByIdWithRolesAsync(int id);
         Task<User?> GetByUserNameWithRolesAsync(string username);

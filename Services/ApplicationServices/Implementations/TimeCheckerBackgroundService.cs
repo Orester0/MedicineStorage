@@ -30,10 +30,8 @@ namespace MedicineStorage.Services.ApplicationServices.Implementations
         private async Task RunAllChecksAsync()
         {
             using var scope = _serviceScopeFactory.CreateScope();
-            var templateExecutionService = scope.ServiceProvider.GetRequiredService<ITemplateCheckService>();
             var deadlineDateCheckService = scope.ServiceProvider.GetRequiredService<IDeadlineDateCheckService>();
 
-            await templateExecutionService.CheckAndNotifyAsync();
             await deadlineDateCheckService.CheckAndCloseExpiredTendersAsync();
         }
     }

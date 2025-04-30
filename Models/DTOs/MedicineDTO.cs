@@ -7,6 +7,20 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace MedicineStorage.Models.DTOs
 {
+    public class MedicineAuditAndTenderDto
+    {
+        public List<ReturnMedicineShortDTO> MedicinesNeedingAudit { get; set; }
+        public List<ReturnMedicineShortDTO> MedicinesNeedingTender { get; set; }
+    }
+
+    public class ReturnMedicineShortDTO
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public decimal MinimumStock { get; set; }
+        public decimal Stock { get; set; }
+        public DateTime? LastAuditDate { get; set; }
+    }
     public class ReturnMedicineDTO
     {
         public int Id { get; set; }

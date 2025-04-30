@@ -2,6 +2,7 @@
 
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.Params;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace MedicineStorage.Data.Implementations
@@ -10,6 +11,22 @@ namespace MedicineStorage.Data.Implementations
     : GenericRepository<Medicine>(_context), IMedicineRepository
 
     {
+        public async Task<IEnumerable<Medicine>> GetMedicinesNeedingAuditAsync()
+        {
+            var currentDate = DateTime.UtcNow;
+            return await _context.Medicines
+                .Where(m => m.LastAuditDate.HasValue &&
+                    m.LastAuditDate.Value.AddDays(m.AuditFrequencyDays) <= currentDate)
+                .ToListAsync();
+        }
+
+        public async Task<IEnumerable<Medicine>> GetMedicinesNeedingTenderAsync()
+        {
+            return await _context.Medicines
+                .Where(m => m.Stock < m.MinimumStock)
+                .ToListAsync();
+        }
+
         public async Task<bool> IsCategoryUnusedAsync(int categoryId)
         {
             return !await _context.Medicines.AnyAsync(m => m.CategoryId == categoryId);
@@ -21,7 +38,6 @@ namespace MedicineStorage.Data.Implementations
             if (category != null)
             {
                 _context.Set<MedicineCategory>().Remove(category);
-                await _context.SaveChangesAsync();
             }
         }
         public async Task<MedicineCategory?> GetCategoryByNameAsync(string name)
@@ -30,18 +46,21 @@ namespace MedicineStorage.Data.Implementations
                 .FirstOrDefaultAsync(c => c.Name.ToLower() == name.ToLower());
         }
 
+
         public async Task<MedicineCategory> GetOrCreateCategoryAsync(string name)
         {
             var existing = await GetCategoryByNameAsync(name);
             if (existing != null) return existing;
 
             var newCategory = new MedicineCategory { Name = name };
-            _context.Add(newCategory);
+            await _context.AddAsync(newCategory);
             await _context.SaveChangesAsync();
             return newCategory;
         }
+        
 
-        public async Task<List<MedicineCategory>> GetAllCategoriesAsync()
+
+        public async Task<IEnumerable<MedicineCategory>> GetAllCategoriesAsync()
         {
             return await _context.Set<MedicineCategory>().OrderBy(c => c.Name).ToListAsync();
         }
@@ -62,7 +81,7 @@ namespace MedicineStorage.Data.Implementations
         }
 
 
-        public async Task<List<Medicine>> GetByIdsAsync(IEnumerable<int> medicineIds)
+        public async Task<IEnumerable<Medicine>> GetByIdsAsync(IEnumerable<int> medicineIds)
         {
             return await _context.Medicines
                 .Where(m => medicineIds.Contains(m.Id))

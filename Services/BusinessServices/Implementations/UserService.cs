@@ -127,7 +127,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             foreach (var user in users)
             {
                 var dto = _mapper.Map<ReturnUserGeneralDTO>(user);
-                dto.PhotoBase64 = await GetBase64PhotoAsync(user.PhotoBlobName);
+                //dto.PhotoBase64 = await GetBase64PhotoAsync(user.PhotoBlobName);
                 dtos.Add(dto);
             }
             

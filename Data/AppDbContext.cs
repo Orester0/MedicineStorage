@@ -2,21 +2,58 @@
 using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.NotificationModels;
-using MedicineStorage.Models.TemplateModels;
 using MedicineStorage.Models.TenderModels;
 using MedicineStorage.Models.UserModels;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Microsoft.EntityFrameworkCore.ValueGeneration;
-
 namespace MedicineStorage.Data
 {
-    public class AppDbContext(DbContextOptions options) : IdentityDbContext<User, AppRole, int, IdentityUserClaim<int>,
-        UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>(options)
+    public class AppDbContext : IdentityDbContext<User, AppRole, int, IdentityUserClaim<int>,
+    UserRole, IdentityUserLogin<int>, IdentityRoleClaim<int>, IdentityUserToken<int>>
     {
+        private readonly string _defaultConnectionString;
+
+        public AppDbContext(IDbConnectionStringProvider connectionStringProvider)
+            : base(new DbContextOptions<AppDbContext>())
+        {
+            _connectionStringProvider = connectionStringProvider ??
+                throw new ArgumentNullException(nameof(connectionStringProvider));
+            _defaultConnectionString = null;
+        }
+
+        public AppDbContext(IDbConnectionStringProvider connectionStringProvider, IConfiguration configuration)
+            : base(new DbContextOptions<AppDbContext>())
+        {
+            _connectionStringProvider = connectionStringProvider ??
+                throw new ArgumentNullException(nameof(connectionStringProvider));
+            _defaultConnectionString = configuration?.GetConnectionString("DefaultConnection");
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            string connectionString;
+
+            try
+            {
+                connectionString = _connectionStringProvider.GetConnectionString();
+            }
+            catch (InvalidOperationException)
+            {
+                if (_defaultConnectionString != null)
+                {
+                    connectionString = _defaultConnectionString;
+                }
+                else
+                {
+                    throw new InvalidOperationException("No connection string available for AppDbContext.");
+                }
+            }
+
+            optionsBuilder.UseSqlServer(connectionString);
+        }
+
         public DbSet<Medicine> Medicines { get; set; }
         public DbSet<MedicineCategory> MedicineCategories { get; set; }
         public DbSet<Tender> Tenders { get; set; }
@@ -30,9 +67,9 @@ namespace MedicineStorage.Data
         public DbSet<MedicineSupply> MedicineSupplies { get; set; }
         public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Notification> Notifications { get; set; }
-        public DbSet<AuditTemplate> AuditTemplates { get; set; }
-        public DbSet<TenderTemplate> TenderTemplates { get; set; }
-        public DbSet<MedicineRequestTemplate> MedicineRequestTemplates { get; set; }
+
+        private readonly IDbConnectionStringProvider _connectionStringProvider;
+
 
         public override int SaveChanges()
         {
@@ -55,21 +92,6 @@ namespace MedicineStorage.Data
                 .Navigation(m => m.Category)
                 .AutoInclude();
 
-
-            modelBuilder.Entity<AuditTemplate>(entity =>
-            {
-                entity.ToTable("AuditTemplates");
-            });
-
-            modelBuilder.Entity<TenderTemplate>(entity =>
-            {
-                entity.ToTable("TenderTemplates");
-            });
-
-            modelBuilder.Entity<MedicineRequestTemplate>(entity =>
-            {
-                entity.ToTable("MedicineRequestTemplates");
-            });
 
             modelBuilder.Entity<User>(entity =>
             {

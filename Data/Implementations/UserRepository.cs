@@ -28,6 +28,16 @@ namespace MedicineStorage.Data.Implementations
                 .ToListAsync();
         }
 
+        public async Task<List<User>> GetUsersByRoleAsync(string rolename)
+        {
+            return await _userManager.Users
+                .Where(u => u.UserRoles.Any(ur => ur.Role.Name == rolename)) 
+                .Include(u => u.UserRoles)
+                .ThenInclude(ur => ur.Role)
+                .ToListAsync();
+        }
+
+
         public async Task<User?> GetUserByIdWithRolesAsync(int id)
         {
             return await _userManager.Users
@@ -146,10 +156,12 @@ namespace MedicineStorage.Data.Implementations
         {
             return await _roleManager.RoleExistsAsync(roleName);
         }
-        
+
         public async Task<List<string>> GetAllRoleNamesAsync()
         {
-            return await _roleManager.Roles.Select(r => r.Name).ToListAsync();
+            return await _roleManager.Roles
+                .Select(r => r.Name)
+                .ToListAsync();
         }
 
         public async Task<User?> FindByIdAsync(string userId)

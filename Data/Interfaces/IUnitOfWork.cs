@@ -1,4 +1,4 @@
-﻿using MedicineStorage.Models.TemplateModels;
+﻿using Microsoft.Data.SqlClient;
 
 namespace MedicineStorage.Data.Interfaces
 {
@@ -14,18 +14,18 @@ namespace MedicineStorage.Data.Interfaces
 
         ITenderProposalItemRepository TenderProposalItemRepository { get; }
         ITenderItemRepository TenderItemRepository { get; }
-
         IMedicineSupplyRepository MedicineSupplyRepository { get; }
         INotificationRepository NotificationRepository { get; }
-
-        ITemplateRepository<MedicineRequestTemplate> MedicineRequestTemplateRepository { get; }
-        ITemplateRepository<AuditTemplate> AuditTemplateRepository { get; }
-        ITemplateRepository<TenderTemplate> TenderTemplateRepository { get; }
 
         Task<bool> CompleteAsync();
         bool HasChanges();
         Task BeginTransactionAsync();
         Task CommitTransactionAsync();
         Task RollbackTransactionAsync();
+
+        Task ExecuteSqlRawAsync(string sql);
+
+        Task ExecuteStoredProcedureAsync(string procedureName, params SqlParameter[] parameters);
+
     }
 }

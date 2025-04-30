@@ -4,6 +4,7 @@ using MedicineStorage.Models.AuditModels;
 using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.Params;
 using MedicineStorage.Models.UserModels;
+using MedicineStorage.Services.ApplicationServices.Interfaces;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -14,8 +15,20 @@ namespace MedicineStorage.Controllers.Implementation
 {
 
     [Authorize]
-    public class MedicineController(IMedicineService _medicineService) : BaseApiController
+    public class MedicineController(IMedicineService _medicineService, IDataSeederService _dataSeederService) : BaseApiController
     {
+        [HttpGet("problematic")]
+        public async Task<ActionResult<MedicineAuditAndTenderDto>> GetProblematicMedicines()
+        {
+            var result = await _medicineService.GetProblematicMedicinesAsync();
+            if (!result.Success)
+            {
+                return BadRequest(new { result.Errors });
+            }
+            return Ok(result.Data);
+        }
+
+
         [HttpPost("bulk-upload")]
         [Consumes("application/json")]
         public async Task<IActionResult> BulkCreateMedicinesFromJson([FromBody] List<BulkCreateMedicineDTO> dtoList)
@@ -23,10 +36,17 @@ namespace MedicineStorage.Controllers.Implementation
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
-            var result = await _medicineService.BulkCreateMedicinesAsync(dtoList);
+            var result = await _dataSeederService.BulkCreateMedicinesAsync(dtoList);
 
-            if (!result.Success)
-                return BadRequest(new { result.Errors });
+            if (result.FailureCount > 0) {
+                return BadRequest(new
+                {
+                    success = false,
+                    successCount = result.SuccessCount,
+                    failureCount = result.FailureCount,
+                    failures = result.Failures
+                });
+            }
 
             return Ok(new { success = true });
         }
@@ -71,18 +91,6 @@ namespace MedicineStorage.Controllers.Implementation
         public async Task<IActionResult> GetAllMedicines()
         {
             var result = await _medicineService.GetAllMedicinesAsync();
-            if (!result.Success)
-            {
-                return BadRequest(new { result.Errors });
-            }
-            return Ok(result.Data);
-        }
-
-        [HttpGet("stock-forecast")]
-        public async Task<IActionResult> GetMedicineStockForecast([FromQuery] bool considerRequests = false,
-           [FromQuery] bool considerTenders = false)
-        {
-            var result = await _medicineService.GetMedicineStockForecast(considerRequests, considerTenders);
             if (!result.Success)
             {
                 return BadRequest(new { result.Errors });

@@ -9,6 +9,25 @@ namespace MedicineStorage.Data.Implementations
     public class MedicineSupplyRepository(AppDbContext _context)
     : GenericRepository<MedicineSupply>(_context), IMedicineSupplyRepository
     {
+        public async Task<List<MedicineSupply>> GetSuppliesByMedicineIdAndDateRangeAsync(int medicineId, DateTime startDate, DateTime endDate)
+        {
+            return await _context.MedicineSupplies
+                .Where(s => s.MedicineId == medicineId)
+                .Where(s => s.TransactionDate >= startDate && s.TransactionDate <= endDate)
+                .Include(s => s.Medicine)
+                .ToListAsync();
+        }
+
+        public async Task<Dictionary<int, List<MedicineSupply>>> GetAllMedicineSuppliesInDateRangeAsync(DateTime startDate, DateTime endDate)
+        {
+            var supplies = await _context.MedicineSupplies
+                .Where(s => s.TransactionDate >= startDate && s.TransactionDate <= endDate)
+                .Include(s => s.Medicine)
+                .ToListAsync();
+
+            return supplies.GroupBy(s => s.MedicineId)
+                .ToDictionary(g => g.Key, g => g.ToList());
+        }
         public async Task<(IEnumerable<MedicineSupply>, int)> GetByParamsAsync(MedicineSupplyParams parameters)
         {
             var query = _context.MedicineSupplies
