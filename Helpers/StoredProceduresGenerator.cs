@@ -1,5 +1,10 @@
 ﻿
 using MedicineStorage.Data.Interfaces;
+using MedicineStorage.Models.MedicineModels;
+using Microsoft.Azure.Amqp.Transaction;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
+using System.Collections.Generic;
+using Org.BouncyCastle.Utilities.Zlib;
 
 
 namespace MedicineStorage.Helpers
@@ -9,45 +14,56 @@ namespace MedicineStorage.Helpers
         public async Task CreateCleanupUnusedCategoryTriggerAsync()
         {
             string script = @"
-                IF OBJECT_ID('TRG_CleanupUnusedCategory', 'TR') IS NOT NULL
-                    DROP TRIGGER TRG_CleanupUnusedCategory;
+        IF OBJECT_ID('TRG_CleanupUnusedCategory', 'TR') IS NOT NULL
+            DROP TRIGGER TRG_CleanupUnusedCategory;
 
-                EXEC('
-                    CREATE TRIGGER TRG_CleanupUnusedCategory
-                    ON Medicines
-                    AFTER DELETE, UPDATE
-                    AS
-                    BEGIN
-                        SET NOCOUNT ON;
+        EXEC('
+            CREATE TRIGGER TRG_CleanupUnusedCategory
+            ON Medicines
+            AFTER DELETE, UPDATE
+            AS
+            BEGIN
+                SET NOCOUNT ON;
 
-                        ;WITH AffectedCategories AS (
-                            SELECT DISTINCT CategoryId
-                            FROM deleted
-                            WHERE CategoryId IS NOT NULL
-                        )
+                IF ORIGINAL_LOGIN() = ''ADMIN''
+                BEGIN
+                    ;WITH AffectedCategories AS (
+                        SELECT DISTINCT CategoryId
+                        FROM deleted
+                        WHERE CategoryId IS NOT NULL
+                    )
 
-                        DELETE FROM MedicineCategories
-                        WHERE Id IN (
-                            SELECT ac.CategoryId
-                            FROM AffectedCategories ac
-                            LEFT JOIN Medicines m ON ac.CategoryId = m.CategoryId
-                            WHERE m.Id IS NULL
-                        );
-                    END
-                ');
-            "
-            ;
+                    DELETE FROM MedicineCategories
+                    WHERE Id IN (
+                        SELECT ac.CategoryId
+                        FROM AffectedCategories ac
+                        LEFT JOIN Medicines m ON ac.CategoryId = m.CategoryId
+                        WHERE m.Id IS NULL
+                    );
+                END
+            END
+        ');
+    ";
 
             await _unitOfWork.ExecuteSqlRawAsync(script);
         }
 
-        //SELECT* FROM MEDICINES WHERE NAME = 'ZXC'
 
-        //SELECT* FROM MedicineCategories WHERE ID = 110
+//        DECLARE @CategoryId INT = 3;  
 
-        //DELETE FROM MEDICINES WHERE NAME = 'ZXC'
+//SELECT* FROM MEDICINES WHERE CategoryId = @CategoryId;
 
-        //SELECT* FROM MedicineCategories WHERE ID = 110
+//SELECT* FROM MedicineCategories WHERE ID = @CategoryId;
+
+//UPDATE MEDICINES
+//SET CategoryId = @CategoryId + 1
+//WHERE CategoryId = @CategoryId;
+
+
+//        SELECT* FROM MEDICINES WHERE CategoryId = @CategoryId;
+
+//SELECT* FROM MedicineCategories WHERE ID = @CategoryId;
+
 
 
         public async Task CreateGetOrInsertCategoryProcedureAsync()
@@ -82,13 +98,16 @@ namespace MedicineStorage.Helpers
             await _unitOfWork.ExecuteSqlRawAsync(script);
         }
 
-        //DECLARE @Id INT;
+//        SELECT TOP 1 * FROM MedicineCategories
 
-        //EXEC sp_GetOrInsertCategory
-        //    @Name = N'Pain-Relief',  
-        //    @Id = @Id OUTPUT;
 
-        //SELECT @Id AS CategoryId;
+//DECLARE @Id INT;
+
+//EXEC sp_GetOrInsertCategory
+//    @Name = N'Addiction Treatment',  
+//    @Id = @Id OUTPUT;
+
+//        SELECT @Id AS CategoryId;
 
 
         public async Task CreateUpdateMinimumStockProcedureAsync()
@@ -108,7 +127,7 @@ namespace MedicineStorage.Helpers
                     DECLARE @EndDate DATETIME = GETUTCDATE();
                     DECLARE @DaysInPeriod FLOAT = DATEDIFF(DAY, @StartDate, @EndDate);
                     DECLARE @SafetyBuffer FLOAT = 1.5;
-                    DECLARE @AdjustmentRate FLOAT = 0.1; -- 10% корекція
+                    DECLARE @AdjustmentRate FLOAT = 0.1; 
 
                     CREATE TABLE #MedicineStockUpdates (
                         MedicineId INT PRIMARY KEY,
@@ -120,7 +139,7 @@ namespace MedicineStorage.Helpers
                             r.MedicineId,
                             SUM(r.Quantity) AS TotalApprovedRequestQty
                         FROM MedicineRequests r
-                        WHERE r.Status = 1
+                        WHERE r.Status = 3
                           AND r.RequestDate BETWEEN @StartDate AND @EndDate
                         GROUP BY r.MedicineId
                     ),
@@ -177,7 +196,7 @@ namespace MedicineStorage.Helpers
             await _unitOfWork.ExecuteSqlRawAsync(script);
         }
 
-        //        SELECT TOP 50 
+        //SELECT TOP 50 
         //    Id, 
         //    Name, 
         //    MinimumStock AS CurrentMinimumStock
@@ -186,7 +205,7 @@ namespace MedicineStorage.Helpers
         //ORDER BY
         //    Name;
 
-        //        EXEC sp_UpdateMinimumStockForecast @ForecastDays = 30;
+        //EXEC sp_UpdateMinimumStockForecast @ForecastDays = 30;
 
         //SELECT TOP 50 
         //    Id, 

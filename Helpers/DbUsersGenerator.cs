@@ -50,9 +50,11 @@ namespace MedicineStorage.Helpers
         private static void GrantNonAuthorisedUserPermissions(SqlConnection conn)
         {
             string sql = """
-                GRANT SELECT ON SCHEMA::dbo TO NonAuthorisedUser;
+                GRANT SELECT, EXECUTE ON SCHEMA::dbo TO NonAuthorisedUser;
                 GRANT INSERT, UPDATE ON OBJECT::dbo.RefreshTokens TO NonAuthorisedUser;
-                GRANT EXECUTE ON SCHEMA::dbo TO NonAuthorisedUser;
+                GRANT INSERT, UPDATE ON OBJECT::dbo.AspNetUsers TO NonAuthorisedUser;
+                GRANT INSERT, UPDATE ON OBJECT::dbo.AspNetUserRoles TO NonAuthorisedUser;
+
             """;
             using var cmd = new SqlCommand(sql, conn);
             cmd.ExecuteNonQuery();
@@ -61,12 +63,8 @@ namespace MedicineStorage.Helpers
         private static void GrantBaseUserPermissions(SqlConnection conn)
         {
             string sql = """
-                GRANT SELECT, INSERT, UPDATE ON SCHEMA::dbo TO BaseUser;
-
-
-
-                GRANT SELECT ON SCHEMA::dbo TO BaseUser;
-                GRANT EXECUTE ON SCHEMA::dbo TO BaseUser;
+                GRANT SELECT, EXECUTE ON SCHEMA::dbo TO BaseUser;
+            
                 GRANT SELECT ON OBJECT::dbo.Medicines TO BaseUser;
                 GRANT SELECT ON OBJECT::dbo.MedicineCategories TO BaseUser;
                 GRANT SELECT, INSERT, UPDATE ON OBJECT::dbo.MedicineRequests TO BaseUser;
@@ -82,9 +80,7 @@ namespace MedicineStorage.Helpers
         private static void GrantAdminUserPermissions(SqlConnection conn)
         {
             string sql = """
-                GRANT SELECT, INSERT, UPDATE, DELETE ON SCHEMA::dbo TO AdminUser;
-                GRANT SELECT, INSERT, UPDATE, DELETE ON OBJECT::dbo.MedicineSupplies TO AdminUser;
-                GRANT EXECUTE ON SCHEMA::dbo TO AdminUser;
+                GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON SCHEMA::dbo TO AdminUser;
             """;
             using var cmd = new SqlCommand(sql, conn);
             cmd.ExecuteNonQuery();
@@ -94,6 +90,7 @@ namespace MedicineStorage.Helpers
         private static void CreateUserWithRole(SqlConnection conn, string loginName, string password, string roleName)
         {
             string createLogin = $"""
+            GRANT SELECT, INSERT, UPDATE, DELETE, EXECUTE ON SCHEMA::dbo TO BaseUser;
             IF NOT EXISTS (SELECT * FROM sys.server_principals WHERE name = '{loginName}')
             BEGIN
                 CREATE LOGIN [{loginName}] WITH PASSWORD = '{password}';

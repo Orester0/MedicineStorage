@@ -248,7 +248,7 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             audit.ClosedByUserId = userId;
             audit.EndDate ??= DateTime.UtcNow;
 
-            bool hasSignificantDiscrepancies = audit.AuditItems.Any(item => item.ExpectedQuantity > item.ActualQuantity);
+            bool hasSignificantDiscrepancies = audit.AuditItems.Any(item => item.ExpectedQuantity != item.ActualQuantity);
             audit.Status = hasSignificantDiscrepancies
                 ? AuditStatus.CompletedWithProblems
                 : AuditStatus.SuccesfullyCompleted;

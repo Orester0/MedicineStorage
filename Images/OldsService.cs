@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using MedicineStorage.Data.Interfaces;
-using MedicineStorage.Helpers;
 using MedicineStorage.Models;
 using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Services.BusinessServices.Interfaces;
@@ -9,15 +8,14 @@ using MedicineStorage.Models.NotificationModels;
 using MedicineStorage.Patterns;
 using MedicineStorage.Models.DTOs;
 using MedicineStorage.Models.Params;
-using Microsoft.Data.SqlClient;
-using Microsoft.EntityFrameworkCore;
+using MedicineStorage.Helpers;
 
-namespace MedicineStorage.Services.BusinessServices.Implementations
+namespace MedicineStorage.Images
 {
-    public class MedicineRequestSersvice(IUnitOfWork _unitOfWork, 
+    public class MedicineRequestService(IUnitOfWork _unitOfWork, 
                                         IMapper _mapper, 
                                         INotificationTextFactory _notificationTextFactory, 
-                                        INotificationService _notificationService)
+                                        INotificationService _notificationService) : IMedicineRequestService
     {
         public async Task<ServiceResult<PagedList<MedicineRequestAnalysisDto>>> GetRequestAnalysisByMedicineAsync(MedicineRequestAnalysisParams parameters)
         {
@@ -151,17 +149,8 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             request.Status = RequestStatus.Approved;
             request.ApprovedByUserId = userId;
             request.ApprovalDate = DateTime.UtcNow;
-            try 
-            { 
-                _unitOfWork.MedicineRequestRepository.Update(request);
-            }
-            catch (DbUpdateException ex) when (ex.InnerException is SqlException sqlEx)
-            {
-                if (sqlEx.Message.Contains("Only Admin or Manager can reject an approved request"))
-                {
-                    throw new BadHttpRequestException("Medicine in the request requires admin approval");
-                }
-            }
+            _unitOfWork.MedicineRequestRepository.Update(request);
+            //await _unitOfWork.CompleteAsync();
 
 
             medicine.Stock -= request.Quantity;

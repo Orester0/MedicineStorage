@@ -13,13 +13,14 @@ namespace MedicineStorage.Data.Implementations
         {
             var query = _context.MedicineRequests
                 .Include(r => r.Medicine)
+                .ThenInclude(m => m.Category)
                 .AsQueryable();
 
             query = query.Where(r => r.RequestDate >= parameters.StartDate);
             query = query.Where(r => r.RequestDate <= parameters.EndDate);
 
-            if (parameters.MedicineId.HasValue)
-                query = query.Where(r => r.MedicineId == parameters.MedicineId);
+            if (!string.IsNullOrWhiteSpace(parameters.CategoryName))
+                query = query.Where(r => r.Medicine.Category.Name == parameters.CategoryName);
 
             if (parameters.Statuses != null && parameters.Statuses.Any())
                 query = query.Where(r => parameters.Statuses.Contains(r.Status));

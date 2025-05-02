@@ -1,4 +1,5 @@
 ﻿using MedicineStorage.Data.Interfaces;
+using Microsoft.Azure.Cosmos.Serialization.HybridRow;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 namespace MedicineStorage.Data.Implementations
@@ -29,9 +30,9 @@ namespace MedicineStorage.Data.Implementations
         public ITenderProposalItemRepository TenderProposalItemRepository => _tenderProposalItemRepository;
         public IMedicineSupplyRepository MedicineSupplyRepository => _medicineSupplyRepository;
         public IUserRepository UserRepository => _userRepository;
-
         public async Task<bool> CompleteAsync()
         {
+
             return await _context.SaveChangesAsync() > 0;
         }
 

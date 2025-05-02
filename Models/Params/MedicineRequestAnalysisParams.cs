@@ -5,8 +5,7 @@ namespace MedicineStorage.Models.Params
 {
     public class MedicineRequestAnalysisParams : Params
     {
-        [Range(1, int.MaxValue)]
-        public int? MedicineId { get; set; }
+        public string? CategoryName { get; set; }
 
         public List<RequestStatus>? Statuses { get; set; }
 

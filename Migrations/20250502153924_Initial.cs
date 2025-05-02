@@ -188,11 +188,13 @@ namespace MedicineStorage.Migrations
                     PlannedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     StartDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     EndDate = table.Column<DateTime>(type: "datetime2", nullable: true),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    Status = table.Column<int>(type: "int", nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Audits", x => x.Id);
+                    table.CheckConstraint("CK_Audit_EndDate", "EndDate IS NULL OR EndDate >= StartDate");
+                    table.CheckConstraint("CK_Audit_Status_EnumConstraint", "Status IN (1, 2, 3, 4, 5)");
                     table.ForeignKey(
                         name: "FK_Audits_AspNetUsers_ClosedByUserId",
                         column: x => x.ClosedByUserId,
@@ -244,11 +246,14 @@ namespace MedicineStorage.Migrations
                     PublishDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ClosingDate = table.Column<DateTime>(type: "datetime2", nullable: true),
                     DeadlineDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    Status = table.Column<int>(type: "int", nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tenders", x => x.Id);
+                    table.CheckConstraint("CK_Tender_ClosingDate", "ClosingDate IS NULL OR ClosingDate >= PublishDate");
+                    table.CheckConstraint("CK_Tender_DeadlineDate", "DeadlineDate >= PublishDate");
+                    table.CheckConstraint("CK_Tender_Status_EnumConstraint", "Status IN (1, 2, 3, 4, 5, 6, 7)");
                     table.ForeignKey(
                         name: "FK_Tenders_AspNetUsers_ClosedByUserId",
                         column: x => x.ClosedByUserId,
@@ -333,11 +338,13 @@ namespace MedicineStorage.Migrations
                     CreatedByUserId = table.Column<int>(type: "int", nullable: false),
                     TotalPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     SubmissionDate = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    Status = table.Column<int>(type: "int", nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TenderProposals", x => x.Id);
+                    table.CheckConstraint("CK_TenderProposal_Status_EnumConstraint", "Status IN (1, 2, 3)");
+                    table.CheckConstraint("CK_TenderProposal_TotalPrice_Positive", "TotalPrice > 0");
                     table.ForeignKey(
                         name: "FK_TenderProposals_AspNetUsers_CreatedByUserId",
                         column: x => x.CreatedByUserId,
@@ -396,7 +403,7 @@ namespace MedicineStorage.Migrations
                     ApprovedByUserId = table.Column<int>(type: "int", nullable: true),
                     MedicineId = table.Column<int>(type: "int", nullable: false),
                     Quantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false, defaultValue: 1),
                     RequestDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     RequiredByDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     Justification = table.Column<string>(type: "nvarchar(500)", maxLength: 500, nullable: true),
@@ -405,6 +412,7 @@ namespace MedicineStorage.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MedicineRequests", x => x.Id);
+                    table.CheckConstraint("CK_MedicineRequest_Status_EnumConstraint", "Status IN (1, 2, 3, 4)");
                     table.ForeignKey(
                         name: "FK_MedicineRequests_AspNetUsers_ApprovedByUserId",
                         column: x => x.ApprovedByUserId,
@@ -494,11 +502,13 @@ namespace MedicineStorage.Migrations
                     TenderId = table.Column<int>(type: "int", nullable: false),
                     MedicineId = table.Column<int>(type: "int", nullable: false),
                     RequiredQuantity = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Status = table.Column<int>(type: "int", nullable: false)
+                    Status = table.Column<int>(type: "int", nullable: false, defaultValue: 1)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_TenderItems", x => x.Id);
+                    table.CheckConstraint("CK_TenderItem_RequiredQuantity_Positive", "RequiredQuantity > 0");
+                    table.CheckConstraint("CK_TenderItem_Status_EnumConstraint", "Status IN (1, 2)");
                     table.ForeignKey(
                         name: "FK_TenderItems_Medicines_MedicineId",
                         column: x => x.MedicineId,

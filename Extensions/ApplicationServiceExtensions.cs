@@ -2,6 +2,7 @@
 using MedicineStorage.Data.Implementations;
 using MedicineStorage.Data.Interfaces;
 using MedicineStorage.Helpers;
+using MedicineStorage.Images;
 using MedicineStorage.Patterns;
 using MedicineStorage.Services.ApplicationServices.Implementations;
 using MedicineStorage.Services.ApplicationServices.Interfaces;
@@ -70,6 +71,7 @@ namespace MedicineStorage.Extensions
             services.AddSignalR();
             services.AddHostedService<TimeCheckerBackgroundService>();
             services.AddScoped<IBlobStorageService, BlobStorageService>();
+            services.AddScoped<ITriggerManager, TriggerManager>();
 
             // REPOSITORIES
             services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));

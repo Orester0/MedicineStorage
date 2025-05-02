@@ -49,5 +49,24 @@ using (var scope = app.Services.CreateScope())
 }
 
 
+
+
+
+
+app.Lifetime.ApplicationStarted.Register(async () =>
+{
+    using var scope = app.Services.CreateScope();
+    var triggerManager = scope.ServiceProvider.GetRequiredService<ITriggerManager>();
+    await triggerManager.DisableTriggersAsync();
+});
+
+app.Lifetime.ApplicationStopping.Register(async () =>
+{
+    using var scope = app.Services.CreateScope();
+    var triggerManager = scope.ServiceProvider.GetRequiredService<ITriggerManager>();
+    await triggerManager.EnableTriggersAsync();
+});
+
+
 app.Run();
 

@@ -173,6 +173,68 @@ namespace MedicineStorage.Data
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
+            modelBuilder.Entity<MedicineRequest>()
+            .ToTable(t => t.HasCheckConstraint(
+                "CK_MedicineRequest_Status_EnumConstraint",
+                $"Status IN ({(int)RequestStatus.Pending}, {(int)RequestStatus.PedingWithSpecial}, {(int)RequestStatus.Approved}, {(int)RequestStatus.Rejected})"));
+            modelBuilder.Entity<Audit>()
+        .ToTable(t => t.HasCheckConstraint(
+            "CK_Audit_Status_EnumConstraint",
+            $"Status IN ({(int)AuditStatus.Planned}, {(int)AuditStatus.InProgress}, {(int)AuditStatus.SuccesfullyCompleted}, {(int)AuditStatus.CompletedWithProblems}, {(int)AuditStatus.Cancelled})"));
+            modelBuilder.Entity<Tender>()
+                    .ToTable(t => t.HasCheckConstraint(
+                        "CK_Tender_Status_EnumConstraint",
+                        $"Status IN ({(int)TenderStatus.Created}, {(int)TenderStatus.Published}, {(int)TenderStatus.Closed}, {(int)TenderStatus.Awarded}, {(int)TenderStatus.Executing}, {(int)TenderStatus.Executed}, {(int)TenderStatus.Cancelled})"));
+
+            modelBuilder.Entity<TenderItem>()
+                .ToTable(t => t.HasCheckConstraint(
+                    "CK_TenderItem_Status_EnumConstraint",
+                    $"Status IN ({(int)TenderItemStatus.Pending}, {(int)TenderItemStatus.Executed})"));
+
+            modelBuilder.Entity<TenderProposal>()
+                .ToTable(t => t.HasCheckConstraint(
+                    "CK_TenderProposal_Status_EnumConstraint",
+                    $"Status IN ({(int)ProposalStatus.Submitted}, {(int)ProposalStatus.Accepted}, {(int)ProposalStatus.Rejected})"));
+            modelBuilder.Entity<Tender>()
+                .ToTable(t => t.HasCheckConstraint("CK_Tender_DeadlineDate", "DeadlineDate >= PublishDate"));
+
+            modelBuilder.Entity<Tender>()
+                .ToTable(t => t.HasCheckConstraint("CK_Tender_ClosingDate", "ClosingDate IS NULL OR ClosingDate >= PublishDate"));
+            modelBuilder.Entity<TenderProposal>()
+    .ToTable(t => t.HasCheckConstraint("CK_TenderProposal_TotalPrice_Positive", "TotalPrice > 0"));
+
+            modelBuilder.Entity<TenderItem>()
+                .ToTable(t => t.HasCheckConstraint("CK_TenderItem_RequiredQuantity_Positive", "RequiredQuantity > 0"));
+
+            modelBuilder.Entity<Audit>()
+                .ToTable(t => t.HasCheckConstraint("CK_Audit_EndDate", "EndDate IS NULL OR EndDate >= StartDate"));
+
+            modelBuilder.Entity<MedicineRequest>()
+    .Property(x => x.Status)
+    .HasDefaultValue(RequestStatus.Pending);
+
+
+            modelBuilder.Entity<Audit>()
+    .Property(x => x.Status)
+    .HasDefaultValue(AuditStatus.Planned);
+
+
+            modelBuilder.Entity<Tender>()
+    .Property(x => x.Status)
+    .HasDefaultValue(TenderStatus.Created);
+
+
+            modelBuilder.Entity<TenderItem>()
+    .Property(x => x.Status)
+    .HasDefaultValue(TenderItemStatus.Pending);
+
+
+            modelBuilder.Entity<TenderProposal>()
+    .Property(x => x.Status)
+    .HasDefaultValue(ProposalStatus.Submitted);
+
+
+
             modelBuilder.Entity<MedicineUsage>(entity =>
             {
                 entity.HasOne(mu => mu.UsedByUser)

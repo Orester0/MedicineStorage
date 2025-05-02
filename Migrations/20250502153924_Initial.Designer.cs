@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace MedicineStorage.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20250429224723_Initial")]
+    [Migration("20250502153924_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -49,7 +49,9 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -66,7 +68,12 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("Status", "PlannedDate");
 
-                    b.ToTable("Audits");
+                    b.ToTable("Audits", t =>
+                        {
+                            t.HasCheckConstraint("CK_Audit_EndDate", "EndDate IS NULL OR EndDate >= StartDate");
+
+                            t.HasCheckConstraint("CK_Audit_Status_EnumConstraint", "Status IN (1, 2, 3, 4, 5)");
+                        });
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.AuditModels.AuditItem", b =>
@@ -233,7 +240,9 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.HasKey("Id");
 
@@ -245,7 +254,10 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("Status", "RequiredByDate");
 
-                    b.ToTable("MedicineRequests");
+                    b.ToTable("MedicineRequests", t =>
+                        {
+                            t.HasCheckConstraint("CK_MedicineRequest_Status_EnumConstraint", "Status IN (1, 2, 3, 4)");
+                        });
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.MedicineModels.MedicineSupply", b =>
@@ -392,7 +404,9 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -416,7 +430,14 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("Status", "DeadlineDate");
 
-                    b.ToTable("Tenders");
+                    b.ToTable("Tenders", t =>
+                        {
+                            t.HasCheckConstraint("CK_Tender_ClosingDate", "ClosingDate IS NULL OR ClosingDate >= PublishDate");
+
+                            t.HasCheckConstraint("CK_Tender_DeadlineDate", "DeadlineDate >= PublishDate");
+
+                            t.HasCheckConstraint("CK_Tender_Status_EnumConstraint", "Status IN (1, 2, 3, 4, 5, 6, 7)");
+                        });
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.TenderItem", b =>
@@ -434,7 +455,9 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<int>("TenderId")
                         .HasColumnType("int");
@@ -445,7 +468,12 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("TenderId");
 
-                    b.ToTable("TenderItems");
+                    b.ToTable("TenderItems", t =>
+                        {
+                            t.HasCheckConstraint("CK_TenderItem_RequiredQuantity_Positive", "RequiredQuantity > 0");
+
+                            t.HasCheckConstraint("CK_TenderItem_Status_EnumConstraint", "Status IN (1, 2)");
+                        });
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.TenderProposal", b =>
@@ -460,7 +488,9 @@ namespace MedicineStorage.Migrations
                         .HasColumnType("int");
 
                     b.Property<int>("Status")
-                        .HasColumnType("int");
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasDefaultValue(1);
 
                     b.Property<DateTime>("SubmissionDate")
                         .HasColumnType("datetime2");
@@ -479,7 +509,12 @@ namespace MedicineStorage.Migrations
 
                     b.HasIndex("TenderId");
 
-                    b.ToTable("TenderProposals");
+                    b.ToTable("TenderProposals", t =>
+                        {
+                            t.HasCheckConstraint("CK_TenderProposal_Status_EnumConstraint", "Status IN (1, 2, 3)");
+
+                            t.HasCheckConstraint("CK_TenderProposal_TotalPrice_Positive", "TotalPrice > 0");
+                        });
                 });
 
             modelBuilder.Entity("MedicineStorage.Models.TenderModels.TenderProposalItem", b =>

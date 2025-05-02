@@ -7,13 +7,14 @@ using MedicineStorage.Models.MedicineModels;
 using MedicineStorage.Models.Params;
 using MedicineStorage.Services.BusinessServices.Interfaces;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using System.Data;
 
-namespace MedicineStorage.Services.BusinessServices.Implementations
+namespace MedicineStorage.Images
 {
-    public class MedicineSersvice(
+    public class MedicineService(
         IUnitOfWork _unitOfWork,
-        IMapper _mapper)
+        IMapper _mapper) : IMedicineService
     {
 
         public async Task<ServiceResult<MedicineAuditAndTenderDto>> GetProblematicMedicinesAsync()
@@ -205,27 +206,28 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             var medicine = _mapper.Map<Medicine>(createMedicineDTO);
             medicine.LastAuditDate = null;
 
+            var category = await _unitOfWork.MedicineRepository.GetOrCreateCategoryAsync(createMedicineDTO.Category);
+            medicine.CategoryId = category.Id;
+            //var nameParam = new SqlParameter("@Name", SqlDbType.NVarChar, 255)
+            //{
+            //    Value = createMedicineDTO.Category
+            //};
+            //var categoryIdParam = new SqlParameter("@Id", SqlDbType.Int)
+            //{
+            //    Direction = ParameterDirection.Output
+            //};
 
-            var nameParam = new SqlParameter("@Name", SqlDbType.NVarChar, 255)
-            {
-                Value = createMedicineDTO.Category
-            };
-            var categoryIdParam = new SqlParameter("@Id", SqlDbType.Int)
-            {
-                Direction = ParameterDirection.Output
-            };
+            //await _unitOfWork.ExecuteStoredProcedureAsync("sp_GetOrInsertCategory",
+            //    new[]
+            //    {
+            //        nameParam,
+            //        categoryIdParam
+            //    }
+            //);
 
-            await _unitOfWork.ExecuteStoredProcedureAsync("sp_GetOrInsertCategory",
-                new[]
-                {
-                    nameParam,
-                    categoryIdParam
-                }
-            );
-
-            medicine.CategoryId = categoryIdParam.Value != DBNull.Value
-                ? Convert.ToInt32(categoryIdParam.Value)
-                : throw new InvalidOperationException("Failed to get or create category ID");
+            //medicine.CategoryId =  categoryIdParam.Value != DBNull.Value
+            //    ? Convert.ToInt32(categoryIdParam.Value)
+            //    : throw new InvalidOperationException("Failed to get or create category ID");
 
 
             var created = await _unitOfWork.MedicineRepository.AddAsync(medicine);
@@ -252,12 +254,16 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             _unitOfWork.MedicineRepository.Update(existing);
             await _unitOfWork.CompleteAsync();
 
-            
+            if (previousCategoryId != newCategory.Id &&
+                await _unitOfWork.MedicineRepository.IsCategoryUnusedAsync(previousCategoryId))
+            {
+                await _unitOfWork.MedicineRepository.DeleteCategoryAsync(previousCategoryId);
+            }
 
             result.Data = true;
             return result;
-        }
 
+        }
 
         public async Task<ServiceResult<bool>> DeleteMedicineAsync(int medicineId, List<string> userRoles)
         {
@@ -273,10 +279,14 @@ namespace MedicineStorage.Services.BusinessServices.Implementations
             await _unitOfWork.MedicineRepository.DeleteAsync(medicine.Id);
             await _unitOfWork.CompleteAsync();
 
-            
+            if (await _unitOfWork.MedicineRepository.IsCategoryUnusedAsync(categoryId))
+            {
+                await _unitOfWork.MedicineRepository.DeleteCategoryAsync(categoryId);
+            }
 
             result.Data = true;
             return result;
+
         }
 
         
